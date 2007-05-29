@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "You'll need to edit me before you even think about running me."
+exit 0
+
+# Make sure that the sync script is syncing from the right directory.
+cd `dirname $0`
+
+REMOTE="user@server:/path/to/application/directory/"
+
+/usr/bin/rsync \
+	-rlptvz --delete \
+	--exclude="sync" --exclude="*~" --exclude=".htaccess" --exclude=".svn" --exclude=".*.sw?" \
+	--rsh=/usr/bin/ssh ./ $REMOTE
