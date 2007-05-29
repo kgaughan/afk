@@ -186,7 +186,7 @@ class AFK {
 class AFK_Cache {
 
 	/* Cache backend in use. */
-	private static $backend = new Cache_Null();
+	private static $backend = null;
 
 	/* ID of current cache block. */
 	private static $id;
@@ -209,6 +209,9 @@ class AFK_Cache {
 	 * @return True if the cache is valid, false if not.
 	 */
 	public static function start($id, $max_age=300) {
+		if (is_null(self::$backend)) {
+			self::$backend = new Cache_Null();
+		}
 		$content = self::$backend->load($id, $max_age);
 		if (!is_null($content)) {
 			echo $content;
@@ -470,7 +473,7 @@ class AFK_Pipeline {
  */
 class AFK_RenderFilter implements AFK_Filter {
 
-	public function execute(AFK_Pipeline $pipe, AFK_Context, $ctx) {
+	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
 		if ($ctx->is_rendering_allowed()) {
 			if (defined('APP_TEMPLATE_ROOT')) {
 				AFK_TemplateEngine::add_paths(
