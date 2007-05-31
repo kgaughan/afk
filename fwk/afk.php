@@ -251,7 +251,10 @@ class AFK_Context {
 	}
 
 	public function __get($key) {
-		return $this->ctx[$key];
+		if (isset($this->ctx[$key])) {
+			return $this->ctx[$key];
+		}
+		return null;
 	}
 
 	public function __set($key, $val) {
@@ -356,7 +359,7 @@ class AFK_Context {
 class AFK_DispatchFilter implements AFK_Filter {
 
 	public function convert_error_to_exception($errno, $errstr, $errfile, $errline, $ctx) {
-		throw new TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
+		throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
 	}
 
 	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
@@ -373,6 +376,7 @@ class AFK_DispatchFilter implements AFK_Filter {
 			$ctx->_old_view = $ctx->_view;
 			$ctx->_view = 'error500';
 			header('HTTP/1.1 500 Internal Server Error');
+			$pipe->to_end();
 			$pipe->do_next($ctx);
 		}
 	}
@@ -460,11 +464,15 @@ class AFK_Pipeline {
 	}
 
 	public function do_next(AFK_Context $ctx) {
-		$filter = current($filters);
+		$filter = current($this->filters);
 		if (is_object($filter)) {
-			next($filter);
+			next($this->filters);
 			$filter->execute($this, $ctx);
 		}
+	}
+
+	public function to_end() {
+		end($this->filters);
 	}
 }
 
@@ -474,15 +482,15 @@ class AFK_Pipeline {
 class AFK_RenderFilter implements AFK_Filter {
 
 	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
-		if ($ctx->is_rendering_allowed()) {
+		if ($ctx->rendering_is_allowed()) {
 			if (defined('APP_TEMPLATE_ROOT')) {
 				AFK_TemplateEngine::add_paths(
 					APP_TEMPLATE_ROOT,
 					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
 			}
 			$t = new AFK_TemplateEngine();
-			$t->render($ctx->view(), $ctx->as_array());
-			$pipe->do_next();
+			$t->render(coalesce($ctx->view(), 'default'), $ctx->as_array());
+			$pipe->do_next($ctx);
 		}
 	}
 }
