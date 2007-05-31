@@ -2,12 +2,13 @@
 
 <html><head>
 
-	<title><?php ee($page_title) ?></title>
-	<?php /* $this->stylesheets('all', 'screen', 'print') */ ?>
+	<title><?php if (isset($page_title)) ee($page_title) ?></title>
 
 </head><body>
 
+<?php if (isset($page_title)) { ?>
 <h1><?php ee($page_title) ?></h1>
+<?php } ?>
 
 <div id="body"><?php echo $generated_content ?></div>
 

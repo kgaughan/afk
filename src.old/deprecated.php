@@ -35,25 +35,6 @@ function luhn_check($cc_number) {
  * Form helpers.
  */
 
-function clear_request_fields() {
-	$args = func_get_args();
-	foreach ($args as $arg) {
-		unset($_REQUEST[$arg]);
-	}
-}
-
-/**
- *
- */
-function has_int_fields($ary, $fields) {
-	foreach ($fields as $field_name) {
-		if (!array_key_exists($field_name, $ary) || !ctype_digit($ary[$field_name])) {
-			return false;
-		}
-	}
-	return true;
-}
-
 /**
  * Checks if a given checkbox/radiobutton in a scope is active or not.
  *
@@ -146,27 +127,6 @@ function checkbox($name, $value, $label, $checked=null) {
 }
 
 /**
- * Form helper generating a start form tag.
- *
- * @param  $method  HTTP method to use for form; defaults to 'post'.
- * @param  $hidden  Array giving fields to include as hidden fields; if a
- *                  name is given by itself, the value is taken from $_REQUEST,
- *                  but if a name=>value mapping is given, that's used.
- */
-function form($method='post', $hidden=array()) {
-	echo '<form method="', strtolower($method), '" action="';
-	echo htmlentities($_SERVER['PHP_SELF']), '">';
-	foreach ($hidden as $name=>$value) {
-		if (is_int($name)) {
-			# Grab the value from $_REQUEST and write it out.
-			$name  = $value;
-			$value = $_REQUEST[$name];
-		}
-		hidden_field($name, $value);
-	}
-}
-
-/**
  * Form helper to write out a named hidden field.
  *
  * @param  $name   Name of hidden field.
@@ -182,20 +142,6 @@ function hidden_field($name, $value='') {
 		echo '<input type="hidden" name="', htmlentities($name);
 		echo '" value="', htmlentities($value), '"/>';
 	}
-}
-
-function text_field($name, $default='', $args=array()) {
-	echo '<input type="text" name="', htmlentities($name), '" id="';
-	echo htmlentities($name), '"';
-	emit_tag_attributes($args);
-	echo ' value="', htmlentities(get_param($name, $default)), '"/>';
-}
-
-function password_field($name, $default='', $args=array()) {
-	echo '<input type="password" name="', htmlentities($name), '" id="';
-	echo htmlentities($name), '"';
-	emit_tag_attributes($args);
-	echo ' value="', htmlentities(get_param($name, $default)), '"/>';
 }
 
 function number_dropdown($name, $start_from=0, $count=1) {
@@ -337,28 +283,6 @@ function generate_javascript_validation($form_id, $constraints, $include_tag=fal
 }
 
 ############################################# Common Validation Functions ##
-
-/**
- * Wrapper around empty() to allow validate() to apply it.
- */
-function validate_is_empty($v) {
-	return empty($v);
-}
-
-/**
- * Quick check to see is the email looks good.
- */
-function validate_is_email($s) {
-	return preg_match('/^[-a-z0-9_.]+@([-a-z0-9_]+\.)+[a-z]+$/i', $s);
-}
-
-/**
- * Wrapper around is_numeric() to get around PHP's inability to apply
- * built-ins by name.
- */
-function validate_is_integer($v) {
-	return is_numeric($v);
-}
 
 function emit_tag_attributes($attrs) {
 	foreach ($attrs as $k=>$v) {
@@ -544,11 +468,6 @@ function method_not_allowed_response($type) {
 	echo 'Method not allowed.';
 }
 
-function not_found_response() {
-	header('HTTP/1.1 404 Not Found');
-	echo 'Not found.';
-}
-
 function get_http_request_method() {
 	$method = strtolower($_SERVER['REQUEST_METHOD']);
 	if ($method == 'post' && !empty($_GET['__method'])) {
@@ -556,10 +475,6 @@ function get_http_request_method() {
 		$method = strtolower($_GET['__method']);
 	}
 	return $method;
-}
-
-function is_valid_http_method($method) {
-	return array_search($method, array('get', 'put', 'delete', 'post', 'head')) !== false;
 }
 
 function get_request_resource_type($default) {

@@ -6,7 +6,7 @@ exit 0
 # Make sure that the sync script is syncing from the right directory.
 cd `dirname $0`
 
-REMOTE="user@server:/path/to/application/directory/"
+REMOTE="%%USER%%@%%SERVER%%:%%APPLICATION_PATH%%"
 
 /usr/bin/rsync \
 	-rlptvz --delete \

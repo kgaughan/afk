@@ -351,6 +351,27 @@ class AFK_Context {
 		}
 		return $result;
 	}
+
+	/**
+	 * Default the named fields to empty strings.
+	 */
+	public function default_to_empty() {
+		$fields = func_get_args();
+		foreach ($fields as $k) {
+			$this->ctx[$k] = isset($this->ctx[$k]) ? trim($this->ctx[$k] : '';
+		}
+	}
+
+	/**
+	 * Use the given defaults if the named fields aren't set.
+	 */
+	public function defaults($defaults) {
+		foreach ($defaults as $k=>$v) {
+			if (!isset($this->ctx[$k])) {
+				$this->ctx[$k] = $v;
+			}
+		}
+	}
 }
 
 /**
