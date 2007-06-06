@@ -358,7 +358,7 @@ class AFK_Context {
 	public function default_to_empty() {
 		$fields = func_get_args();
 		foreach ($fields as $k) {
-			$this->ctx[$k] = isset($this->ctx[$k]) ? trim($this->ctx[$k] : '';
+			$this->ctx[$k] = isset($this->ctx[$k]) ? trim($this->ctx[$k]) : '';
 		}
 	}
 
@@ -379,7 +379,7 @@ class AFK_Context {
  */
 class AFK_DispatchFilter implements AFK_Filter {
 
-	public function convert_error_to_exception($errno, $errstr, $errfile, $errline, $ctx) {
+	private function convert_error_to_exception($errno, $errstr, $errfile, $errline, $ctx) {
 		throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
 	}
 
@@ -579,15 +579,15 @@ class AFK_Routes {
 	}
 
 	/** If none of the routes match, this resource handler is used. */
-	public function fallback($handler) {
-		$this->fallback = $handler;
+	public function fallback($defaults) {
+		$this->fallback = $defaults;
 		return $this;
 	}
 
 	/** Adds a route and an associated resource handler. */
-	public function route($route, $handler, $extra=array()) {
-		list($regex, $keys) = $this->compile_route($route);
-		$this->routes[$regex] = array($handler, $keys, $extra);
+	public function route($route, $defaults=array(), $patterns=array()) {
+		list($regex, $keys) = $this->compile_route($route, $patterns);
+		$this->routes[$regex] = array($keys, $defaults);
 		return $this;
 	}
 
@@ -596,15 +596,14 @@ class AFK_Routes {
 		foreach ($this->routes as $regex=>$v) {
 			// This is only needed because PHP's parser is too dumb to allow
 			// the use for list() in the foreach.
-			list($handler, $keys, $extra) = $v;
+			list($keys, $defaults) = $v;
 
 			$values = $this->match($regex, $path);
 			if ($values !== false) {
-				$values = array_merge($extra, $this->combine($keys, $values));
-				return array($handler, $values);
+				return array_merge($defaults, $this->combine($keys, $values));
 			}
 		}
-		return array($this->fallback, array());
+		return $this->fallback;
 	}
 
 	private function combine($keys, $values) {
@@ -621,7 +620,7 @@ class AFK_Routes {
 	 */
 	private function match($regex, $path) {
 		$values = array();
-		if (preg_match($regex, $path, $values)) {
+		if (preg_match('`^' . $regex . '$`', $path, $values)) {
 			// We only want the parts parsed out, not the whole string.
 			array_shift($values);
 			return $values;
@@ -630,7 +629,7 @@ class AFK_Routes {
 	}
 
 	/** Compiles a route into a regex and an array of placeholder keys. */
-	private function compile_route($route) {
+	private function compile_route($route, $patterns) {
 		// Construct a regular expression to match this route. This method is
 		// meant to be simple, not to be fast. If speed becomes necessary, it
 		// can probably be improved using some complex nonsense with
@@ -639,46 +638,50 @@ class AFK_Routes {
 		// a file. Will need some caching mechanism first and some way of
 		// figuring out if the routes have changed.
 		$keys  = array();
-		$regex = '/^';
+		$regex = '';
 		$parts = explode(':', $route);
 		foreach ($parts as $i=>$part) {
 			$matches = array();
-			if (preg_match('/^([a-z_]*)([^a-z_])(.*)$/i', $part, $matches)) {
+			if (preg_match('/^([a-z_]*)([^a-z_]?.*)$/i', $part, $matches)) {
 				if (strlen($matches[1]) == 0) {
 					// No placeholder: most likely the first segment.
-					$regex .= preg_quote($matches[0], '/');
+					$regex .= preg_quote($matches[0], '`');
 				} else {
 					$keys[] = $matches[1];
-					$regex .= '([^' .
-						$this->escape_class_character($matches[2]) . ']+)';
-					if ($matches[3] == '' && $i == count($parts) - 1) {
-						// To cope with trailing separators.
-						$regex .= preg_quote($matches[2], '/') . '?';
-					} else {
-						// There's a trailing constant string.
-						$regex .= preg_quote($matches[2] . $matches[3], '/');
-					}
+					$regex .= $this->to_pattern($matches[1], $matches[2], $patterns);
 				}
-			} elseif ($i == count($parts) - 1) {
-				// At end of string with a trailing separator.
-				$keys[] = $part;
-				$regex .= '(.*)';
 			} else {
 				// Malformed route!
 				throw new AFK_RouteSyntaxException($route);
 			}
 		}
-		$regex .= '$/';
-
 		return array($regex, $keys);
+	}
+
+	private function to_pattern($name, $trailer, $patterns) {
+		if (isset($patterns[$name])) {
+			$pattern = $patterns[$name];
+			if (is_array($p)) {
+				$pattern = implode('|', array_map(array($this, 'quote'), $pattern));
+			}
+		} elseif ($trailer == '') {
+			$pattern = '.+';
+		} else {
+			$pattern = '[^' . $this->escape_character_class($trailer[0]) . ']+';
+		}
+		return "($pattern)" . preg_quote($trailer, '`');
 	}
 
 	/** Escapes a character if it has a special meaning in a character class. */
 	private function escape_class_character($c) {
-		if ($c == '-' || $c == ']' || $c == '\\' || $c == '/') {
+		if (strpos("/^-]\\", $c) !== false) {
 			return "\\$c";
 		}
 		return $c;
+	}
+
+	private function quote($s) {
+		return preg_quote($s, '`');
 	}
 
 	/** Replaces any attribute placeholders in the given URI. */
@@ -729,16 +732,16 @@ class AFK_Session_DB {
 		$this->table = $table;
 	}
 
-	public function open($save_path, $name) {
+	protected function open($save_path, $name) {
 		$this->name = $name;
 		return true;
 	}
 
-	public function close() {
+	protected function close() {
 		return true;
 	}
 
-	public function read($id) {
+	protected function read($id) {
 		$data = $this->dbh->query_value("
 			SELECT	data
 			FROM	{$this->table}
@@ -746,7 +749,7 @@ class AFK_Session_DB {
 		return is_null($data) ? '' : $data;
 	}
 
-	public function write($id, $data) {
+	protected function write($id, $data) {
 		if (!$this->session_exists($id)) {
 			$query = "INSERT INTO {$this->table} (data, time, name, id) VALUES (%s, %d, %s, %s)";
 		} else {
@@ -756,7 +759,7 @@ class AFK_Session_DB {
 		return true;
 	}
 
-	public function destroy($id) {
+	protected function destroy($id) {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
@@ -764,7 +767,7 @@ class AFK_Session_DB {
 		return true;
 	}
 
-	public function gc($max_lifetime) {
+	protected function gc($max_lifetime) {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
@@ -772,7 +775,7 @@ class AFK_Session_DB {
 		return true;
 	}
 
-	private function session_exists($id) {
+	protected function session_exists($id) {
 		return $this->dbh->query_value("
 			SELECT	COUNT(*)
 			FROM	{$this->table}
