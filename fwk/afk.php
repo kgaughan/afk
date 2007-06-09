@@ -92,7 +92,7 @@ class AFK {
 	/** Loads the named helper. */
 	public static function load_helper($name) {
 		if (!isset(self::$loaded_helpers[$name]) && !self::load(self::$helper_paths, $name)) {
-			throw new Exception("Unknown helper: $name");
+			throw new AFK_Exception("Unknown helper: $name");
 		} else {
 			// There's no significance to the stored value: we're just using
 			// the array keys as a set.
@@ -113,12 +113,16 @@ class AFK {
 	}
 
 	/** Does a clean HTML dump of the given variable. */
-	public static function dump($v) {
+	public static function dump() {
+		$vs = func_get_args();
 		ob_start();
-		var_dump($v);
+		call_user_func_array('var_dump', $vs);
 		$contents = ob_get_contents();
 		ob_end_clean();
-		echo '<pre style="border:1px solid red;padding:1ex;background:white;color:black">', e($contents), '</pre>';
+		if (!extension_loaded('Xdebug') && php_sapi_name() != 'cli') {
+			$contents = '<pre style="border:1px solid red;padding:1ex;background:white;color:black">' . e($contents) . '</pre>';
+		}
+		echo $contents;
 	}
 
 	/** Fixes the superglobals by removing any magic quotes, if present. */
@@ -148,29 +152,16 @@ class AFK {
 
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
 	public static function process_request($routes, $extra_filters=array()) {
-		self::ensure_canonicalised_uri();
 		self::fix_superglobals();
 
-		error_reporting(E_ALL);
-
 		$p = new AFK_Pipeline();
+		$p->add(new AFK_RouteFilter($routes, $_SERVER, $_REQUEST));
 		foreach ($extra_filters as $filter) {
 			$p->add($filter);
 		}
-		$p->add(new AFK_RouteFilter($routes, $_SERVER, $_REQUEST));
 		$p->add(new AFK_DispatchFilter());
 		$p->add(new AFK_RenderFilter());
 		$p->start();
-	}
-
-	/** Ensures the request URI doesn't contain double-slashes. */
-	public static function ensure_canonicalised_uri() {
-		$canon = preg_replace('~(/)/+~', '$1', $_SERVER['REQUEST_URI']);
-		if ($canon !== $_SERVER['REQUEST_URI']) {
-			header("HTTP/1.1 301 Permanent Redirect");
-			header("Location: $canon");
-			exit;
-		}
 	}
 }
 
@@ -312,6 +303,11 @@ class AFK_Context {
 		return $default;
 	}
 
+	public function change_view($new) {
+		$this->_old_view = $this->_view;
+		$this->_view = $new;
+	}
+
 	/** @return The context as an array. */
 	public function as_array() {
 		return $this->ctx;
@@ -379,12 +375,9 @@ class AFK_Context {
  */
 class AFK_DispatchFilter implements AFK_Filter {
 
-	private function convert_error_to_exception($errno, $errstr, $errfile, $errline, $ctx) {
-		throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
-	}
-
 	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
-		set_error_handler(array($this, 'convert_error_to_exception'), E_ALL);
+		set_error_handler(array('AFK_TrappedErrorException', 'convert_error'), E_ALL);
+
 		// What if there's no handler?
 		$handler_class = $ctx->_handler . 'Handler';
 		try {
@@ -394,12 +387,26 @@ class AFK_DispatchFilter implements AFK_Filter {
 		} catch (Exception $e) {
 			// Not entirely happy with this.
 			$ctx->_exception = $e;
-			$ctx->_old_view = $ctx->_view;
-			$ctx->_view = 'error500';
+			$ctx->change_view('error500');
+			$ctx->page_title = 'Internal Error';
 			header('HTTP/1.1 500 Internal Server Error');
 			$pipe->to_end();
 			$pipe->do_next($ctx);
 		}
+	}
+}
+
+/**
+ * Common logic for AFK-specific exceptions.
+ */
+class AFK_Exception extends Exception {
+
+	public function __construct($msg, $code=0) {
+		parent::__construct($msg, $code);
+	}
+
+	public function __toString() {
+		return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
 	}
 }
 
@@ -510,8 +517,15 @@ class AFK_RenderFilter implements AFK_Filter {
 					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
 			}
 			$t = new AFK_TemplateEngine();
-			$t->render(coalesce($ctx->view(), 'default'), $ctx->as_array());
-			$pipe->do_next($ctx);
+			try {
+				ob_start();
+				$t->render($ctx->view('default'), $ctx->as_array());
+				$pipe->do_next($ctx);
+				ob_end_flush();
+			} catch (Exception $e) {
+				ob_end_clean();
+				throw $e;
+			}
 		}
 	}
 }
@@ -543,26 +557,30 @@ class AFK_RouteFilter implements AFK_Filter {
 
 	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
 		$ctx->merge($this->server);
-		list($handler, $attrs) = $this->routes->search($ctx->PATH_INFO);
-		$ctx->merge($this->server, $attrs, $this->request);
-		$ctx->_handler = $handler;
-		$pipe->do_next($ctx);
+		if ($this->ensure_canonicalised_uri($ctx)) {
+			$attrs = $this->routes->search($ctx->PATH_INFO);
+			$ctx->merge($this->server, $attrs, $this->request);
+			$pipe->do_next($ctx);
+		}
 	}
+
+	/* Ensures the request URI doesn't contain double-slashes. */
+	private function ensure_canonicalised_uri($ctx) {
+		$canon = preg_replace('~(/)/+~', '$1', $ctx->REQUEST_URI);
+		if ($canon !== $ctx->REQUEST_URI) {
+			header("HTTP/1.1 301 Moved Permanently");
+			header("Location: $canon");
+			return false;
+		}
+		return true;
+	}
+
 }
 
 /**
  * Thrown if a malformed route is given.
  */
-class AFK_RouteSyntaxException extends Exception {
-
-	public function __construct($msg, $code=0) {
-		parent::__construct($msg, $code);
-	}
-
-	public function __toString() {
-		return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
-	}
-}
+class AFK_RouteSyntaxException extends AFK_Exception { }
 
 /**
  * URL parsing and routing.
@@ -639,10 +657,10 @@ class AFK_Routes {
 		// figuring out if the routes have changed.
 		$keys  = array();
 		$regex = '';
-		$parts = explode(':', $route);
+		$parts = explode('{', $route);
 		foreach ($parts as $i=>$part) {
 			$matches = array();
-			if (preg_match('/^([a-z_]*)([^a-z_]?.*)$/i', $part, $matches)) {
+			if (preg_match('/^(?:([a-z_]+)})?([^a-z_]?.*)$/i', $part, $matches)) {
 				if (strlen($matches[1]) == 0) {
 					// No placeholder: most likely the first segment.
 					$regex .= preg_quote($matches[0], '`');
@@ -660,16 +678,16 @@ class AFK_Routes {
 
 	private function to_pattern($name, $trailer, $patterns) {
 		if (isset($patterns[$name])) {
-			$pattern = $patterns[$name];
+			$p = $patterns[$name];
 			if (is_array($p)) {
-				$pattern = implode('|', array_map(array($this, 'quote'), $pattern));
+				$p = implode('|', array_map(array($this, 'quote'), $p));
 			}
 		} elseif ($trailer == '') {
-			$pattern = '.+';
+			$p = '.+';
 		} else {
-			$pattern = '[^' . $this->escape_character_class($trailer[0]) . ']+';
+			$p = '[^' . $this->escape_class_character($trailer[0]) . ']+';
 		}
-		return "($pattern)" . preg_quote($trailer, '`');
+		return "($p)" . preg_quote($trailer, '`');
 	}
 
 	/** Escapes a character if it has a special meaning in a character class. */
@@ -828,7 +846,7 @@ class AFK_TemplateEngine {
 	 */
 	public function start_slot($slot) {
 		if (!is_null($this->current_slot)) {
-			throw new Exception("Cannot start new slot '$slot': already in slot '{$this->current_slot}'.");
+			throw new AFK_TemplateException("Cannot start new slot '$slot': already in slot '{$this->current_slot}'.");
 		}
 		$this->current_slot = $slot;
 		ob_start();
@@ -840,7 +858,7 @@ class AFK_TemplateEngine {
 	 */
 	public function end_slot() {
 		if (is_null($this->current_slot)) {
-			throw new Exception("Attempt to end a slot while not in a slot.");
+			throw new AFK_TemplateException("Attempt to end a slot while not in a slot.");
 		}
 		$this->set_slot($this->current_slot, ob_get_contents());
 		ob_end_clean();
@@ -853,7 +871,7 @@ class AFK_TemplateEngine {
 	 */
 	public function end_slot_append() {
 		if (is_null($this->current_slot)) {
-			throw new Exception("Attempt to end a slot while not in a slot.");
+			throw new AFK_TemplateException("Attempt to end a slot while not in a slot.");
 		}
 		$this->append_slot($this->current_slot, ob_get_contents());
 		ob_end_clean();
@@ -863,7 +881,7 @@ class AFK_TemplateEngine {
 	/** Renders the named template. */
 	public function render($name, $values=array()) {
 		$this->start_rendering_context($name);
-		$this->internal_render(self::find($name), $values);
+		$this->internal_render($this->find($name), $values);
 		$this->end_rendering_context($values);
 	}
 
@@ -878,10 +896,10 @@ class AFK_TemplateEngine {
 				$names = array($names);
 			}
 			if (count($names) == 0) {
-				throw new Exception('You must specify at least one template for ::render_each()');
+				throw new AFK_TemplateException('You must specify at least one template for ::render_each()');
 			}
 
-			$paths = array_map(array(__CLASS__, 'find'), $names);
+			$paths = array_map(array($this, 'find'), $names);
 
 			$this->start_rendering_context($names[0]);
 
@@ -953,13 +971,17 @@ class AFK_TemplateEngine {
 		}
 		$end = count($this->envelopes) - 1;
 		if ($end < 0) {
-			throw new Exception("Um, ::with_envelope() can't be called outside of a template rendering context.");
+			throw new AFK_TemplateException(
+				"Um, ::with_envelope() can't be called outside of a template rendering context.");
 		} elseif (is_null($this->envelopes[$end])) {
+			if ($this->internal_find($name . '.envelope') === false) {
+				$name = 'default';
+			}
 			$this->envelopes[$end] = $name;
 			ob_start();
 			ob_implicit_flush(false);
 		} elseif ($name != $this->envelopes[$end]) {
-			throw new Exception("Attempt to replace an envelope: $name");
+			throw new AFK_TemplateException("Attempt to replace an envelope: $name");
 		}
 	}
 
@@ -976,9 +998,20 @@ class AFK_TemplateEngine {
 	}
 
 	/* Searches the template directories for a named template. */
-	public static function find($name) {
+	protected function find($name, $fallback=null) {
+		$location = $this->internal_find($name);
+		if ($location === false) {
+			throw new AFK_TemplateException("Unknown template: $name");
+		}
+		return $location;
+	}
+
+	private function internal_find($name) {
 		if (isset(self::$locations[$name])) {
 			return self::$locations[$name];
+		}
+		if (count(self::$paths) == 0) {
+			throw new AFK_TemplateException('No template search paths specified!');
 		}
 		foreach (self::$paths as $d) {
 			if (file_exists("$d/$name.php")) {
@@ -986,27 +1019,31 @@ class AFK_TemplateEngine {
 				return "$d/$name.php";
 			}
 		}
-		if (count(self::$paths) == 0) {
-			throw new Exception('No template search paths specified!');
-		} else {
-			throw new Exception("Unknown template: $name");
-		}
+		return false;
 	}
 }
 
 /**
+ * Thrown if something goes wrong in the process of rendering a template.
+ */
+class AFK_TemplateException extends AFK_Exception { }
+
+/**
  * Wraps a PHP error that's been converted to an exception.
  */
-class AFK_TrappedErrorException extends Exception {
+class AFK_TrappedErrorException extends AFK_Exception {
 
 	protected $ctx;
 
-	public function __construct($msg='', $code=0, $file='', $line=-1, $ctx=array()) {
-		$this->message = $msg;
-		$this->code = $code;
+	public function __construct($msg, $code, $file, $line, $ctx) {
+		parent::__construct($msg, $code);
 		$this->file = $file;
 		$this->line = $line;
 		$this->ctx  = $ctx;
+	}
+
+	public static function convert_error($errno, $errstr, $errfile, $errline, $ctx) {
+		throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
 	}
 }
 
@@ -1388,17 +1425,12 @@ abstract class DB_Base {
 		return addslashes($s);
 	}
 
-	/**
-	 * Allows query errors to be logged or echoed to the user.
-	 */
+	/** Allows query errors to be logged or echoed to the user. */
 	protected function report_error($query='') {
-		die(sprintf('<div class="error"><h2>Database Error</h2><p>%s</p><pre>%s</pre></div>',
-			e($this->get_last_error()), e($query)));
+		throw new DB_Exception($this->get_last_error(), $query);
 	}
 
-	/**
-	 * Returns the last error known to the underlying database driver.
-	 */
+	/** Returns the last error known to the underlying database driver. */
 	public abstract function get_last_error();
 
 	/**
@@ -1463,6 +1495,24 @@ class DB_EchoingLogger extends DB_BasicLogger {
 	}
 }
 
+class DB_Exception extends Exception {
+
+	private $q;
+
+	public function __construct($msg, $q=null) {
+		parent::__construct($msg, 0);
+		$this->q = $q;
+	}
+
+	public function __toString() {
+		$msg = __CLASS__ . ": {$this->message}\n";
+		if (!empty($this->q)) {
+			$msg .= $this->q . "\n";
+		}
+		return $msg;
+	}
+}
+
 /**
  * An implementation of DB_Base for MySQL.
  */
@@ -1483,7 +1533,7 @@ class DB_MySQL extends DB_Base {
 			}
 			mysql_select_db($db, $this->dbh);
 		} else {
-			throw new Exception('Could not connect to database.');
+			throw new DB_Exception('Could not connect to database.');
 		}
 	}
 

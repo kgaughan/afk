@@ -9,7 +9,9 @@ AFK::add_class_path(APP_ROOT . '/classes');
 AFK::add_class_path(APP_ROOT . '/handlers');
 
 include(APP_ROOT . '/config.php');
-include(APP_ROOT . '/lib/lib.php');
+if (file_exists(APP_ROOT . '/lib/lib.php')) {
+	include(APP_ROOT . '/lib/lib.php');
+}
 
 AFK::process_request(routes(), init());
 ?>
