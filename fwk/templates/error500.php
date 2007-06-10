@@ -9,17 +9,18 @@
 	html * { padding:0; margin:0; }
 	body * { padding:10px 20px; }
 	body * * { padding:0; }
-	body { font:small Helvetica, Arial, sans-serif; }
+	body { font:small Helvetica, Arial, sans-serif; line-height: 1.5 }
 	body>div { border-bottom:1px solid #ddd; }
-	h1 { font-weight:normal; }
-	h2 { margin-bottom:.8em; }
+	h1 { font-weight:normal; line-height: 1.2 }
+	h2 { margin-bottom:.4em; line-height: 1.2 }
 	h2 span { font-size:80%; color:#666; font-weight:normal; }
 	ul.traceback { list-style-type:none; }
 	ul.traceback li.frame { margin-bottom:1em; }
-	div.context { margin: 10px 0; }
+	ul.traceback li.frame span.method { float: right; font-weight: bold }
+	div.context { margin: 0 0 10px 0; background: white; border: 1px solid #ddd }
 	div.context ol { padding-left:30px; margin:0 10px; list-style-position: inside; }
 	div.context ol li { font-family:monospace; white-space:pre; color:#666; }
-	div.context ol li.context-line { color:black; background-color:#ccc; }
+	div.context ol li.context-line { color:black; background-color:#eeb; }
 	#summary { background: #ffc; }
 	#summary h2 { font-weight: normal; color: #666; }
 	#traceback { background:#eee; }
@@ -49,7 +50,7 @@
 	</li>
 <?php foreach ($_exception->getTrace() as $i=>$frame) { ?>
 	<li class="frame">
-	<?php ee(AFK::frame_to_name($frame)) ?><br>
+	<span class="method"><?php ee(AFK::frame_to_name($frame)) ?>()</span>
 	<code><?php ee($frame['file']) ?></code>
 	<div class="context">
 	<?php list($start, $context) = AFK::get_context_lines($frame['file'], $frame['line']) ?>

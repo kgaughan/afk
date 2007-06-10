@@ -397,8 +397,13 @@ class AFK_DispatchFilter implements AFK_Filter {
 		set_error_handler(array('AFK_TrappedErrorException', 'convert_error'), E_ALL);
 
 		try {
-			// What if there's no handler?
+			if (is_null($ctx->_handler)) {
+				throw new AFK_Exception('No handler specified.');
+			}
 			$handler_class = $ctx->_handler . 'Handler';
+			if (!class_exists($handler_class)) {
+				throw new AFK_Exception("No such handler: $handler_class");
+			}
 			$handler = new $handler_class();
 			$handler->handle($ctx);
 			$pipe->do_next($ctx);
