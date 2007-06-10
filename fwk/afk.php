@@ -150,27 +150,6 @@ class AFK {
 		}
 	}
 
-	/** Converts an exception trace frame to a function/method name. */
-	public static function frame_to_name($frame) {
-		$name = '';
-		if (isset($frame['class'])) {
-			$name .= $frame['class'] . $frame['type'];
-		}
-		$name .= $frame['function'];
-		return $name;
-	}
-
-	public static function get_context_lines($file, $line_no, $amount=3) {
-		$context = array();
-		$lines = file($file);
-		for ($i = $line_no - $amount; $i <= $line_no + $amount; $i++) {
-			if ($i >= 0 && isset($lines[$i - 1])) {
-				$context[$i] = $lines[$i - 1];
-			}
-		}
-		return array(max(1, $line_no - $amount), $context);
-	}
-
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
 	public static function process_request($routes, $extra_filters=array()) {
 		self::fix_superglobals();
@@ -410,7 +389,6 @@ class AFK_DispatchFilter implements AFK_Filter {
 		} catch (Exception $e) {
 			$ctx->_exception = $e;
 			$ctx->change_view('error500');
-			$ctx->page_title = 'Internal Error';
 			header('HTTP/1.1 500 Internal Server Error');
 			// Assuming the last pipeline element is a rendering filter.
 			// Not entirely happy with this.

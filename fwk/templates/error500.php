@@ -1,15 +1,16 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
+<?php AFK::load_helper('exceptions') ?>
 <html lang="en"><head>
 
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta name="robots" content="NONE,NOARCHIVE">
-	<title><?php ee(get_class($_exception)) ?> in <?php ee($_exception->getFile()) ?></title>
+	<title><?php ee(get_class($_exception)) ?> in <?php ee(truncate_filename($_exception->getFile())) ?></title>
 	<style type="text/css">
 	html * { padding:0; margin:0; }
 	body * { padding:10px 20px; }
 	body * * { padding:0; }
-	body { font:small Helvetica, Arial, sans-serif; line-height: 1.5 }
+	body { font:small Calibri, Helvetica, Arial, sans-serif; line-height: 1.5 }
 	body>div { border-bottom:1px solid #ddd; }
 	h1 { font-weight:normal; line-height: 1.2 }
 	h2 { margin-bottom:.4em; line-height: 1.2 }
@@ -30,7 +31,7 @@
 </head><body>
 
 <div id="summary">
-<h1><?php ee(get_class($_exception)) ?> in <?php ee($_exception->getFile()) ?></h1>
+<h1><?php ee(get_class($_exception)) ?> in <?php ee(truncate_filename($_exception->getFile())) ?></h1>
 <h2><?php ee($_exception->getMessage()) ?></h2>
 </div>
 
@@ -38,9 +39,9 @@
 <h2>Traceback <span>(innermost first)</span></h2>
 <ul class="traceback">
 	<li class="frame">
-	<code><?php ee($_exception->getFile()) ?></code>
+	<code><?php ee(truncate_filename($_exception->getFile())) ?></code>
 	<div class="context">
-	<?php list($start, $context) = AFK::get_context_lines($_exception->getFile(), $_exception->getLine()) ?>
+	<?php list($start, $context) = get_context_lines($_exception->getFile(), $_exception->getLine()) ?>
 		<ol start="<?php echo $start ?>">
 		<?php foreach ($context as $line_no=>$line) { ?>
 		<li<?php if ($line_no == $_exception->getLine()) echo ' class="context-line"' ?>><?php ee($line) ?></li>
@@ -50,10 +51,10 @@
 	</li>
 <?php foreach ($_exception->getTrace() as $i=>$frame) { ?>
 	<li class="frame">
-	<span class="method"><?php ee(AFK::frame_to_name($frame)) ?>()</span>
-	<code><?php ee($frame['file']) ?></code>
+	<span class="method"><?php ee(frame_to_name($frame)) ?>()</span>
+	<code><?php ee(truncate_filename($frame['file'])) ?></code>
 	<div class="context">
-	<?php list($start, $context) = AFK::get_context_lines($frame['file'], $frame['line']) ?>
+	<?php list($start, $context) = get_context_lines($frame['file'], $frame['line']) ?>
 		<ol start="<?php echo $start ?>">
 		<?php foreach ($context as $line_no=>$line) { ?>
 		<li<?php if ($line_no == $frame['line']) echo ' class="context-line"' ?>><?php ee($line) ?></li>
