@@ -1,6 +1,6 @@
 h1 {
 	margin: 0;
-	background: #666 url(images/bk-logo.png) bottom right no-repeat;
+	background: #666;
 	padding: 0 80px 0 0.5ex;
 	color: white;
 	font-weight: normal;
@@ -9,21 +9,4 @@ h1 {
 
 #body {
 	padding: 1em;
-}
-
-table.highlighted tbody tr:hover {
-	background: #FFFF88;
-}
-
-table.data thead th a {
-	color: white;
-	text-decoration: underline;
-}
-
-table.data thead th.order-desc {
-	background: #666 url(images/arrow-desc.png) center right no-repeat;
-}
-
-table.data thead th.order-asc {
-	background: #666 url(images/arrow-asc.png) center right no-repeat;
 }

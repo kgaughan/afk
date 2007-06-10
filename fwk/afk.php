@@ -150,6 +150,27 @@ class AFK {
 		}
 	}
 
+	/** Converts an exception trace frame to a function/method name. */
+	public static function frame_to_name($frame) {
+		$name = '';
+		if (isset($frame['class'])) {
+			$name .= $frame['class'] . $frame['type'];
+		}
+		$name .= $frame['function'];
+		return $name;
+	}
+
+	public static function get_context_lines($file, $line_no, $amount=3) {
+		$context = array();
+		$lines = file($file);
+		for ($i = $line_no - $amount; $i <= $line_no + $amount; $i++) {
+			if ($i >= 0 && isset($lines[$i - 1])) {
+				$context[$i] = $lines[$i - 1];
+			}
+		}
+		return array(max(1, $line_no - $amount), $context);
+	}
+
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
 	public static function process_request($routes, $extra_filters=array()) {
 		self::fix_superglobals();
@@ -310,9 +331,10 @@ class AFK_Context {
 
 	/** @return The context as an array. */
 	public function as_array() {
-		return $this->ctx;
+		return array_merge($this->ctx, array('ctx' => $this));
 	}
 
+	/** Toggles whether any rendering components should run. */
 	public function allow_rendering($allow=true) {
 		$this->allow_rendering = $allow;
 	}
@@ -348,9 +370,7 @@ class AFK_Context {
 		return $result;
 	}
 
-	/**
-	 * Default the named fields to empty strings.
-	 */
+	/** Default the named fields to empty strings. */
 	public function default_to_empty() {
 		$fields = func_get_args();
 		foreach ($fields as $k) {
@@ -358,9 +378,7 @@ class AFK_Context {
 		}
 	}
 
-	/**
-	 * Use the given defaults if the named fields aren't set.
-	 */
+	/** Use the given defaults if the named fields aren't set. */
 	public function defaults($defaults) {
 		foreach ($defaults as $k=>$v) {
 			if (!isset($this->ctx[$k])) {
@@ -378,18 +396,19 @@ class AFK_DispatchFilter implements AFK_Filter {
 	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
 		set_error_handler(array('AFK_TrappedErrorException', 'convert_error'), E_ALL);
 
-		// What if there's no handler?
-		$handler_class = $ctx->_handler . 'Handler';
 		try {
+			// What if there's no handler?
+			$handler_class = $ctx->_handler . 'Handler';
 			$handler = new $handler_class();
 			$handler->handle($ctx);
 			$pipe->do_next($ctx);
 		} catch (Exception $e) {
-			// Not entirely happy with this.
 			$ctx->_exception = $e;
 			$ctx->change_view('error500');
 			$ctx->page_title = 'Internal Error';
 			header('HTTP/1.1 500 Internal Server Error');
+			// Assuming the last pipeline element is a rendering filter.
+			// Not entirely happy with this.
 			$pipe->to_end();
 			$pipe->do_next($ctx);
 		}
@@ -429,9 +448,7 @@ interface AFK_Filter {
  */
 interface AFK_Handler {
 
-	/**
-	 * Handles a HTTP request.
-	 */
+	/** Handles a HTTP request. */
 	function handle(AFK_Context $ctx);
 }
 
