@@ -1,33 +1,4 @@
 <?php
-function scrub_cc_number($cc) {
-	$result = '';
-	for ($i = 0; $i < strlen($cc); $i++) {
-		$ch = substr($cc, $i, 1);
-		if (is_numeric($ch)) {
-			$result .= $ch;
-		}
-	}
-	return $result;
-}
-
-function luhn_check($cc_number) {
-	$ttl = 0;
-	$len = strlen($cc_number);
-	$alt = false;
-	for ($i = $len - 1; $i >= 0; $i--) {
-		$digit = (int) substr($cc_number, $i, 1);
-		if ($alt) {
-			$digit *= 2;
-			if ($digit > 9) {
-				$digit -= 9;
-			}
-		}
-		$ttl += $digit;
-		$alt = !$alt;
-	}
-	return $ttl % 10 == 0;
-}
-
 /*
  * Antifwk
  * by Keith Gaughan
@@ -548,19 +519,5 @@ function iso8601_datetime($dt) {
 		$dt = strtotime($dt);
 	}
 	return date('Y-m-d\TH:i:sO', $dt);
-}
-
-/**
- * Generates a timespan in seconds.
- *
- * @param  $sec  Number of seconds to include in timespan; may exceed 60.
- * @param  $min  Ditto for minutes.
- * @param  $hr   Ditto for hours; may exceed 24.
- * @param  $dy   Ditto for days.
- *
- * @return Specified timespan in seconds.
- */
-function make_timespan($sec=0, $min=0, $hr=0, $dy=0) {
-	return $sec + ($min * 60) + ($hr * 360) + ($dy * 8640);
 }
 ?>
