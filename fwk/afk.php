@@ -406,7 +406,7 @@ class AFK_Exception extends Exception {
 	}
 
 	public function __toString() {
-		return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+		return get_class($this) . ": [{$this->code}]: {$this->message}\n";
 	}
 }
 
@@ -464,12 +464,37 @@ class AFK_HandlerBase implements AFK_Handler {
 	}
 
 	protected function get_available_methods($view) {
-		return array();
+		static $allowed = array();
+		if (count($allowed) == 0) {
+			$methods = get_class_methods(get_class($this));
+			$allowed = array();
+			foreach ($methods as $m) {
+				$parts = explode('_', $m, 3);
+				if ($parts[0] == 'on' && count($parts) > 1) {
+					$m_view = isset($parts[2]) ? $parts[2] : '';
+					if ($m_view == '' || $m_view == $view) {
+						$allowed[] = strtoupper($parts[1]);
+					}
+				}
+			}
+			$allowed = array_unique($allowed);
+		}
+		return $allowed;
 	}
 
-	protected function no_such_method($ctx) {
+	protected function on_options(AFK_Context $ctx) {
+		$this->write_allow_header($ctx->view());
+		$ctx->allow_rendering(false);
+	}
+
+	protected function no_such_method(AFK_Context $ctx) {
 		header('HTTP/1.1 403 Method Not Allowed');
-		header('Allow: ' . implode(', ', $this->get_available_methods()));
+		$this->write_allow_header($ctx->view());
+		$ctx->change_view('error403');
+	}
+
+	protected function write_allow_header($view) {
+		header('Allow: ' . implode(', ', $this->get_available_methods($view)));
 	}
 }
 
@@ -1079,6 +1104,20 @@ class AFK_TrappedErrorException extends AFK_Exception {
 	}
 }
 
+// ---------------------------------------------------------- Convenience --
+
+/**
+ * A simple fallback handler so authors won't have to write their own.
+ */
+class AFK_DefaultHandler extends AFK_HandlerBase {
+
+	public function on_get(AFK_Context $ctx) {
+		header('HTTP/1.1 404 Not Found');
+		$ctx->change_view('error404');
+		$ctx->page_title = 'You are wandering through a maze of tunnels, all alike...';
+	}
+}
+
 // ------------------------------------------------------- Object Caching --
 
 /**
@@ -1537,7 +1576,7 @@ class DB_Exception extends Exception {
 	}
 
 	public function __toString() {
-		$msg = __CLASS__ . ": {$this->message}\n";
+		$msg = get_class($this) . ": {$this->message}\n";
 		if (!empty($this->q)) {
 			$msg .= $this->q . "\n";
 		}

@@ -2,7 +2,7 @@
 function routes() {
 	$r = new AFK_Routes();
 	$r->route('/', array('_handler' => 'Root'));
-	$r->fallback(array('_handler' => 'Default'));
+	$r->fallback(array('_handler' => 'AFK_Default'));
 	return $r;
 }
 
