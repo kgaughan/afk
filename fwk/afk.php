@@ -1013,9 +1013,9 @@ class AFK_TemplateEngine {
 	}
 
 	/* Creates a dedicated scope for rendering a PHP template. */
-	private function internal_render($_path, &$_values) {
-		extract($_values, EXTR_SKIP);
-		require($_path);
+	private function internal_render($__path, &$__values) {
+		extract($__values, EXTR_SKIP);
+		require($__path);
 	}
 
 	/* Prepares the current template rendering context. */
