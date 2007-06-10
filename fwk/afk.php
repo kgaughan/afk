@@ -558,9 +558,21 @@ class AFK_RouteFilter implements AFK_Filter {
 	public function execute(AFK_Pipeline $pipe, AFK_Context $ctx) {
 		$ctx->merge($this->server);
 		if ($this->ensure_canonicalised_uri($ctx)) {
-			$attrs = $this->routes->search($ctx->PATH_INFO);
-			$ctx->merge($this->server, $attrs, $this->request);
-			$pipe->do_next($ctx);
+			$result = $this->routes->search($ctx->PATH_INFO);
+			if (is_array($result)) {
+				// The result is the attributes.
+				$ctx->merge($this->server, $result, $this->request);
+				$pipe->do_next($ctx);
+			} else {
+				// Result is a normalised URL. The original request URL was
+				// most likely missing a trailing slash or had one it
+				// shouldn't have had.
+				$path = $ctx->application_root() . $result;
+				if ($ctx->QUERY_STRING != '') {
+					$path .= '?' . $ctx->QUERY_STRING;
+				}
+				$this->permanent_redirect($path);
+			}
 		}
 	}
 
@@ -568,13 +580,16 @@ class AFK_RouteFilter implements AFK_Filter {
 	private function ensure_canonicalised_uri($ctx) {
 		$canon = preg_replace('~(/)/+~', '$1', $ctx->REQUEST_URI);
 		if ($canon !== $ctx->REQUEST_URI) {
-			header("HTTP/1.1 301 Moved Permanently");
-			header("Location: $canon");
+			$this->permanent_redirect($canon);
 			return false;
 		}
 		return true;
 	}
 
+	private function permanent_redirect($path) {
+		header("HTTP/1.1 301 Moved Permanently");
+		header("Location: $path");
+	}
 }
 
 /**
@@ -611,6 +626,23 @@ class AFK_Routes {
 
 	/** Finds the first route that matches the given path. */
 	public function search($path) {
+		$result = $this->internal_search($path);
+		if ($result !== false) {
+			return $result;
+		}
+
+		// Tweak it to remove or append a trailing slash.
+		$path = substr($path, -1) == '/' ? substr($path, 0, -1) : "$path/";
+		foreach ($this->routes as $regex=>$_) {
+			if ($this->match($regex, $path)) {
+				return $path;
+			}
+		}
+
+		return $this->fallback;
+	}
+
+	private function internal_search($path) {
 		foreach ($this->routes as $regex=>$v) {
 			// This is only needed because PHP's parser is too dumb to allow
 			// the use for list() in the foreach.
@@ -621,7 +653,7 @@ class AFK_Routes {
 				return array_merge($defaults, $this->combine($keys, $values));
 			}
 		}
-		return $this->fallback;
+		return false;
 	}
 
 	private function combine($keys, $values) {
