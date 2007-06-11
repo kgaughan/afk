@@ -226,8 +226,13 @@ class AFK_Cache {
  */
 class AFK_Context {
 
+	private static $instance = null;
+
 	private $ctx = array();
 	private $allow_rendering = true;
+
+	private function __construct() {
+	}
 
 	/**
 	 * Merges the given arrays into the current request context; existing
@@ -365,6 +370,13 @@ class AFK_Context {
 			}
 		}
 	}
+
+	public static function get() {
+		if (!isset(self::$instance)) {
+			self::$instance = new AFK_Context();
+		}
+		return self::$instance;
+	}
 }
 
 /**
@@ -458,7 +470,7 @@ class AFK_HandlerBase implements AFK_Handler {
 			return $this->get_handler_method('get', $view);
 		}
 		if ($view != '') {
-			return $this->get_handler_method($method);
+			return $this->get_handler_method($method, '');
 		}
 		return '';
 	}
@@ -511,9 +523,8 @@ class AFK_Pipeline {
 	}
 
 	public function start() {
-		$ctx = new AFK_Context();
 		reset($this->filters);
-		$this->do_next($ctx);
+		$this->do_next(AFK_Context::get());
 	}
 
 	public function do_next(AFK_Context $ctx) {
@@ -877,6 +888,8 @@ class AFK_TemplateEngine {
 	private $current_slot = null;
 	private $slots = array();
 
+	private $context = array();
+
 	/** Checks if the named slot has content. */
 	public function has_slot($slot) {
 		return isset($this->slots[$slot]);
@@ -997,8 +1010,21 @@ class AFK_TemplateEngine {
 
 	/* Creates a dedicated scope for rendering a PHP template. */
 	private function internal_render($__path, &$__values) {
-		extract($__values, EXTR_SKIP);
-		require($__path);
+		array_unshift($this->context, $__values);
+		try {
+			foreach ($this->context as $__c) {
+				extract($__c, EXTR_SKIP);
+			}
+			require($__path);
+		} catch (Exception $__e) {
+			// Prevent envelopes from inadvertantly wrapping the error.
+			for ($i = 0; $i < count($this->envelopes); $i++) {
+				ob_end_clean();
+			}
+			$this->envelopes = array();
+			throw $__e;
+		}
+		array_shift($this->context);
 	}
 
 	/* Prepares the current template rendering context. */

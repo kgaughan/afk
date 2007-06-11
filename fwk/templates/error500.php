@@ -51,6 +51,9 @@
 	</li>
 <?php foreach ($_exception->getTrace() as $i=>$frame) { ?>
 	<li class="frame">
+	<?php if (empty($frame['file'])) { ?>
+	<?php AFK::dump($frame) ?>
+	<?php } else { ?>
 	<span class="method"><?php ee(frame_to_name($frame)) ?>()</span>
 	<code><?php ee(truncate_filename($frame['file'])) ?></code>
 	<div class="context">
@@ -60,8 +63,9 @@
 		<li<?php if ($line_no == $frame['line']) echo ' class="context-line"' ?>><?php ee($line) ?></li>
 		<?php } ?>
 		</ol>
-	  </div>
-	  </li>
+	</div>
+	<?php } ?>
+	</li>
 <?php } ?>
   </ul>
 </div>
