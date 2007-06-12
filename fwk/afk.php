@@ -555,6 +555,7 @@ class AFK_RenderFilter implements AFK_Filter {
 			$t = new AFK_TemplateEngine();
 			try {
 				ob_start();
+				$ctx->defaults(array('page_title' => ''));
 				$t->render($ctx->view('default'), $ctx->as_array());
 				$pipe->do_next($ctx);
 				ob_end_flush();
@@ -623,6 +624,7 @@ class AFK_RouteFilter implements AFK_Filter {
 	}
 
 	private function permanent_redirect($path) {
+		// I don't really think this belongs here.
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $path");
 	}
@@ -787,16 +789,15 @@ class AFK_Routes {
  * CREATE TABLE sessions (
  *     id   CHAR(26) NOT NULL,
  *     name CHAR(16) NOT NULL,
- *     time INTEGER  NOT NULL,
+ *     ts   INTEGER  NOT NULL,
  *     data TEXT     NOT NULL,
  * 
  *     PRIMARY KEY (id, name),
- *     INDEX ix_time (time)
+ *     INDEX ix_timestamp (ts)
  * );
  *
  * I'm pretty sure the table schema and the class itself should work on just
- * about every RDBMS out there. The only bit that might not is the use of the
- * field name 'time', which might conflict with a reserved word.
+ * about every RDBMS out there.
  *
  * You will need an implementation of DB_Base to get this to work.
  */
@@ -837,9 +838,9 @@ class AFK_Session_DB {
 
 	protected function write($id, $data) {
 		if (!$this->session_exists($id)) {
-			$query = "INSERT INTO {$this->table} (data, time, name, id) VALUES (%s, %d, %s, %s)";
+			$query = "INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %d, %s, %s)";
 		} else {
-			$query = "UPDATE {$this->table} SET data = %s, time = %d WHERE name = %s AND id = %s";
+			$query = "UPDATE {$this->table} SET data = %s, ts = %d WHERE name = %s AND id = %s";
 		}
 		$this->dbh->execute($query, $data, time(), $this->name, $id);
 		return true;
@@ -857,7 +858,7 @@ class AFK_Session_DB {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
-			WHERE	time < %d", time() - $max_lifetime);
+			WHERE	ts < %d", time() - $max_lifetime);
 		return true;
 	}
 
@@ -866,6 +867,78 @@ class AFK_Session_DB {
 			SELECT	COUNT(*)
 			FROM	{$this->table}
 			WHERE	name = %s AND id = %s", $this->name, $id) == 0;
+	}
+}
+
+/** */
+class AFK_SlotException extends AFK_Exception { }
+
+/**
+ * A slot is a placeholder whose content can be generated in one place and
+ * output in a completely different place elsewhere.
+ */ 
+class AFK_Slots {
+
+	/* Stuff for handling slots. */
+	private $current = null;
+	private $slots = array();
+
+	/** Checks if the named slot has content. */
+	public function has($slot) {
+		return isset($this->slots[$slot]);
+	}
+
+	/** Writes out the content in the given slot. */
+	public function get($slot, $default='') {
+		echo $this->has($slot) ? $this->slots[$slot] : $default;
+	}
+
+	/** Sets the contents of the given slot. */
+	public function set($slot, $contents) {
+		$this->slots[$slot] = $contents;
+	}
+
+	/** Appends content to the given slot. */
+	public function append($slot, $contents) {
+		$this->slots[$slot] .= $contents;
+	}
+
+	/**
+	 * Delimit the start of a block of code which will generate content for
+	 * the given slot.
+	 */
+	public function start($slot) {
+		if (!is_null($this->current)) {
+			throw new AFK_SlotException("Cannot start new slot '$slot': already in slot '{$this->current}'.");
+		}
+		$this->current = $slot;
+		ob_start();
+		ob_implicit_flush(false);
+	}
+
+	/**
+	 * Delimits the end of a block started with ::start().
+	 */
+	public function end() {
+		if (is_null($this->current)) {
+			throw new AFK_SlotException("Attempt to end a slot while not in a slot.");
+		}
+		$this->set($this->current, ob_get_contents());
+		ob_end_clean();
+		$this->current = null;
+	}
+
+	/**
+	 * Like ::end(), but the delimited content is appended to whatever's
+	 * already in the slot.
+	 */
+	public function end_append() {
+		if (is_null($this->current)) {
+			throw new AFK_SlotException("Attempt to end a slot while not in a slot.");
+		}
+		$this->append($this->current, ob_get_contents());
+		ob_end_clean();
+		$this->current = null;
 	}
 }
 
@@ -884,69 +957,7 @@ class AFK_TemplateEngine {
 
 	private $current_template = '';
 
-	/* Stuff for handling slots. */
-	private $current_slot = null;
-	private $slots = array();
-
 	private $context = array();
-
-	/** Checks if the named slot has content. */
-	public function has_slot($slot) {
-		return isset($this->slots[$slot]);
-	}
-
-	/** Writes out the content in the given slot. */
-	public function get_slot($slot, $default='') {
-		echo $this->has_slot($slot) ? $this->slots[$slot] : $default;
-	}
-
-	/** Sets the contents of the given slot. */
-	public function set_slot($slot, $contents) {
-		$this->slots[$slot] = $contents;
-	}
-
-	/** Appends content to the given slot. */
-	public function append_slot($slot, $contents) {
-		$this->slots[$slot] .= $contents;
-	}
-
-	/**
-	 * Delimit the start of a block of code which will generate content for
-	 * the given slot.
-	 */
-	public function start_slot($slot) {
-		if (!is_null($this->current_slot)) {
-			throw new AFK_TemplateException("Cannot start new slot '$slot': already in slot '{$this->current_slot}'.");
-		}
-		$this->current_slot = $slot;
-		ob_start();
-		ob_implicit_flush(false);
-	}
-
-	/**
-	 * Delimits the end of a block started with ::start_slot().
-	 */
-	public function end_slot() {
-		if (is_null($this->current_slot)) {
-			throw new AFK_TemplateException("Attempt to end a slot while not in a slot.");
-		}
-		$this->set_slot($this->current_slot, ob_get_contents());
-		ob_end_clean();
-		$this->current_slot = null;
-	}
-
-	/**
-	 * Like ::end_slot(), but the delimited content is appended to whatever's
-	 * already in the slot.
-	 */
-	public function end_slot_append() {
-		if (is_null($this->current_slot)) {
-			throw new AFK_TemplateException("Attempt to end a slot while not in a slot.");
-		}
-		$this->append_slot($this->current_slot, ob_get_contents());
-		ob_end_clean();
-		$this->current_slot = null;
-	}
 
 	/** Renders the named template. */
 	public function render($name, $values=array()) {
