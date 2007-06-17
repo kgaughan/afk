@@ -18,6 +18,7 @@
 define('CRLF', "\r\n");
 
 define('AFK_ROOT', dirname(__FILE__));
+define('AFK_VERSION', '1.2.0');
 
 AFK::register_autoloader();
 AFK::add_helper_path(AFK_ROOT . '/helpers');
@@ -89,14 +90,17 @@ class AFK {
 		self::$helper_paths[] = $path;
 	}
 
-	/** Loads the named helper. */
-	public static function load_helper($name) {
-		if (!isset(self::$loaded_helpers[$name]) && !self::load(self::$helper_paths, $name)) {
-			throw new AFK_Exception("Unknown helper: $name");
-		} else {
-			// There's no significance to the stored value: we're just using
-			// the array keys as a set.
-			self::$loaded_helpers[$name] = true;
+	/** Loads the named helpers. */
+	public static function load_helper() {
+		$helpers = func_get_args();
+		foreach ($helpers as $name) {
+			if (!isset(self::$loaded_helpers[$name]) && !self::load(self::$helper_paths, $name)) {
+				throw new AFK_Exception("Unknown helper: $name");
+			} else {
+				// There's no significance to the stored value: we're just using
+				// the array keys as a set.
+				self::$loaded_helpers[$name] = true;
+			}
 		}
 	}
 
@@ -190,6 +194,12 @@ class AFK_Cache {
 		self::$backend = $backend;
 	}
 
+	private static function ensure_backend() {
+		if (is_null(self::$backend)) {
+			self::set_backend(new Cache_Null());
+		}
+	}
+
 	/**
 	 * Start a cache block, outputting the previously cached content if
 	 * it's still valid.
@@ -200,9 +210,7 @@ class AFK_Cache {
 	 * @return True if the cache is valid, false if not.
 	 */
 	public static function start($id, $max_age=300) {
-		if (is_null(self::$backend)) {
-			self::$backend = new Cache_Null();
-		}
+		self::ensure_backend();
 		$content = self::$backend->load($id, $max_age);
 		if (!is_null($content)) {
 			echo $content;
@@ -214,10 +222,16 @@ class AFK_Cache {
 		return true;
 	}
 
-	/** Markes the end the cache block. */
+	/** Marks the end the cache block. */
 	public static function end() {
 		self::$backend->save(self::$id, ob_get_contents());
 		ob_end_flush();
+	}
+
+	/** Removes an item from the cache. */
+	public static function remove($id) {
+		self::ensure_backend();
+		self::$backend->invalidate($id);
 	}
 }
 
@@ -779,10 +793,35 @@ class AFK_Routes {
 	}
 }
 
+abstract class AFK_Session {
+
+	public function __construct() {
+		session_set_save_handler(
+			array($this, 'open'),
+			array($this, 'close'),
+			array($this, 'read'),
+			array($this, 'write'),
+			array($this, 'destroy'),
+			array($this, 'gc'));
+	}
+
+	public abstract function open($save_path, $name);
+
+	public function close() {
+		return true;
+	}
+
+	public abstract function read($id);
+
+	public abstract function write($id, $data);
+
+	public abstract function destroy($id);
+
+	public abstract function gc($max_lifetime);
+}
+
 /**
- * A new, cleaner session handler for Tempus Wiki. It still uses the same table
- * names, but no longer pollutes the global namespace with functions and global
- * variables. Should be usable with other applications too.
+ * A port to AFK of the new, cleaner session handler I wrote for Tempus Wiki.
  *
  * To create the appropriate, you'll need to run something like the following:
  * 
@@ -801,34 +840,24 @@ class AFK_Routes {
  *
  * You will need an implementation of DB_Base to get this to work.
  */
-class AFK_Session_DB {
+class AFK_Session_DB extends AFK_Session {
 
 	private $dbh;
 	private $name;
 	private $table;
 
-	public function __construct($dbh, $table='sessions') {
+	public function __construct(DB_Base $dbh, $table='sessions') {
+		parent::__construct();
 		$this->dbh = $dbh;
-		session_set_save_handler(
-			array($this, 'open'),
-			array($this, 'close'),
-			array($this, 'read'),
-			array($this, 'write'),
-			array($this, 'destroy'),
-			array($this, 'gc'));
 		$this->table = $table;
 	}
 
-	protected function open($save_path, $name) {
+	public function open($save_path, $name) {
 		$this->name = $name;
 		return true;
 	}
 
-	protected function close() {
-		return true;
-	}
-
-	protected function read($id) {
+	public function read($id) {
 		$data = $this->dbh->query_value("
 			SELECT	data
 			FROM	{$this->table}
@@ -836,7 +865,7 @@ class AFK_Session_DB {
 		return is_null($data) ? '' : $data;
 	}
 
-	protected function write($id, $data) {
+	public function write($id, $data) {
 		if (!$this->session_exists($id)) {
 			$query = "INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %d, %s, %s)";
 		} else {
@@ -846,7 +875,7 @@ class AFK_Session_DB {
 		return true;
 	}
 
-	protected function destroy($id) {
+	public function destroy($id) {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
@@ -854,7 +883,7 @@ class AFK_Session_DB {
 		return true;
 	}
 
-	protected function gc($max_lifetime) {
+	public function gc($max_lifetime) {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
@@ -862,11 +891,11 @@ class AFK_Session_DB {
 		return true;
 	}
 
-	protected function session_exists($id) {
+	private function session_exists($id) {
 		return $this->dbh->query_value("
 			SELECT	COUNT(*)
 			FROM	{$this->table}
-			WHERE	name = %s AND id = %s", $this->name, $id) == 0;
+			WHERE	name = %s AND id = %s", $this->name, $id) != 0;
 	}
 }
 
@@ -1234,6 +1263,70 @@ class Cache_Array implements Cache {
 	public function save($id, $item) {
 		$this->cache[$id] = $item;
 		$this->timestamps[$id] = time();
+	}
+}
+
+/**
+ * To create the appropriate, you'll need to run something like the following:
+ * 
+ * CREATE TABLE cache (
+ *     id   CHAR(32) NOT NULL,
+ *     ts   INTEGER  NOT NULL,
+ *     data TEXT     NOT NULL,
+ * 
+ *     PRIMARY KEY (id),
+ *     INDEX ix_timestamp (ts)
+ * );
+ *
+ * I'm pretty sure the table schema and the class itself should work on just
+ * about every RDBMS out there.
+ *
+ * You will need an implementation of DB_Base to get this to work.
+ */
+class Cache_DB implements Cache {
+
+	private $dbh;
+	private $table;
+
+	public function __construct(DB_Base $dbh, $table='cache') {
+		$this->dbh = $dbh;
+		$this->table = $table;
+	}
+
+	public function load($id, $max_age=300) {
+		$data = $this->dbh->query_value("
+			SELECT	data
+			FROM	{$this->table}
+			WHERE	id = %s AND ts > %d", md5($id), time() - $max_age);
+
+		if (!is_null($data)) {
+			return unserialize($data);
+		}
+		return null;
+	}
+
+	public function save($id, $item) {
+		$hash = md5($id);
+
+		$item_exists = $this->dbh->query_value("
+			SELECT	COUNT(*)
+			FROM	{$this->table}
+			WHERE	id = %s", $hash) != 0;
+
+		if ($item_exists) {
+			$query = "UPDATE {$this->table} SET data = %s, ts = %d WHERE id = %s";
+		} else {
+			$query = "INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %d, %s)";
+		}
+		$this->dbh->execute($query, serialize($item), time(), $hash);
+	}
+
+	public function invalidate($id) {
+		$this->dbh->execute("DELETE FROM {$this->table} WHERE id = %s", md5($id));
+	}
+
+	public function invalidate_all($max_lifetime=0) {
+		$this->dbh->execute("DELETE FROM {$this->table} WHERE ts < %d", time() - $max_lifetime);
 	}
 }
 

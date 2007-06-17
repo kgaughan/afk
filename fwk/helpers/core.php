@@ -1,6 +1,7 @@
 <?php
-function load_helper($name) {
-	AFK::load_helper($name);
+function load_helper() {
+	$args = func_get_args();
+	call_user_func_array(array('AFK', 'load_helper'), $args);
 }
 
 /**
