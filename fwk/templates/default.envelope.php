@@ -2,13 +2,11 @@
 
 <html><head>
 
-	<title><?php if (isset($page_title)) ee($page_title) ?></title>
+	<title><?php ee($page_title) ?></title>
 
 </head><body>
 
-<?php if (isset($page_title)) { ?>
 <h1><?php ee($page_title) ?></h1>
-<?php } ?>
 
 <div id="body"><?php echo $generated_content ?></div>
 

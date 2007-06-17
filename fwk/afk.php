@@ -817,7 +817,7 @@ abstract class AFK_Session {
 
 	public abstract function destroy($id);
 
-	public abstract function gc($max_lifetime);
+	public abstract function gc($max_age);
 }
 
 /**
@@ -883,11 +883,11 @@ class AFK_Session_DB extends AFK_Session {
 		return true;
 	}
 
-	public function gc($max_lifetime) {
+	public function gc($max_age) {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
-			WHERE	ts < %d", time() - $max_lifetime);
+			WHERE	ts < %d", time() - $max_age);
 		return true;
 	}
 
@@ -1293,6 +1293,14 @@ class Cache_DB implements Cache {
 		$this->table = $table;
 	}
 
+	public function invalidate($id) {
+		$this->dbh->execute("DELETE FROM {$this->table} WHERE id = %s", md5($id));
+	}
+
+	public function invalidate_all($max_age=0) {
+		$this->dbh->execute("DELETE FROM {$this->table} WHERE ts < %d", time() - $max_age);
+	}
+
 	public function load($id, $max_age=300) {
 		$data = $this->dbh->query_value("
 			SELECT	data
@@ -1319,14 +1327,6 @@ class Cache_DB implements Cache {
 			$query = "INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %d, %s)";
 		}
 		$this->dbh->execute($query, serialize($item), time(), $hash);
-	}
-
-	public function invalidate($id) {
-		$this->dbh->execute("DELETE FROM {$this->table} WHERE id = %s", md5($id));
-	}
-
-	public function invalidate_all($max_lifetime=0) {
-		$this->dbh->execute("DELETE FROM {$this->table} WHERE ts < %d", time() - $max_lifetime);
 	}
 }
 
@@ -1425,6 +1425,10 @@ abstract class DB_Base {
 
 	public function set_logger($logger) {
 		$this->logger = $logger;
+	}
+
+	public function get_logger() {
+		return $this->logger;
 	}
 
 	/**
