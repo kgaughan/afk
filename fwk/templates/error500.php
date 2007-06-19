@@ -6,6 +6,7 @@
 	<meta name="robots" content="NONE,NOARCHIVE">
 	<title><?php ee($page_title) ?></title>
 	<style type="text/css">
+	/* <[CDATA[ */
 	html * { padding:0; margin:0 }
 	body * { padding:10px 20px }
 	body * * { padding:0 }
@@ -33,8 +34,10 @@
 	#request-info { background:#f6f6f6 }
 	address { overflow:hidden }
 	address img { float:right }
+	/* ]]> */
 	</style>
 	<script type="text/javascript">
+	// <![CDATA[
 	function fetchInternalFrames() {
 		var frames = [];
 		var tb = document.getElementById('traceback');
@@ -72,6 +75,7 @@
 			assignHandlers(frames, 'onclick', null);
 		};
 	};
+	// ]]>
 	</script>
 
 </head><body>
@@ -82,7 +86,7 @@
 </div>
 
 <div id="traceback">
-	<h2>Traceback <span>(<?php echo count($traceback) ?> frames, innermost first, click to expand AFK internals)</span></h2>
+	<h2>Traceback <span>(<?php echo count($traceback) ?> significant frames, innermost first, click to expand AFK internals)</span></h2>
 	<ul class="traceback"><?php $this->render_each('error500-frame', $traceback) ?></ul>
 </div>
 

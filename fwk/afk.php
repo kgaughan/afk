@@ -441,11 +441,11 @@ class AFK_DispatchFilter implements AFK_Filter {
 		$traceback = array();
 		$traceback[] = $this->make_traceback_frame(
 			$ex->getFile(), $ex->getLine());
-		foreach ($ex->getTrace() as $frame) {
-			if (!empty($frame['file'])) {
-				$traceback[] = $this->make_traceback_frame(
-					$frame['file'], $frame['line'],
-					$this->frame_to_name($frame). '()');
+		foreach ($ex->getTrace() as $f) {
+			if (!empty($f['file']) && !$this->should_ignore($f)) {
+				 $traceback[] = $this->make_traceback_frame(
+					$f['file'], $f['line'],
+					$this->frame_to_name($f). '()');
 			}
 		}
 
@@ -496,6 +496,24 @@ class AFK_DispatchFilter implements AFK_Filter {
 			return substr($filename, strlen(APP_ROOT) + 1);
 		}
 		return $filename;
+	}
+
+	/* */
+	private function should_ignore($f) {
+		static $methods_to_ignore = array(
+			'AFK_Pipeline'       => array('start', 'do_next'),
+		//	'AFK_Filter'         => array('execute'),
+			'AFK_TemplateEngine' => array('internal_render'));
+		static $functions_to_ignore = array('require');
+		if (isset($f['class'])) {
+			foreach ($methods_to_ignore as $class=>$methods) {
+				if ($class == $f['class'] || is_subclass_of($class, $f['class'])) {
+					return array_search($f['function'], $methods) !== false;
+				}
+			}
+			return false;
+		}
+		return array_search($f['function'], $functions_to_ignore) !== false;
 	}
 }
 
