@@ -62,6 +62,7 @@ class AFK {
 	private static $class_paths = array();
 	private static $helper_paths = array();
 	private static $loaded_helpers = array();
+	private static $registry = array();
 
 	public static function register_autoloader() {
 		if (function_exists('spl_autoload_register')) {
@@ -112,6 +113,21 @@ class AFK {
 				require $file;
 				return true;
 			}
+		}
+		return false;
+	}
+
+	public static function register($key, $object) {
+		if (isset(self::$registry[$key])) {
+			throw new AFK_Exception("The object '$key' is already registered.");
+		}
+		self::$registry[$key] = $object;
+		return $object;
+	}
+
+	public static function get($key) {
+		if (isset(self::$registry[$key])) {
+			return self::$registry[$key];
 		}
 		return false;
 	}
@@ -413,14 +429,73 @@ class AFK_DispatchFilter implements AFK_Filter {
 			$handler->handle($ctx);
 			$pipe->do_next($ctx);
 		} catch (Exception $e) {
-			$ctx->_exception = $e;
-			$ctx->change_view('error500');
-			header('HTTP/1.1 500 Internal Server Error');
 			// Assuming the last pipeline element is a rendering filter.
 			// Not entirely happy with this.
 			$pipe->to_end();
+			$this->render_error500($ctx, $e);
 			$pipe->do_next($ctx);
 		}
+	}
+
+	private function render_error500(AFK_Context $ctx, $ex) {
+		$traceback = array();
+		$traceback[] = $this->make_traceback_frame(
+			$ex->getFile(), $ex->getLine());
+		foreach ($ex->getTrace() as $frame) {
+			if (!empty($frame['file'])) {
+				$traceback[] = $this->make_traceback_frame(
+					$frame['file'], $frame['line'],
+					$this->frame_to_name($frame). '()');
+			}
+		}
+
+		$ctx->page_title = get_class($ex) . ' in ' .
+			$this->truncate_filename($ex->getFile());
+		$ctx->message = $ex->getMessage();
+		$ctx->traceback = $traceback;
+
+		$ctx->change_view('error500');
+		header('HTTP/1.1 500 Internal Server Error');
+	}
+
+	private function make_traceback_frame($file, $line, $function='') {
+		return array(
+			'file'       => $this->truncate_filename($file),
+			'line'       => $line,
+			'context'    => $this->get_context_lines($file, $line),
+			'method'     => $function);
+	}
+
+	/* Converts an exception trace frame to a function/method name. */
+	private function frame_to_name($frame) {
+		$name = '';
+		if (isset($frame['class'])) {
+			$name .= $frame['class'] . $frame['type'];
+		}
+		$name .= $frame['function'];
+		return $name;
+	}
+
+	private function get_context_lines($file, $line_no, $amount=3) {
+		$context = array();
+		$lines = file($file);
+		for ($i = $line_no - $amount; $i <= $line_no + $amount; $i++) {
+			if ($i >= 0 && isset($lines[$i - 1])) {
+				$context[$i] = rtrim($lines[$i - 1]);
+			}
+		}
+		return $context;
+	}
+
+	/* Truncates an application/library filename. */
+	private function truncate_filename($filename) {
+		if (substr($filename, 0, strlen(AFK_ROOT)) == AFK_ROOT) {
+			return 'AFK:' . substr($filename, strlen(AFK_ROOT) + 1);
+		}
+		if (defined('APP_ROOT') && substr($filename, 0, strlen(APP_ROOT)) == APP_ROOT) {
+			return substr($filename, strlen(APP_ROOT) + 1);
+		}
+		return $filename;
 	}
 }
 
@@ -551,6 +626,57 @@ class AFK_Pipeline {
 
 	public function to_end() {
 		end($this->filters);
+	}
+}
+
+class AFK_NotificationMessage {
+
+	public $field;
+	public $msg;
+
+	public function __construct($field, $msg) {
+		$this->field = $field;
+		$this->msg = $msg;
+	}
+}
+
+class AFK_Notification {
+
+	const REQUIRED = 'Required field';
+	const INVALID  = 'Invalid format';
+
+	private $msgs = array();
+
+	public function is_valid() {
+		return count($this->msgs) == 0;
+	}
+
+	public function add($field, $msg) {
+		$this->msgs[] = new AFK_NotificationMessage($field, $msg);
+	}
+
+	public function get_messages($field) {
+		$msgs = array();
+		foreach ($this->msgs as $n) {
+			if ($n->field == $field) {
+				$msgs[] = $n->msg;
+			}
+		}
+		return $msgs;
+	}
+
+	public function get_all() {
+		usort($this->msgs, array($this, 'comparator'));
+		// Assume the user won't be a fool and modify it.
+		return $this->msgs;
+	}
+
+	private function comparator($a, $b) {
+		$result = strcmp($a->field, $b->field);
+		if ($result == 0) {
+			$result = strcasecmp($a->msg, $b->msg);
+		}
+		return $result;
 	}
 }
 

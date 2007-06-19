@@ -2,11 +2,11 @@
 					An introduction to AFK, an antiframework
 					========================================
 
-AFK is what I like to call an "antiframework": it's a bit like a framework,
-but it's not really one. It's just a library with a few loosely-coupled 
-components that wire together easily, combined with a few conventions, none
-of which *need* to be followed, but allow everything to knit together more
-easily if you stick to them.
+AFK is what I like to call an "antiframework": it's a bit like a framework, but
+it's not really one. It's just a library with a few loosely-coupled components
+that wire together easily, combined with a few conventions, none of which
+*need* to be followed, but allow everything to knit together more easily if you
+stick to them.
 
 Out of the box, AFK provides the following services:
 
@@ -36,8 +36,8 @@ editor is just fine.
 Starting out
 ============
 
-AFK comes with a skeleton directory structure for a basic project. It has
-the following structure:
+AFK comes with a skeleton directory structure for a basic project. It has the
+following structure:
 
 	assets/
 		Your application's assets (images, stylesheets, javascript, &c.)
@@ -97,9 +97,9 @@ the following structure:
 Initial setup
 -------------
 
-The first thing you'll want to do before doing anything else is to rename
-the "htaccess-template" file to ".htaccess" and edit it so that it's suitable
-for you site:
+The first thing you'll want to do before doing anything else is to rename the
+"htaccess-template" file to ".htaccess" and edit it so that it's suitable for
+you site:
 
  $ mv htaccess-template .htaccess
  $ vim .htaccess
@@ -116,9 +116,9 @@ You'll be presented with something like this:
 	RewriteRule ^(.*)$             dispatch.php/$1  [QSA,L]
 
 Most of this is just fine and doesn't need to be edited. However, you *will*
-need to edit the 'RewriteBase' line to suit your application. Change the
-text currently marked '%%APPLICATION_URI_PATH%%' to wherever your application
-is situated relative to the root of your webserver. For instance, if your
+need to edit the 'RewriteBase' line to suit your application. Change the text
+currently marked '%%APPLICATION_URI_PATH%%' to wherever your application is
+situated relative to the root of your webserver. For instance, if your
 application is at "http://localhost/zoot/", "%%APPLICATION_URI_PATH%%" will
 need to be changed to "/zoot/".
 
@@ -140,16 +140,16 @@ If you open up handlers/RootHandler.php, you'll see something like this:
 	?>
 
 It has one method, on_get(), which means it can respond to HTTP GET requests.
-It doesn't do any processing and is just there so that the dispatcher knows
-it can handle HTTP GET requests.
+It doesn't do any processing and is just there so that the dispatcher knows it
+can handle HTTP GET requests.
 
-Unless the on_get() method tells AFK otherwise, it will look for for a
-template called default.php to render next. Because the handler handing the
-request is called 'RootHandler', it will first look in the directory
-'templates/root/' for the template. If it can't be found there, it looks
-in the 'templates/' folder for it instead. If it still hasn't been found, it
-uses the fallback default.php template that comes with AFK. Right now, that's
-what's being rendered, but we're going to change that.
+Unless the on_get() method tells AFK otherwise, it will look for for a template
+called default.php to render next. Because the handler handing the request is
+called 'RootHandler', it will first look in the directory 'templates/root/' for
+the template. If it can't be found there, it looks in the 'templates/' folder
+for it instead. If it still hasn't been found, it uses the fallback default.php
+template that comes with AFK. Right now, that's what's being rendered, but
+we're going to change that.
 
 Create the directory 'templates/root':
 
@@ -170,29 +170,29 @@ And save that as 'templates/root/default.php'.
 
 If you refresh your browser, you should see the page you just created in it.
 So far we haven't done anything that makes using AFK any more useful than
-straight PHP, but thankfully the effort hasn't been much more, and we're
-going to start doing more interesting things now anyway.
+straight PHP, but thankfully the effort hasn't been much more, and we're going
+to start doing more interesting things now anyway.
 
 
 Making request handler's slightly more useful
 ---------------------------------------------
 
 We're going to do two simple things with our current root request handler:
-we're going to get it to accept a parameter through the query string and
-pass the time into our template.
+we're going to get it to accept a parameter through the query string and pass
+the time into our template.
 
 AFK has two important notions, those of the request pipeline and of a request
 context. A request pipeline is a chain of bits of code that manipulate a
-request context in some way before passing it on to the next bit of code in
-the chain. The request context consists of any information the browser making
-the request included in the request such as query string parameters, HTTP
-headers, form fields, &c. The various bits of code along the request pipeline
-can also add and change this information before passing it on.
+request context in some way before passing it on to the next bit of code in the
+chain. The request context consists of any information the browser making the
+request included in the request such as query string parameters, HTTP headers,
+form fields, &c. The various bits of code along the request pipeline can also
+add and change this information before passing it on.
 
-Request handlers and the template engine are both part of this pipeline.
-For instance, a request handler could get the ID of a weblog entry, fetch
-the entry from a database, add the contents of the entry to the request
-context for the template engine to render later.
+Request handlers and the template engine are both part of this pipeline.  For
+instance, a request handler could get the ID of a weblog entry, fetch the entry
+from a database, add the contents of the entry to the request context for the
+template engine to render later.
 
 We're going to change RootHandler::on_get() so that it takes a name as a
 parameter and passes the current time to the template through the request
@@ -215,8 +215,8 @@ context:
 
 The content of the request context gets pulled into the template as regular
 variables, though you can still access the request context object using the
-$ctx variable. Let's change template/root/default.php to cope with the
-changes to RootHandler::on_get():
+$ctx variable. Let's change template/root/default.php to cope with the changes
+to RootHandler::on_get():
 
 	<html>
 		<head>
@@ -232,18 +232,18 @@ Now refresh your browser. If you add '?name=Keith' onto the end of the URL in
 your browser's address field, you'll see the name change.
 
 You'll notice a function you might be unfamiliar with: ee(). This is a useful
-function included in AFK which joins up all its parameters into on string,
-runs the result through htmlspecialchar() to escape any special characters,
-and then echos it. Its a safe and convenient alternative to using echo() when
-you're working with HTML.
+function included in AFK which joins up all its parameters into on string, runs
+the result through htmlspecialchar() to escape any special characters, and then
+echos it. Its a safe and convenient alternative to using echo() when you're
+working with HTML.
 
 
 Dealing with simple forms
 -------------------------
 
 Unless you're just rendering static content, some interactivity is useful.
-Let's add a simple form to templates/root/default.php so that the name can
-be changed more easily:
+Let's add a simple form to templates/root/default.php so that the name can be
+changed more easily:
 
 	<html>
 		<head>
@@ -271,21 +271,20 @@ Here's where AFK starts to become somewhat more useful.
 Sites tend to have common headers and footers for all their pages, and even
 individual page fragments also tend to have bits common to them before and
 after they start. AFK's templating engine generalises this this notion as
-'envelopes'. An envelope is simply a template that wraps the output of
-another template just like an envelope wraps a letter.
+'envelopes'. An envelope is simply a template that wraps the output of another
+template just like an envelope wraps a letter.
 
 There's a big chunk of HTML in templates/root/default.php that could probably
-be used elsewhere on the site, so let's pull it out into an envelope
-template.
+be used elsewhere on the site, so let's pull it out into an envelope template.
 
-There are two special things about envelope templates, specifically that
-their name ends with '.envelope.php' rather than just '.php' and that when
-rendered, they have an extra variable called "$generated_content", which
-contains the text generated by the template being wrapped.
+There are two special things about envelope templates, specifically that their
+name ends with '.envelope.php' rather than just '.php' and that when rendered,
+they have an extra variable called "$generated_content", which contains the
+text generated by the template being wrapped.
 
-Seeing as this template will probably be used throughout the site, we'll
-create it in the templates/ directory rather than the templates/root/
-directory. We'll call it default.envelope.php:
+Seeing as this template will probably be used throughout the site, we'll create
+it in the templates/ directory rather than the templates/root/ directory. We'll
+call it default.envelope.php:
 
 	<html>
 		<head>
@@ -312,13 +311,13 @@ templates/root/default.php to use the envelope template:
 		<input type="submit" value="Go!"/>
 	</form>
 
-The ::with_envelope() method tells the template engine to wrap this template
-in an envelope. It can optionally take the name of the envelope template you
-want to use, but if you don't specify one, it'll look for an envelope
-template with the same name of the template being rendered, and if that
-doesn't exist, it'll use the envelope template called 'default', so if your
-template is called 'zoot.php', it'll first look for 'zoot.envelope.php', and
-failing that, look for 'default.envelope.php'.
+The ::with_envelope() method tells the template engine to wrap this template in
+an envelope. It can optionally take the name of the envelope template you want
+to use, but if you don't specify one, it'll look for an envelope template with
+the same name of the template being rendered, and if that doesn't exist, it'll
+use the envelope template called 'default', so if your template is called
+'zoot.php', it'll first look for 'zoot.envelope.php', and failing that, look
+for 'default.envelope.php'.
 
 In the envelope template, where we used to have "Hello, <?php ee($name) ?>!",
 we now have "<?php ee($page_title) ?>". We _could_ have left the old code in
@@ -380,3 +379,19 @@ this:
 	}
 	?>
 
+[Actually, if you're using databases, sessions, caching, and the like, the
+init() function would have quite a bit more than this, but this is a reasonable
+basic setup.]
+
+This most likely all looks like gibberish initially, but it's all really quite
+simple. The init() function is where you place all your application's
+configuration code. The example shown here configures the error reporting level
+and the default timezone. This function must return an array of extra filters
+to place in the processing pipeline. However, filters are a more advanced
+topic, so for now it's fine just to pass back an empty array.
+
+The routes() function is more interesting. It's in here that your application
+defines the AFK_Routes object to use for parsing incoming request URLs.
+
+-------------------------------------------------------------------------------
+vim:set ts=4:
