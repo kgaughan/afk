@@ -140,7 +140,7 @@ class AFK {
 		$contents = ob_get_contents();
 		ob_end_clean();
 		if (!extension_loaded('Xdebug') && php_sapi_name() != 'cli') {
-			$contents = '<pre style="border:1px solid red;padding:1ex;background:white;color:black">' . e($contents) . '</pre>';
+			$contents = '<pre style="border:1px solid red;padding:1ex;background:white;color:black;max-height:60em;overflow:auto">' . e($contents) . '</pre>';
 		}
 		echo $contents;
 	}
@@ -326,6 +326,10 @@ class AFK_Context {
 		return $method;
 	}
 
+	public function is_secure() {
+		return isset($this->ctx['HTTPS']);
+	}
+
 	/**
 	 * @param  $default  Default view name to use.
 	 *
@@ -338,6 +342,7 @@ class AFK_Context {
 		return $default;
 	}
 
+	/** Alters the view to be rendered later. */
 	public function change_view($new) {
 		$this->_old_view = $this->_view;
 		$this->_view = $new;
@@ -355,6 +360,101 @@ class AFK_Context {
 
 	public function rendering_is_allowed() {
 		return $this->allow_rendering;
+	}
+
+	public function redirect($code=303, $to=null) {
+		if ($code < 300 || $code > 307 || $code == 306 || $code == 304) {
+			throw new AFK_Exception("Bad redirect code: $code");
+		}
+		// For backward compatibility, see RFC2616, SS10.3.4
+		if ($code == 303 && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
+			$code = 302;
+		}
+		if (is_null($to)) {
+			$to = $this->REQUEST_URI;
+		}
+		header('Location: ' . $this->to_absolute_uri($to), true, $code);
+	}
+
+	public function not_found($msg='') {
+		throw new AFK_HttpException($msg, 404);
+	}
+
+	public function no_such_method($available_methods) {
+		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
+	}
+
+	public function to_absolute_uri($path) {
+		if ($path[0] == '/') {
+			$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
+			if ($this->is_secure() && $this->SERVER_PORT != 441 || !$this->is_secure() && $this->SERVER_PORT != 80) {
+				$prefix .= ':' . $this->SERVER_PORT;
+			}
+			return $prefix . $path;
+		}
+		return $path;
+	}
+
+	public function set_response_code($code) {
+		// For backward compatibility, see RFC2616, SS10.3.4
+		if ($code == 303 && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
+			$code = 302;
+		}
+		if (array_search(array(204, 205, 407, 411, 413, 414, 415, 416, 417), $code) !== false) {
+			$this->allow_rendering(false);
+		}
+		header("HTTP/1.1 $code " . $this->get_response_msg($code));
+	}
+
+	private function get_response_msg($code) {
+		switch ($code) {
+		// Informational.
+		case 100: return 'Continue';
+		case 101: return 'Switching Protocols';
+		// Success.
+		case 200: return 'OK';
+		case 201: return 'Created';
+		case 202: return 'Accepted';
+		case 203: return 'Non-Authoritative Information';
+		case 204: return 'No Content';
+		case 205: return 'Reset Content';
+		case 206: return 'Partial Content';
+		// Redirection.
+		case 300: return 'Multiple Choices';
+		case 301: return 'Moved Permanently';
+		case 302: return 'Found';
+		case 303: return 'See Other';
+		case 304: return 'Not Modified';
+		case 305: return 'Use Proxy';
+		case 307: return 'Temporary Redirect';
+		// Client Error.
+		case 400: return 'Bad Request';
+		case 401: return 'Unauthorised';
+		case 402: return 'Payment Required';
+		case 403: return 'Forbidden';
+		case 404: return 'Not Found';
+		case 405: return 'Method Not Allowed';
+		case 406: return 'Not Acceptable';
+		case 407: return 'Proxy Authentication Required';
+		case 408: return 'Request Timeout';
+		case 409: return 'Conflict';
+		case 410: return 'Gone';
+		case 411: return 'Length Required';
+		case 412: return 'Precondition Failed';
+		case 413: return 'Request Entity Too Large';
+		case 414: return 'Request-URI Too Long';
+		case 415: return 'Unsupported Media Type';
+		case 416: return 'Request Range Not Satisfiable';
+		case 417: return 'Expectation Failed';
+		// Server Error.
+		case 500: return 'Internal Server Error';
+		case 501: return 'Not Implemented';
+		case 502: return 'Bad Gateway';
+		case 503: return 'Service Unavailable';
+		case 504: return 'Gateway Timeout';
+		case 505: return 'HTTP Version Not Supported';
+		}
+		return '';
 	}
 
 	/**
@@ -428,19 +528,29 @@ class AFK_DispatchFilter implements AFK_Filter {
 			$handler = new $handler_class();
 			$handler->handle($ctx);
 			$pipe->do_next($ctx);
+		} catch (AFK_HttpException $he) {
+			foreach ($he->get_headers() as $h) {
+				header($h);
+			}
+			$ctx->message = $he->getMessage();
+			$this->report_error($he->getCode(), $pipe, $ctx);
 		} catch (Exception $e) {
-			// Assuming the last pipeline element is a rendering filter.
-			// Not entirely happy with this.
-			$pipe->to_end();
 			$this->render_error500($ctx, $e);
-			$pipe->do_next($ctx);
+			$this->report_error(500, $pipe, $ctx);
 		}
+	}
+
+	private function render_error($code, AFK_Pipeline $pipe, AFK_Context $ctx) {
+		// Assuming the last pipeline element is a rendering filter.
+		// Not entirely happy with this.
+		$pipe->to_end();
+		$this->change_view('error' . $code);
+		$ctx->set_response_code($code);
 	}
 
 	private function render_error500(AFK_Context $ctx, $ex) {
 		$traceback = array();
-		$traceback[] = $this->make_traceback_frame(
-			$ex->getFile(), $ex->getLine());
+		$traceback[] = $this->make_traceback_frame($ex->getFile(), $ex->getLine());
 		foreach ($ex->getTrace() as $f) {
 			if (!empty($f['file']) && !$this->should_ignore($f)) {
 				 $traceback[] = $this->make_traceback_frame(
@@ -453,17 +563,14 @@ class AFK_DispatchFilter implements AFK_Filter {
 			$this->truncate_filename($ex->getFile());
 		$ctx->message = $ex->getMessage();
 		$ctx->traceback = $traceback;
-
-		$ctx->change_view('error500');
-		header('HTTP/1.1 500 Internal Server Error');
 	}
 
 	private function make_traceback_frame($file, $line, $function='') {
 		return array(
-			'file'       => $this->truncate_filename($file),
-			'line'       => $line,
-			'context'    => $this->get_context_lines($file, $line),
-			'method'     => $function);
+			'file'    => $this->truncate_filename($file),
+			'line'    => $line,
+			'context' => $this->get_context_lines($file, $line),
+			'method'  => $function);
 	}
 
 	/* Converts an exception trace frame to a function/method name. */
@@ -564,7 +671,12 @@ class AFK_HandlerBase implements AFK_Handler {
 		if ($method != '') {
 			call_user_func(array($this, $method), $ctx);
 		} else {
-			$this->no_such_method($ctx);
+			$methods = $this->get_available_methods($ctx->view());
+			if (count($methods) == 0) {
+				$ctx->not_found();
+			} else {
+				$ctx->no_such_method($methods);
+			}
 		}
 	}
 
@@ -582,7 +694,7 @@ class AFK_HandlerBase implements AFK_Handler {
 		return '';
 	}
 
-	protected function get_available_methods($view) {
+	private function get_available_methods($view) {
 		static $allowed = array();
 		if (count($allowed) == 0) {
 			$methods = get_class_methods(get_class($this));
@@ -602,18 +714,40 @@ class AFK_HandlerBase implements AFK_Handler {
 	}
 
 	protected function on_options(AFK_Context $ctx) {
-		$this->write_allow_header($ctx->view());
+		header('Allow: ' . implode(', ', $this->get_available_methods($ctx->view())));
 		$ctx->allow_rendering(false);
 	}
+}
 
-	protected function no_such_method(AFK_Context $ctx) {
-		header('HTTP/1.1 403 Method Not Allowed');
-		$this->write_allow_header($ctx->view());
-		$ctx->change_view('error403');
+class AFK_HttpException extends AFK_Exception {
+
+	private $headers = array();
+
+	public function __construct($msg, $code, $headers=array()) {
+		parent::__construct($msg, $code);
+		$this->add_headers($headers);
 	}
 
-	protected function write_allow_header($view) {
-		header('Allow: ' . implode(', ', $this->get_available_methods($view)));
+	public function add_headers($headers) {
+		foreach ($headers as $n=>$v) {
+			if (is_array($v)) {
+				$v = implode(', ', $v);
+			}
+			$v = str_replace("\n", "\t\r\n", $v);
+			if (isset($this->headers[$n])) {
+				$this->headers[$n] .= ', ' . $v;
+			} else {
+				$this->headers[$n] = $v;
+			}
+		}
+	}
+
+	public function get_headers() {
+		$result = array();
+		foreach ($this->headers as $n=>$v) {
+			$result[] = "$n: $v";
+		}
+		return $result;
 	}
 }
 
@@ -854,7 +988,7 @@ class AFK_Routes {
 
 	private function combine($keys, $values) {
 		if (count($keys) > 0) {
-			return array_filter(array_combine($keys, $values));
+			return array_combine($keys, $values);
 		}
 		return array();
 	}
@@ -970,12 +1104,12 @@ abstract class AFK_Session {
  * To create the appropriate, you'll need to run something like the following:
  * 
  * CREATE TABLE sessions (
- *     id   CHAR(26) NOT NULL,
+ *     id   CHAR(32) NOT NULL,
  *     name CHAR(16) NOT NULL,
  *     ts   INTEGER  NOT NULL,
  *     data TEXT     NOT NULL,
  * 
- *     PRIMARY KEY (id, name),
+ *     PRIMARY KEY (id),
  *     INDEX ix_timestamp (ts)
  * );
  *
@@ -1010,7 +1144,11 @@ class AFK_Session_DB extends AFK_Session {
 	}
 
 	public function write($id, $data) {
-		if (!$this->session_exists($id)) {
+		$n = $this->dbh->query_value("
+			SELECT	COUNT(*)
+			FROM	{$this->table}
+			WHERE	name = %s AND id = %s", $this->name, $id);
+		if ($n == 0) {
 			$query = "INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %d, %s, %s)";
 		} else {
 			$query = "UPDATE {$this->table} SET data = %s, ts = %d WHERE name = %s AND id = %s";
@@ -1033,13 +1171,6 @@ class AFK_Session_DB extends AFK_Session {
 			FROM	{$this->table}
 			WHERE	ts < %d", time() - $max_age);
 		return true;
-	}
-
-	private function session_exists($id) {
-		return $this->dbh->query_value("
-			SELECT	COUNT(*)
-			FROM	{$this->table}
-			WHERE	name = %s AND id = %s", $this->name, $id) != 0;
 	}
 }
 
