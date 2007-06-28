@@ -18,7 +18,7 @@
 define('CRLF', "\r\n");
 
 define('AFK_ROOT', dirname(__FILE__));
-define('AFK_VERSION', '1.2.0');
+define('AFK_VERSION', '1.2.1');
 
 AFK::register_autoloader();
 AFK::add_helper_path(AFK_ROOT . '/helpers');
@@ -276,8 +276,16 @@ class AFK_Context {
 		}
 	}
 
+	public function __isset($key) {
+		return isset($this->ctx[$key]);
+	}
+
+	public function __unset($key) {
+		unset($this->ctx[$key]);
+	}
+
 	public function __get($key) {
-		if (isset($this->ctx[$key])) {
+		if ($this->__isset($key)) {
 			return $this->ctx[$key];
 		}
 		return null;
