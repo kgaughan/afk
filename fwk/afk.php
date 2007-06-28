@@ -393,6 +393,23 @@ class AFK_Context {
 	}
 
 	public function to_absolute_uri($path) {
+		if ($path[0] != '/' && strpos($path, '://') === false) {
+			$prefix = $this->REQUEST_URI;
+			if (substr($prefix, -1) != '/') {
+				$prefix = dirname($prefix) . '/';
+			}
+			$path = $prefix . $path;
+		}
+
+		// Attempt to canonicalise the path, removing any instances of '..'
+		// and '.'. Why? Mainly because it's likely that the client dealing
+		// with the request will likely not be smart enough to deal with them
+		// itself. This code sucks.
+		$path = preg_replace('~/(\.(/|$))+~', '/', $path);
+		do {
+			$path = preg_replace('~/[^./;?]([^./?;][^/?;]*)?/\.\.(/|$)~', '/', $path, -1, $c);
+		} while ($c > 0);
+
 		if ($path[0] == '/') {
 			$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
 			if ($this->is_secure() && $this->SERVER_PORT != 441 || !$this->is_secure() && $this->SERVER_PORT != 80) {
@@ -408,7 +425,7 @@ class AFK_Context {
 		if ($code == 303 && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
 			$code = 302;
 		}
-		if (array_search(array(204, 205, 407, 411, 413, 414, 415, 416, 417), $code) !== false) {
+		if (array_search($code, array(204, 205, 407, 411, 413, 414, 415, 416, 417)) !== false) {
 			$this->allow_rendering(false);
 		}
 		header("HTTP/1.1 $code " . $this->get_response_msg($code));
@@ -548,12 +565,13 @@ class AFK_DispatchFilter implements AFK_Filter {
 		}
 	}
 
-	private function render_error($code, AFK_Pipeline $pipe, AFK_Context $ctx) {
+	private function report_error($code, AFK_Pipeline $pipe, AFK_Context $ctx) {
 		// Assuming the last pipeline element is a rendering filter.
 		// Not entirely happy with this.
-		$pipe->to_end();
-		$this->change_view('error' . $code);
+		$ctx->change_view('error' . $code);
 		$ctx->set_response_code($code);
+		$pipe->to_end();
+		$pipe->do_next($ctx);
 	}
 
 	private function render_error500(AFK_Context $ctx, $ex) {
