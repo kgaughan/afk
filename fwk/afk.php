@@ -588,6 +588,7 @@ class AFK_DispatchFilter implements AFK_Filter {
 		$ctx->page_title = get_class($ex) . ' in ' .
 			$this->truncate_filename($ex->getFile());
 		$ctx->message = $ex->getMessage();
+		$ctx->details = $ex->__toString();
 		$ctx->traceback = $traceback;
 	}
 
@@ -698,7 +699,8 @@ class AFK_HandlerBase implements AFK_Handler {
 			call_user_func(array($this, $method), $ctx);
 		} else {
 			$methods = $this->get_available_methods($ctx->view());
-			if (count($methods) == 0) {
+			// Why 1? Because the OPTIONS method is always available.
+			if (count($methods) == 1) {
 				$ctx->not_found();
 			} else {
 				$ctx->no_such_method($methods);
@@ -1210,38 +1212,38 @@ class AFK_SlotException extends AFK_Exception { }
 class AFK_Slots {
 
 	/* Stuff for handling slots. */
-	private $current = null;
-	private $slots = array();
+	private static $current = null;
+	private static $slots = array();
 
 	/** Checks if the named slot has content. */
-	public function has($slot) {
-		return isset($this->slots[$slot]);
+	public static function has($slot) {
+		return isset(self::$slots[$slot]);
 	}
 
 	/** Writes out the content in the given slot. */
-	public function get($slot, $default='') {
-		echo $this->has($slot) ? $this->slots[$slot] : $default;
+	public static function get($slot, $default='') {
+		echo self::has($slot) ? self::$slots[$slot] : $default;
 	}
 
 	/** Sets the contents of the given slot. */
-	public function set($slot, $contents) {
-		$this->slots[$slot] = $contents;
+	public static function set($slot, $contents) {
+		self::$slots[$slot] = $contents;
 	}
 
 	/** Appends content to the given slot. */
-	public function append($slot, $contents) {
-		$this->slots[$slot] .= $contents;
+	public static function append($slot, $contents) {
+		self::$slots[$slot] .= $contents;
 	}
 
 	/**
 	 * Delimit the start of a block of code which will generate content for
 	 * the given slot.
 	 */
-	public function start($slot) {
-		if (!is_null($this->current)) {
-			throw new AFK_SlotException("Cannot start new slot '$slot': already in slot '{$this->current}'.");
+	public static function start($slot) {
+		if (!is_null(self::$current)) {
+			throw new AFK_SlotException("Cannot start new slot '$slot': already in slot '" . self::$current . "'.");
 		}
-		$this->current = $slot;
+		self::$current = $slot;
 		ob_start();
 		ob_implicit_flush(false);
 	}
@@ -1249,26 +1251,26 @@ class AFK_Slots {
 	/**
 	 * Delimits the end of a block started with ::start().
 	 */
-	public function end() {
-		if (is_null($this->current)) {
+	public static function end() {
+		if (is_null(self::$current)) {
 			throw new AFK_SlotException("Attempt to end a slot while not in a slot.");
 		}
-		$this->set($this->current, ob_get_contents());
+		self::set(self::$current, ob_get_contents());
 		ob_end_clean();
-		$this->current = null;
+		self::$current = null;
 	}
 
 	/**
 	 * Like ::end(), but the delimited content is appended to whatever's
 	 * already in the slot.
 	 */
-	public function end_append() {
-		if (is_null($this->current)) {
+	public static function end_append() {
+		if (is_null(self::$current)) {
 			throw new AFK_SlotException("Attempt to end a slot while not in a slot.");
 		}
-		$this->append($this->current, ob_get_contents());
+		self::append(self::$current, ob_get_contents());
 		ob_end_clean();
-		$this->current = null;
+		self::$current = null;
 	}
 }
 
@@ -1468,6 +1470,50 @@ class AFK_TrappedErrorException extends AFK_Exception {
 
 	public static function convert_error($errno, $errstr, $errfile, $errline, $ctx) {
 		throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
+	}
+}
+
+abstract class AFK_User {
+
+	private static $impl = null;
+	private static $instances = array();
+
+	public static function get_logged_in_user() {
+		$id = call_user_func(array(self::$impl, 'get_logged_in_user_id'));
+		return self::get($id);
+	}
+
+	public static function get($id) {
+		self::preload(array($id));
+		if (!isset(self::$instances[$id])) {
+			throw new AFK_Exception("Bad User ID: $id");
+		}
+		return self::$instances[$id];
+	}
+
+	public static function preload($users=array()) {
+		if (is_null(self::$impl)) {
+			throw new AFK_Exception("No implementation for User specified.");
+		}
+		$to_load = array_diff($users, array_keys(self::$instances));
+		if (count($to_load) > 0) {
+			self::merge(call_user_func(array(self::$impl, 'load'), $to_load));
+		}
+	}
+
+	private static function merge($users) {
+		// Can't use array_merge() because it ignores numeric indices.
+		foreach ($users as $u) {
+			self::$instances[$u->get_id()] = $u;
+		}
+	}
+
+	public static function set_implementation($cls) {
+		if (is_string($cls) && is_subclass_of($cls, __CLASS__)) {
+			self::$impl = $cls;
+		} else {
+			throw AFK_Exception("$cls is not an implementation of " . __CLASS__);
+		}
 	}
 }
 
@@ -2158,6 +2204,9 @@ class XML_ElementNode {
 	}
 
 	public function child($name, $text=null, $ns=null) {
+		if (!is_null($text)) {
+			$text = htmlspecialchars($text, ENT_NOQUOTES, 'UTF-8');
+		}
 		$child = $this->node->addChild($name, $text, $ns);
 		return new XML_ElementNode($child);
 	}
