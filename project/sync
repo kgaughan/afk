@@ -1,14 +1,25 @@
 #!/bin/sh
 
-echo "You'll need to edit me before you even think about running me."
-exit 0
-
-# Make sure that the sync script is syncing from the right directory.
+# Make sure that we're in the right directory.
 cd `dirname $0`
+
+if [ "$1" = "lint" ]; then
+	echo Please wait, checking PHP code in project for syntax errors...
+	for i in `find . -name \*.php`; do
+		if ! php -l "$i" >/dev/null; then
+			exit 255
+		fi
+	done
+	echo PHP code successfully linted.
+	exit 0
+fi
+
+echo "You'll need to edit me before you even think about running me."
+exit 255
 
 REMOTE="%%USER%%@%%SERVER%%:%%APPLICATION_PATH%%"
 
 /usr/bin/rsync \
 	-rlptvz --delete \
-	--exclude="sync" --exclude="*~" --exclude=".htaccess" --exclude=".svn" --exclude=".*.sw?" \
+	--exclude="sync" --exclude="*~" --exclude=".htaccess" --exclude=".svn" --exclude=".*.sw?" --exclude="tests" \
 	--rsh=/usr/bin/ssh ./ $REMOTE
