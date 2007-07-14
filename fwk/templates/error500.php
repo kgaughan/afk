@@ -5,8 +5,8 @@
 	<title><?php ee($page_title) ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="robots" content="NONE,NOARCHIVE">
-	<?php stylesheets(array('all' => 'fwk/traceback')) ?>
-	<?php javascript(array('fwk/js/traceback')) ?>
+	<?php stylesheets(array('all' => 'afk/traceback')) ?>
+	<?php javascript(array('afk/js/traceback')) ?>
 
 </head><body>
 
@@ -22,7 +22,10 @@
 
 <div id="request-info">
 	<h2>Request Context</h2>
-	<?php AFK::dump($ctx) ?>
+	<?php
+	$ctx->__unset('traceback');
+	AFK::dump($ctx);
+	?>
 </div>
 
 <address>
