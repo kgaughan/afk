@@ -5,7 +5,8 @@
 class AFK_DefaultHandler extends AFK_HandlerBase {
 
 	public function on_get(AFK_Context $ctx) {
-		$ctx->not_found('You are wandering through a maze of tunnels, all alike...');
+		$ctx->page_title = "Lost?";
+		$ctx->not_found();
 	}
 }
 ?>

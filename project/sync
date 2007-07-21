@@ -1,25 +1,26 @@
 #!/bin/sh
 
 # Make sure that we're in the right directory.
-cd `dirname $0`
+HERE=`dirname $0`
+
+# Details for syncing with the live site.
+REMOTE="%%USER%%@%%SERVER%%:%%APPLICATION_PATH%%"
 
 if [ "$1" = "lint" ]; then
-	echo Please wait, checking PHP code in project for syntax errors...
-	for i in `find . -name \*.php`; do
+	echo "Please wait, checking PHP code in project for syntax errors..."
+	for i in `find $HERE -name \*.php`; do
 		if ! php -l "$i" >/dev/null; then
 			exit 255
 		fi
 	done
-	echo PHP code successfully linted.
+	echo "PHP code successfully linted."
 	exit 0
 fi
 
 echo "You'll need to edit me before you even think about running me."
 exit 255
 
-REMOTE="%%USER%%@%%SERVER%%:%%APPLICATION_PATH%%"
-
-/usr/bin/rsync \
-	-rlptvz --delete \
-	--exclude="sync" --exclude="*~" --exclude=".htaccess" --exclude=".svn" --exclude=".*.sw?" --exclude="tests" \
-	--rsh=/usr/bin/ssh ./ $REMOTE
+/usr/bin/rsync -rlptvz --delete --rsh=/usr/bin/ssh \
+	--exclude="sync" --exclude="*~" --exclude=".htaccess" --exclude=".svn" \
+	--exclude=".*.sw?" --exclude="tests" \
+	$HERE/ $REMOTE

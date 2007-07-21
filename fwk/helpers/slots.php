@@ -1,6 +1,6 @@
 <?php
 function has_slot($slot) {
-	AFK_Slots::has($slot);
+	return AFK_Slots::has($slot);
 }
 
 function get_slot($slot, $default='') {

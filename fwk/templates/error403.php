@@ -1,2 +1,3 @@
 <?php $this->with_envelope() ?>
-<p>Halt! Achtung! Das ist verboten!</p>
+<p>&lsquote;Bother,&rsquo; said Pooh as the border guard screamed &#raquo;Halt!
+Achtung! Das ist verboten!&#laquo;</p>

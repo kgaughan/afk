@@ -45,28 +45,34 @@ abstract class AFK_User {
 		return self::get($id);
 	}
 
+	protected static function has($id) {
+		return isset(self::$instances[$id]);
+	}
+
+	protected static function add_instance(AFK_User $inst) {
+		self::$instances[$inst->get_id()] = $inst;
+	}
+
 	public static function get($id) {
-		self::preload(array($id));
-		if (!isset(self::$instances[$id])) {
-			throw new AFK_Exception("Bad User ID: $id");
+		if (is_null(self::$impl)) {
+			throw new AFK_Exception("No implementation for AFK_User specified.");
+		}
+		if (!self::has($id)) {
+			$users = call_user_func(array(self::$impl, 'load'), array($id));
+			if (!isset(self::$instances[$id])) {
+				throw new AFK_Exception("Bad User ID: $id");
+			}
 		}
 		return self::$instances[$id];
 	}
 
-	public static function preload($users=array()) {
+	public static function preload($users) {
 		if (is_null(self::$impl)) {
-			throw new AFK_Exception("No implementation for User specified.");
+			throw new AFK_Exception("No implementation for AFK_User specified.");
 		}
 		$to_load = array_diff($users, array_keys(self::$instances));
 		if (count($to_load) > 0) {
-			self::merge(call_user_func(array(self::$impl, 'load'), $to_load));
-		}
-	}
-
-	private static function merge($users) {
-		// Can't use array_merge() because it ignores numeric indices.
-		foreach ($users as $u) {
-			self::$instances[$u->get_id()] = $u;
+			call_user_func(array(self::$impl, 'load'), $to_load);
 		}
 	}
 

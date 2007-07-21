@@ -37,6 +37,18 @@ class AFK_Notification {
 		}
 		return $result;
 	}
+
+	public function __toString() {
+		$result = '';
+		$msgs = $this->get_all();
+		if (count($msgs) > 0) {
+			foreach ($msgs as $m) {
+				$result .= '<li>' . e($m->msg) . '</li>';
+			}
+			$result .= '<div class="errors"><ul>' . $result . '</ul></div>';
+		}
+		return $result;
+	}
 }
 
 class AFK_NotificationMessage {

@@ -42,7 +42,7 @@ abstract class DB_Base {
 	 * implements a kind of poor man's prepared statements. If you provide
 	 * just a single argument--the query--it is sent to the DB as-is. If you
 	 * provide more than one, the query is taken to be a template to be passed
-	 * to the compose method. It returns true if the query runs successfully, 
+	 * to the compose method. It returns true if the query runs successfully,
 	 * and false if it didn't.
 	 */
 	abstract public function query();
@@ -63,7 +63,7 @@ abstract class DB_Base {
 		if (call_user_func_array(array($this, 'query'), $args) &&
 				($r = $this->fetch(DB_ASSOC, true))) {
 			return $r;
-		} 
+		}
 		return false;
 	}
 
@@ -72,7 +72,7 @@ abstract class DB_Base {
 		if (call_user_func_array(array($this, 'query'), $args) &&
 				($r = $this->fetch(DB_NUM, true))) {
 			return $r;
-		} 
+		}
 		return false;
 	}
 
@@ -177,7 +177,7 @@ abstract class DB_Base {
 	 *
 	 */
 	public function update($table, $data, $qualifiers=array()) {
-		if (count($a) == 0) {
+		if (count($data) == 0) {
 			return false;
 		}
 
@@ -201,7 +201,7 @@ abstract class DB_Base {
 				} else {
 					$is_first = false;
 				}
-				$sql .= $f . $qual['op'] . $this->make_safe($qual['value']);
+				$sql .= $f . $qual[0] . $this->make_safe($qual[1]);
 			}
 		}
 
