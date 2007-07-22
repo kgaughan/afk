@@ -4,13 +4,8 @@
  */
 class AFK_Context {
 
-	private static $instance = null;
-
 	private $ctx = array();
 	private $allow_rendering = true;
-
-	private function __construct() {
-	}
 
 	/**
 	 * Merges the given arrays into the current request context; existing
@@ -271,13 +266,6 @@ class AFK_Context {
 	/** @return The context as an array. */
 	public function as_array() {
 		return array_merge($this->ctx, array('ctx' => $this));
-	}
-
-	public static function get() {
-		if (!isset(self::$instance)) {
-			self::$instance = new AFK_Context();
-		}
-		return self::$instance;
 	}
 }
 ?>

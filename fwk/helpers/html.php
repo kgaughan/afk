@@ -1,7 +1,7 @@
 <?php
 function afk_get_assets_location($where) {
 	if (is_null($where)) {
-		return AFK_Context::get()->application_root() . 'assets/';
+		return AFK_Registry::context()->application_root() . 'assets/';
 	}
 	return $where;
 }

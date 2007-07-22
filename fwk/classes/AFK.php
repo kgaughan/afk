@@ -104,6 +104,8 @@ class AFK {
 	public static function process_request($routes, $extra_filters=array()) {
 		self::fix_superglobals();
 
+		AFK_Registry::set_instance(new AFK_Registry());
+
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
 		$p->add(new AFK_RouteFilter($routes, $_SERVER, $_REQUEST));
@@ -112,7 +114,7 @@ class AFK {
 		}
 		$p->add(new AFK_DispatchFilter());
 		$p->add(new AFK_RenderFilter());
-		$p->start(AFK_Context::get());
+		$p->start(AFK_Registry::context());
 	}
 }
 ?>
