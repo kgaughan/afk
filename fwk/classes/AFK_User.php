@@ -40,6 +40,18 @@ abstract class AFK_User {
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
 
+	public static function prerequisites() {
+		$reqs = func_get_args();
+		$user = self::get_logged_in_user();
+		if (!call_user_func_array(array($user, 'can'), $reqs)) {
+			call_user_func(array(self::$impl, 'require_auth'));
+		}
+	}
+
+	public static function require_auth() {
+		throw new AFK_HttpException('You lack the required credentials.', 403);
+	}
+
 	public static function get_logged_in_user() {
 		$id = call_user_func(array(self::$impl, 'get_logged_in_user_id'));
 		return self::get($id);

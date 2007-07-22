@@ -41,6 +41,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			}
 		}
 
+		AFK::load_helper('html');
 		$ctx->page_title = get_class($ex) . ' in ' .
 			$this->truncate_filename($ex->getFile());
 		$ctx->message = $ex->getMessage();
