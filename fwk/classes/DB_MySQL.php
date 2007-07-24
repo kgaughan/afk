@@ -14,8 +14,15 @@ class DB_MySQL extends DB_Base {
 		$this->dbh = mysql_connect($host, $user, $pass);
 		if ($this->dbh) {
 			if (version_compare(mysql_get_server_info($this->dbh), '4.1.0', '>=')) {
-				$charset = defined('DB_CHARSET') ? constant('DB_CHARSET') : 'UTF8';
+				$charset = defined('DB_CHARSET') ? constant('DB_CHARSET') : 'utf8';
 				$this->execute("SET NAMES $charset");
+				$this->execute("SET SESSION character_set_database='$charset'");
+				$this->execute("SET SESSION character_set_server='$charset'");
+				$this->execute("SET SESSION character_set_connection='$charset'");
+				$this->execute("SET SESSION character_set_results='$charset'");
+				$this->execute("SET SESSION character_set_client='$charset'");
+				$this->execute("SET SESSION collation_connection='{$charset}_general_ci'");
+				$this->execute("SET SESSION collation_database='{$charset}_general_ci'");
 			}
 			mysql_select_db($db, $this->dbh);
 		} else {
