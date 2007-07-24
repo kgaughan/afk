@@ -44,7 +44,7 @@ abstract class AFK_Users {
 	}
 
 	protected function get_current_user_id() {
-		return 1;
+		return 0;
 	}
 
 	public static function current() {
