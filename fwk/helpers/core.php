@@ -24,4 +24,14 @@ function check_etag($current_etag) {
 	return is_numeric(array_search("\"$current_etag\"",
 		explode(', ', g($_SERVER, 'HTTP_IF_NONE_MATCH', ''))));
 }
+
+function collect_column($rs, $name) {
+	$values = array();
+	foreach ($rs as $r) {
+		if ($r[$name] != '') {
+			$values[] = $r[$name];
+		}
+	}
+	return array_unique($values);
+}
 ?>

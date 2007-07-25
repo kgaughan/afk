@@ -32,4 +32,9 @@ function javascript($scripts, $where=null) {
 	}
 	echo "\n";
 }
+
+function echo_title() {
+	$args = func_get_args();
+	echo implode(' - ', array_filter(array_map('e', $args)));
+}
 ?>
