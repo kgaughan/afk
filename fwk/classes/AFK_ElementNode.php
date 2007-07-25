@@ -2,7 +2,7 @@
 /**
  * Wrapper around SimpleXML to make building XML documents easier.
  */
-class XML_ElementNode {
+class AFK_ElementNode {
 
 	private $node;
 
@@ -35,7 +35,7 @@ class XML_ElementNode {
 			$text = e($text);
 		}
 		$child = $this->node->addChild($name, $text, $ns);
-		return new XML_ElementNode($child);
+		return new AFK_ElementNode($child);
 	}
 
 	public function with($name, $text=null, $ns=null) {

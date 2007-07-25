@@ -52,6 +52,7 @@ class AFK_Context {
 		// with the request will likely not be smart enough to deal with them
 		// itself. This code sucks, and no, realpath() won't work here.
 		$path = preg_replace('~/(\.(/|$))+~', '/', $path);
+		$c = 0;
 		do {
 			$path = preg_replace('~/[^./;?]([^./?;][^/?;]*)?/\.\.(/|$)~', '/', $path, -1, $c);
 		} while ($c > 0);
