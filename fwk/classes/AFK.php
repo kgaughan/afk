@@ -77,11 +77,12 @@ class AFK {
 
 	/** Fixes the superglobals by removing any magic quotes, if present. */
 	public static function fix_superglobals() {
-		if (ini_get('magic_quotes_gpc')) {
+		if (get_magic_quotes_gpc()) {
 			self::fix_magic_quotes($_GET);
 			self::fix_magic_quotes($_POST);
 			self::fix_magic_quotes($_COOKIE);
 			self::fix_magic_quotes($_REQUEST);
+			set_magic_quotes_runtime(0);
 		}
 	}
 

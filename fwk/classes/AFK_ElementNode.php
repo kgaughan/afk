@@ -1,7 +1,14 @@
 <?php
-/**
+/*
+ * AFK_ElementNode.php
+ * by Keith Gaughan
+ *
  * Wrapper around SimpleXML to make building XML documents easier.
+ *
+ * Copyright (c) Keith Gaughan, 2007.
+ * Released under the terms of the BSD License.
  */
+
 class AFK_ElementNode {
 
 	private $node;
@@ -31,7 +38,9 @@ class AFK_ElementNode {
 	}
 
 	public function child($name, $text=null, $ns=null) {
-		if (!is_null($text)) {
+		if ($text == '') {
+			$text = null;
+		} elseif (!is_null($text)) {
 			$text = e($text);
 		}
 		$child = $this->node->addChild($name, $text, $ns);
