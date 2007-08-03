@@ -37,6 +37,9 @@ abstract class AFK_Users {
 		if (!$this->has($id)) {
 			$this->load(array($id));
 			if (!$this->has($id)) {
+				if ($id === 0) {
+					return null;
+				}
 				throw new AFK_Exception("Bad User ID: $id");
 			}
 		}
@@ -66,7 +69,11 @@ abstract class AFK_Users {
 	}
 
 	protected function require_auth() {
-		throw new AFK_HttpException('You lack the required credentials.', 403);
+		static $called = false;
+		if (!$called) {
+			$called = true;
+			throw new AFK_HttpException('You lack the required credentials.', 403);
+		}
 	}
 }
 ?>

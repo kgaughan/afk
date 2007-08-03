@@ -1,12 +1,20 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * To create the appropriate, you'll need to run something like the following:
- * 
+ *
  * CREATE TABLE cache (
  *     id   CHAR(32) NOT NULL,
  *     ts   INTEGER  NOT NULL,
  *     data TEXT     NOT NULL,
- * 
+ *
  *     PRIMARY KEY (id),
  *     INDEX ix_timestamp (ts)
  * );
@@ -15,6 +23,8 @@
  * about every RDBMS out there.
  *
  * You will need an implementation of DB_Base to get this to work.
+ *
+ * @author Keith Gaughan
  */
 class AFK_Cache_DB implements AFK_Cache {
 

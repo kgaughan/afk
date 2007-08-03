@@ -1,8 +1,22 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * Represents the current request context.
+ *
+ * @author Keith Gaughan
  */
 class AFK_Context {
+
+	const PERMANENT = 301;
+	const SEE_OTHER = 303;
+	const TEMPORARY = 307;
 
 	private $ctx = array();
 	private $allow_rendering = true;
@@ -38,6 +52,12 @@ class AFK_Context {
 		$this->ctx[$key] = $val;
 	}
 
+	/**
+	 * Converts the given URI into an absolute one, fit for use with the
+	 * HTTP 'Location' header.
+	 *
+	 * @param  $path  An absolute or relative path to canonicalise into a URI.
+	 */
 	public function to_absolute_uri($path) {
 		if ($path[0] != '/' && strpos($path, '://') === false) {
 			$prefix = $this->REQUEST_URI;
@@ -59,7 +79,8 @@ class AFK_Context {
 
 		if ($path[0] == '/') {
 			$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
-			if ($this->is_secure() && $this->SERVER_PORT != 441 || !$this->is_secure() && $this->SERVER_PORT != 80) {
+			if ($this->is_secure() && $this->SERVER_PORT != 441 ||
+				!$this->is_secure() && $this->SERVER_PORT != 80) {
 				$prefix .= ':' . $this->SERVER_PORT;
 			}
 			return $prefix . $path;
@@ -71,8 +92,8 @@ class AFK_Context {
 	public function application_root() {
 		static $root = null;
 		if (is_null($root)) {
-			$path  = $this->REQUEST_URI;
-			$len  = strlen($path) - strlen($this->PATH_INFO);
+			$path = $this->REQUEST_URI;
+			$len = strlen($path) - strlen($this->PATH_INFO);
 			if ($this->QUERY_STRING == '') {
 				$len++;
 			} else {
@@ -101,6 +122,7 @@ class AFK_Context {
 		return $method;
 	}
 
+	/** @return True if this request is running over SSL/TLS. */
 	public function is_secure() {
 		return isset($this->ctx['HTTPS']);
 	}
@@ -128,10 +150,22 @@ class AFK_Context {
 		$this->allow_rendering = $allow;
 	}
 
+	/** @return True if any subsequent template renderer should run. */
 	public function rendering_is_allowed() {
 		return $this->allow_rendering;
 	}
 
+	public function created($location) {
+		$this->allow_rendering(false);
+		header('Location: ' . $this->to_absolute_uri($location), true, 201);
+	}
+
+	/**
+	 * Performs a HTTP redirect.
+	 *
+	 * @param  The redirect type. Defaults to 'See Other' (303).
+	 * @param  Where to redirect to. Defaults to the current URI.
+	 */
 	public function redirect($code=303, $to=null) {
 		if ($code < 300 || $code > 307 || $code == 306 || $code == 304) {
 			throw new AFK_Exception("Bad redirect code: $code");
@@ -146,18 +180,30 @@ class AFK_Context {
 		header('Location: ' . $this->to_absolute_uri($to), true, $code);
 	}
 
+	/** Performs a permanent redirect. See ::redirect(). */
 	public function permanent_redirect($to) {
 		$this->redirect(301, $to);
 	}
 
+	public function bad_request($msg='') {
+		throw new AFK_HttpException($msg, 400);
+	}
+
+	public function forbidden($msg='') {
+		throw new AFK_HttpException($msg, 403);
+	}
+
+	/** Triggers a HTTP Not Found (404) response. */
 	public function not_found($msg='') {
 		throw new AFK_HttpException($msg, 404);
 	}
 
+	/** Triggers a HTTP No Such Method (405) response. */
 	public function no_such_method($available_methods) {
 		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
 	}
 
+	/** Sets the HTTP response code. */
 	public function set_response_code($code) {
 		// For backward compatibility, see RFC2616, SS10.3.4
 		if ($code == 303 && $this->SERVER_PROTOCOL == 'HTTP/1.0') {

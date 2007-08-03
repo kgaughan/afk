@@ -1,14 +1,17 @@
 <?php
 /*
- * AFK_ElementNode.php
- * by Keith Gaughan
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
  *
- * Wrapper around SimpleXML to make building XML documents easier.
- *
- * Copyright (c) Keith Gaughan, 2007.
- * Released under the terms of the BSD License.
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
  */
 
+/**
+ * A wrapper around SimpleXML to make building XML documents easier.
+ *
+ * @author Keith Gaughan
+ */
 class AFK_ElementNode {
 
 	private $node;

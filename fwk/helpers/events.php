@@ -1,6 +1,6 @@
 <?php
 function trigger_event($event, $value, $with_universal_observers=false) {
-	AFK_Registry::broker()->trigger($event, $value, $with_universal_observers);
+	return AFK_Registry::broker()->trigger($event, $value, $with_universal_observers);
 }
 
 function announce_event($event, $value) {

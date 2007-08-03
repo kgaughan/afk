@@ -1,7 +1,17 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * Implement this interface to add extra caching mechanisms for use with
  * AFK.
+ *
+ * @author Keith Gaughan
  */
 interface AFK_Cache {
 
@@ -28,7 +38,7 @@ interface AFK_Cache {
 
 	/**
 	 * Saves the given item to the cache.
-	 * 
+	 *
 	 * @param  $id    ID of the cached item.
 	 * @param  $item  The item to be cached.
 	 */

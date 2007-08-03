@@ -5,10 +5,9 @@ class AFK_User {
 	private $username;
 	private $caps = array();
 
-	public function __construct($id, $username, $caps=array()) {
+	public function __construct($id, $username) {
 		$this->id = $id;
 		$this->username = $username;
-		$this->add_capabilities($caps);
 	}
 
 	public function get_id() {

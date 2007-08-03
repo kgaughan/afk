@@ -29,7 +29,7 @@
 </div>
 
 <address>
-<img src="<?php ee($ctx->application_root()) ?>assets-fwk/images/logo.png"
+<img src="<?php ee($ctx->application_root()) ?>assets/afk/images/logo.png"
 	width="205" height="53" alt="">
 Powered by
 AFK/<?php echo AFK_VERSION ?>:

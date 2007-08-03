@@ -20,4 +20,4 @@ function luhn_check($cc) {
 	}
 	return $ttl % 10 == 0;
 }
-
+?>
