@@ -2,7 +2,7 @@
 /**
  * a logger that echos any queries to standard output for debugging purposes.
  */
-class DB_EchoingLogger extends DB_BasicLogger {
+class DB_FileLogger extends DB_BasicLogger {
 
 	private $location;
 
@@ -12,7 +12,7 @@ class DB_EchoingLogger extends DB_BasicLogger {
 
 	public function log($q) {
 		parent::log($q);
-		error_log($q, 3, $this->location);
+		error_log($q, 3, $this->location . ';');
 	}
 }
 ?>

@@ -135,11 +135,5 @@ class AFK_Routes {
 	private function quote($s) {
 		return preg_quote($s, '`');
 	}
-
-	/** Replaces any attribute placeholders in the given URI. */
-	public function expand_uri_template($template, $params=array()) {
-		$quoted = array_map('rawurlencode', $params);
-		return preg_replace('/:([a-z_]+)/ie', '$quoted[\'\\1\']', $template);
-	}
 }
 ?>

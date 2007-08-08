@@ -53,20 +53,51 @@ class AFK_Context {
 	}
 
 	/**
+	 * Resolves a relative path to an absolute one relative to the application root.
+	 */
+	public function resolve($rel_path) {
+		$canon = $this->canonicalise_path($rel_path);
+		$root = $this->application_root();
+		if (substr_compare($canon, $root, 0, strlen($root)) == 0) {
+			return substr($canon, strlen($root) - 1);
+		}
+		return false;
+	}
+
+	/**
 	 * Converts the given URI into an absolute one, fit for use with the
 	 * HTTP 'Location' header.
 	 *
 	 * @param  $path  An absolute or relative path to canonicalise into a URI.
 	 */
 	public function to_absolute_uri($path) {
-		if ($path[0] != '/' && strpos($path, '://') === false) {
+		if (strpos($path, '://') !== false) {
+			return $this->scrub_path($path);
+		}
+		return $this->get_host_prefix() . $this->canonicalise_path($path);
+	}
+
+	private function canonicalise_path($path) {
+		if ($path[0] != '/') {
 			$prefix = $this->REQUEST_URI;
 			if (substr($prefix, -1) != '/') {
 				$prefix = dirname($prefix) . '/';
 			}
 			$path = $prefix . $path;
 		}
+		return $this->scrub_path($path);
+	}
 
+	private function get_host_prefix() {
+		static $ports = array(true => 441, false => 80);
+		$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
+		if ($port[$this->is_secure()] != $this->SERVER_PORT) {
+			$prefix .= ':' . $this->SERVER_PORT;
+		}
+		return $prefix;
+	}
+
+	private function scrub_path($path) {
 		// Attempt to canonicalise the path, removing any instances of '..'
 		// and '.'. Why? Mainly because it's likely that the client dealing
 		// with the request will likely not be smart enough to deal with them
@@ -77,14 +108,6 @@ class AFK_Context {
 			$path = preg_replace('~/[^./;?]([^./?;][^/?;]*)?/\.\.(/|$)~', '/', $path, -1, $c);
 		} while ($c > 0);
 
-		if ($path[0] == '/') {
-			$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
-			if ($this->is_secure() && $this->SERVER_PORT != 441 ||
-				!$this->is_secure() && $this->SERVER_PORT != 80) {
-				$prefix .= ':' . $this->SERVER_PORT;
-			}
-			return $prefix . $path;
-		}
 		return $path;
 	}
 

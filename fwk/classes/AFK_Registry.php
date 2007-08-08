@@ -23,10 +23,15 @@ class AFK_Registry {
 		return self::$inst->slots;
 	}
 
+	public static function routes() {
+		return self::$inst->routes;
+	}
+
 	public $broker;
 	public $context;
 	public $output_cache;
 	public $slots;
+	public $routes;
 
 	public function __construct() {
 		$this->broker = new AFK_EventBroker();
