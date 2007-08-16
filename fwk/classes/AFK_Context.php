@@ -91,7 +91,7 @@ class AFK_Context {
 	private function get_host_prefix() {
 		static $ports = array(true => 441, false => 80);
 		$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
-		if ($port[$this->is_secure()] != $this->SERVER_PORT) {
+		if ($ports[$this->is_secure()] != $this->SERVER_PORT) {
 			$prefix .= ':' . $this->SERVER_PORT;
 		}
 		return $prefix;
@@ -181,6 +181,14 @@ class AFK_Context {
 	public function created($location) {
 		$this->allow_rendering(false);
 		header('Location: ' . $this->to_absolute_uri($location), true, 201);
+	}
+
+	public function accepted($location=null) {
+		if (is_null($location)) {
+			header('HTTP/1.1 202 Accepted');
+		} else {
+			header('Location: ' . $this->to_absolute_uri($location), true, 202);
+		}
 	}
 
 	/**
