@@ -33,6 +33,14 @@ class AFK_Context {
 		}
 	}
 
+	public function merge_or_not_found($ary) {
+		if (empty($ary)) {
+			$this->not_found();
+		} else {
+			$this->merge($ary);
+		}
+	}
+
 	public function __isset($key) {
 		return isset($this->ctx[$key]);
 	}

@@ -41,14 +41,14 @@ class AFK_Cache_DB implements AFK_Cache {
 	}
 
 	public function invalidate_all($max_age=0) {
-		$this->dbh->execute("DELETE FROM {$this->table} WHERE ts < %d", time() - $max_age);
+		$this->dbh->execute("DELETE FROM {$this->table} WHERE ts < %s", time() - $max_age);
 	}
 
 	public function load($id, $max_age=300) {
 		$data = $this->dbh->query_value("
 			SELECT	data
 			FROM	{$this->table}
-			WHERE	id = %s AND ts > %d", md5($id), time() - $max_age);
+			WHERE	id = %s AND ts > %s", md5($id), time() - $max_age);
 
 		if (!is_null($data)) {
 			return unserialize($data);
@@ -65,9 +65,9 @@ class AFK_Cache_DB implements AFK_Cache {
 			WHERE	id = %s", $hash) != 0;
 
 		if ($item_exists) {
-			$query = "UPDATE {$this->table} SET data = %s, ts = %d WHERE id = %s";
+			$query = "UPDATE {$this->table} SET data = %s, ts = %s WHERE id = %s";
 		} else {
-			$query = "INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %d, %s)";
+			$query = "INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %s, %s)";
 		}
 		$this->dbh->execute($query, serialize($item), time(), $hash);
 	}

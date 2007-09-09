@@ -3,13 +3,13 @@
  * A port to AFK of the new, cleaner session handler I wrote for Tempus Wiki.
  *
  * To create the appropriate, you'll need to run something like the following:
- * 
+ *
  * CREATE TABLE sessions (
  *     id   CHAR(32) NOT NULL,
  *     name CHAR(16) NOT NULL,
  *     ts   INTEGER  NOT NULL,
  *     data TEXT     NOT NULL,
- * 
+ *
  *     PRIMARY KEY (id),
  *     INDEX ix_timestamp (ts)
  * );
@@ -50,9 +50,9 @@ class AFK_Session_DB extends AFK_Session {
 			FROM	{$this->table}
 			WHERE	name = %s AND id = %s", $this->name, $id);
 		if ($n == 0) {
-			$query = "INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %d, %s, %s)";
+			$query = "INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %s, %s, %s)";
 		} else {
-			$query = "UPDATE {$this->table} SET data = %s, ts = %d WHERE name = %s AND id = %s";
+			$query = "UPDATE {$this->table} SET data = %s, ts = %s WHERE name = %s AND id = %s";
 		}
 		$this->dbh->execute($query, $data, time(), $this->name, $id);
 		return true;
@@ -70,7 +70,7 @@ class AFK_Session_DB extends AFK_Session {
 		$this->dbh->execute("
 			DELETE
 			FROM	{$this->table}
-			WHERE	ts < %d", time() - $max_age);
+			WHERE	ts < %s", time() - $max_age);
 		return true;
 	}
 }
