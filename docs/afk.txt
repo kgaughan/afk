@@ -93,6 +93,13 @@ following structure:
 		A small template shell script for syncing with the live version of
 		your site using rsync.
 
+NOTE: The method for creating a fresh new project is site dependent. If you
+don't already know what it is, ask your friendly neighbourhood AFK guru for
+help. The procedure will either be laid out in writing or there will be a
+project generation script you can use. The key thing to note is that you should
+_not_ just copy existing projects willy-nilly. Therein lies pain and suffering
+for all.
+
 
 Initial setup
 -------------
