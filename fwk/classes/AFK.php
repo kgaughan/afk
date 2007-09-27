@@ -126,4 +126,3 @@ class AFK {
 		$p->start(AFK_Registry::context());
 	}
 }
-?>

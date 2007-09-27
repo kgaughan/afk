@@ -19,4 +19,3 @@ class AFK_DefaultHandler extends AFK_HandlerBase {
 		$ctx->not_found();
 	}
 }
-?>

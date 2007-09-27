@@ -6,4 +6,3 @@ function cache($id, $max_age=300) {
 function cache_end() {
 	AFK_Registry::output_cache()->end();
 }
-?>

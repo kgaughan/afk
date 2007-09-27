@@ -57,4 +57,3 @@ class AFK_HandlerBase implements AFK_Handler {
 		$ctx->allow_rendering(false);
 	}
 }
-?>

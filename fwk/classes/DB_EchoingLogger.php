@@ -9,4 +9,3 @@ class DB_EchoingLogger extends DB_BasicLogger {
 		printf('<pre class="log">%s</pre>', e($q));
 	}
 }
-?>

@@ -19,4 +19,3 @@ function paginate($name, $limit, $extra=array()) {
 	}
 	echo '</ul>';
 }
-?>

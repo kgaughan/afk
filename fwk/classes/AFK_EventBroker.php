@@ -82,4 +82,3 @@ class AFK_EventBroker {
 		return array(true, $value);
 	}
 }
-?>

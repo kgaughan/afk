@@ -59,4 +59,3 @@ class AFK_ElementNode {
 		return $this->node->asXML();
 	}
 }
-?>

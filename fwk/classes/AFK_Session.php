@@ -25,4 +25,3 @@ abstract class AFK_Session {
 
 	public abstract function gc($max_age);
 }
-?>

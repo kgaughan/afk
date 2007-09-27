@@ -12,4 +12,3 @@ class AFK_Exception extends Exception {
 		return get_class($this) . ": [{$this->code}]: {$this->message}\n";
 	}
 }
-?>

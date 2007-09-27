@@ -12,4 +12,3 @@ interface AFK_Filter {
 	 */
 	function execute(AFK_Pipeline $pipe, $ctx);
 }
-?>

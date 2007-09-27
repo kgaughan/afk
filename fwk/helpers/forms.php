@@ -11,4 +11,3 @@ function select_box($name, $elements, $default=null) {
 	}
 	echo '</select>';
 }
-?>

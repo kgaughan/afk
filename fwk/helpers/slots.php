@@ -18,4 +18,3 @@ function end_slot() {
 function end_slot_append() {
 	AFK_Registry::slots()->end_append();
 }
-?>

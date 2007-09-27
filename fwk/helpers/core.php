@@ -39,4 +39,3 @@ function collect_column($rs, $name) {
 	}
 	return array_unique($values);
 }
-?>

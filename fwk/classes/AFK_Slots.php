@@ -67,4 +67,3 @@ class AFK_Slots {
 		$this->current = null;
 	}
 }
-?>

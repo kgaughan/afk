@@ -39,4 +39,3 @@ class AFK_Cache_Null implements AFK_Cache {
 		// Do nothing.
     }
 }
-?>

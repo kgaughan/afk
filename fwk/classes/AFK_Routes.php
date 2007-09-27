@@ -136,4 +136,3 @@ class AFK_Routes {
 		return preg_quote($s, '`');
 	}
 }
-?>

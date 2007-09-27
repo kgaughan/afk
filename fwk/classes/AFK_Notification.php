@@ -1,8 +1,18 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 class AFK_Notification {
 
 	const REQUIRED = 'Required field';
 	const INVALID  = 'Invalid format';
+
+	const SESSION = '_afk_notification';
 
 	private $msgs = array();
 
@@ -38,16 +48,23 @@ class AFK_Notification {
 		return $result;
 	}
 
-	public function __toString() {
-		$result = '';
-		$msgs = $this->get_all();
-		if (count($msgs) > 0) {
-			foreach ($msgs as $m) {
-				$result .= '<li>' . e($m->msg) . '</li>';
-			}
-			$result .= '<div class="errors"><ul>' . $result . '</ul></div>';
+	public static function get() {
+		if (!isset($_SESSION[self::SESSION])) {
+			$_SESSION[self::SESSION] = new AFK_Notification();
 		}
-		return $result;
+		return $_SESSION[self::SESSION];
+	}
+
+	public static function render() {
+		$msgs = self::get()->get_all();
+		unset($_SESSION[self::SESSION]);
+		if (count($msgs) > 0) {
+			echo '<div class="errors"><ul>';
+			foreach ($msgs as $m) {
+				echo '<li>', e($m->msg), '</li>';
+			}
+			echo '</ul></div>';
+		}
 	}
 }
 
@@ -61,4 +78,3 @@ class AFK_NotificationMessage {
 		$this->msg = $msg;
 	}
 }
-?>

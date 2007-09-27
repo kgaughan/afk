@@ -7,4 +7,3 @@ class AFK_RequireAuthFilter implements AFK_Filter {
 		$pipe->do_next($ctx);
 	}
 }
-?>

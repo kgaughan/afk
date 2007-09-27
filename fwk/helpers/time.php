@@ -21,21 +21,24 @@ function freshness($date) {
 	// Seconds
 	if ($ts == 1) {
 		return 'a second ago';
-	} elseif ($ts < 59) {
+	}
+	if ($ts < 59) {
 		return $ts . ' seconds ago';
 	}
 	// Minutes
 	$ts /= 60;
 	if ($ts < 2) {
 		return 'a minute ago';
-	} elseif ($ts < 60) {
+	}
+	if ($ts < 60) {
 		return intval($ts) . ' minutes ago';
 	}
 	// Hours
 	$ts /= 60;
 	if ($ts < 2) {
 		return 'an hour ago';
-	} elseif ($ts < 24) {
+	}
+	if ($ts < 24) {
 		return intval($ts) . ' hours ago';
 	}
 	// Days
@@ -45,4 +48,3 @@ function freshness($date) {
 	}
 	return intval($ts) . ' days ago';
 }
-?>

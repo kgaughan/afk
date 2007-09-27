@@ -127,4 +127,3 @@ class AFK_TrappedErrorException extends AFK_Exception {
 		$this->ctx  = $ctx;
 	}
 }
-?>

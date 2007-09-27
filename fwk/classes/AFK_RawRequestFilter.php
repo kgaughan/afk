@@ -49,4 +49,3 @@ class AFK_RawRequestFilter implements AFK_Filter {
 		return array($status, $data);
 	}
 }
-?>

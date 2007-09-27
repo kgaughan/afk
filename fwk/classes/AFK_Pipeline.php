@@ -28,4 +28,3 @@ class AFK_Pipeline {
 		end($this->filters);
 	}
 }
-?>

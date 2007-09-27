@@ -72,4 +72,3 @@ class AFK_Cache_DB implements AFK_Cache {
 		$this->dbh->execute($query, serialize($item), time(), $hash);
 	}
 }
-?>

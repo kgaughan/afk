@@ -54,4 +54,3 @@ function ee() {
 	$args = func_get_args();
 	echo htmlspecialchars(implode('', $args), ENT_QUOTES, 'UTF-8');
 }
-?>

@@ -74,4 +74,3 @@ class AFK_Session_DB extends AFK_Session {
 		return true;
 	}
 }
-?>

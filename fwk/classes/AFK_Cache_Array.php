@@ -52,4 +52,3 @@ class AFK_Cache_Array implements AFK_Cache {
 		$this->timestamps[$id] = time();
 	}
 }
-?>

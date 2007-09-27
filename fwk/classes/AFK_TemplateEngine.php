@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * A flexible yet compact template rendering system.
  */
 class AFK_TemplateEngine {
@@ -193,4 +193,3 @@ class AFK_TemplateEngine {
 		return false;
 	}
 }
-?>

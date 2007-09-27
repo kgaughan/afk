@@ -110,4 +110,3 @@ class DB_MySQL extends DB_Base {
 		return $this->execute('ROLLBACK') && $this->execute('SET AUTOCOMMIT=1');
 	}
 }
-?>

@@ -28,4 +28,3 @@ class AFK_DispatchFilter implements AFK_Filter {
 		$pipe->do_next($ctx);
 	}
 }
-?>

@@ -14,4 +14,3 @@ class DB_BasicLogger {
 		return $this->logged;
 	}
 }
-?>

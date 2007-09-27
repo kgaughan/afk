@@ -15,4 +15,3 @@ class DB_FileLogger extends DB_BasicLogger {
 		error_log($q, 3, $this->location . ';');
 	}
 }
-?>

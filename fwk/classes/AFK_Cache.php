@@ -44,4 +44,3 @@ interface AFK_Cache {
 	 */
 	function save($id, $item);
 }
-?>

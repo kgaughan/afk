@@ -30,4 +30,3 @@ class AFK_HttpException extends AFK_Exception {
 		return $result;
 	}
 }
-?>

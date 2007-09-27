@@ -10,4 +10,3 @@ function announce_event($event, $value) {
 function register_listener($event, $callback, $singleton=false) {
 	AFK_Registry::broker()->register($event, $callback, $singleton);
 }
-?>

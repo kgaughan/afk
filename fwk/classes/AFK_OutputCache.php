@@ -61,4 +61,3 @@ class AFK_OutputCache {
 		$this->backend->invalidate($id);
 	}
 }
-?>

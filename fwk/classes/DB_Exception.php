@@ -16,4 +16,3 @@ class DB_Exception extends Exception {
 		return $msg;
 	}
 }
-?>

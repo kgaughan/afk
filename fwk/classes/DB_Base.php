@@ -259,4 +259,3 @@ abstract class DB_Base {
 		}
 	}
 }
-?>

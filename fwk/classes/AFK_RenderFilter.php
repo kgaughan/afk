@@ -26,4 +26,3 @@ class AFK_RenderFilter implements AFK_Filter {
 		}
 	}
 }
-?>

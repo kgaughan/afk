@@ -36,4 +36,3 @@ class AFK_User {
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
 }
-?>

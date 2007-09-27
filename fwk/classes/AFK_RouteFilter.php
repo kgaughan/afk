@@ -55,4 +55,3 @@ class AFK_RouteFilter implements AFK_Filter {
 		return true;
 	}
 }
-?>

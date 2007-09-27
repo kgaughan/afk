@@ -33,9 +33,10 @@ class AFK_Context {
 		}
 	}
 
-	public function merge_or_not_found($ary) {
+	/** Merges an array into the context, but if it's empty, cause a 404. */
+	public function merge_or_not_found($ary, $msg='') {
 		if (empty($ary)) {
-			$this->not_found();
+			$this->not_found($msg);
 		} else {
 			$this->merge($ary);
 		}
@@ -61,7 +62,12 @@ class AFK_Context {
 	}
 
 	/**
-	 * Resolves a relative path to an absolute one relative to the application root.
+	 * Canonicalises a path relative to the current request URI to one
+	 * relative to the application root URI, producing a path that can be
+	 * processed by routing code.
+	 *
+	 * @return The resolved path, or false if it could not be processed,
+	 *         e.g., it resolved to something outside the application.
 	 */
 	public function resolve($rel_path) {
 		$canon = $this->canonicalise_path($rel_path);
@@ -97,10 +103,13 @@ class AFK_Context {
 	}
 
 	private function get_host_prefix() {
-		static $ports = array(true => 441, false => 80);
-		$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
-		if ($ports[$this->is_secure()] != $this->SERVER_PORT) {
-			$prefix .= ':' . $this->SERVER_PORT;
+		static $prefix = null;
+		if (is_null($prefix)) {
+			$ports = array(true => 443, false => 80);
+			$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
+			if ($ports[$this->is_secure()] != $this->SERVER_PORT) {
+				$prefix .= ':' . $this->SERVER_PORT;
+			}
 		}
 		return $prefix;
 	}
@@ -115,11 +124,10 @@ class AFK_Context {
 		do {
 			$path = preg_replace('~/[^./;?]([^./?;][^/?;]*)?/\.\.(/|$)~', '/', $path, -1, $c);
 		} while ($c > 0);
-
 		return $path;
 	}
 
-	/** @return The root URL of the application. */
+	/** @return The root URL path of the application. */
 	public function application_root() {
 		static $root = null;
 		if (is_null($root)) {
@@ -137,18 +145,24 @@ class AFK_Context {
 
 	/** @return The current request URI (without the query string.) */
 	public function request_uri() {
-		$path = $this->REQUEST_URI;
-		if ($this->QUERY_STRING != '') {
-			$path = substr($path, 0, strpos($path, '?'));
+		static $path = null;
+		if (is_null($path)) {
+			$path = $this->REQUEST_URI;
+			if ($this->QUERY_STRING != '') {
+				$path = substr($path, 0, strpos($path, '?'));
+			}
 		}
 		return $path;
 	}
 
 	/** @return The HTTP method used for this request. */
 	public function method() {
-		$method = strtolower($this->REQUEST_METHOD);
-		if ($method == 'post') {
-			$method = $this->_method ? $this->_method : $method;
+		static $method = null;
+		if (is_null($method)) {
+			$method = strtolower($this->REQUEST_METHOD);
+			if ($method == 'post' && isset($this->_method)) {
+				$method = strtolower($this->_method);
+			}
 		}
 		return $method;
 	}
@@ -186,11 +200,23 @@ class AFK_Context {
 		return $this->allow_rendering;
 	}
 
+	/**
+	 * Signal that the application has created a new resource.
+	 *
+	 * @param  $location  Path to the new resource.
+	 */
 	public function created($location) {
 		$this->allow_rendering(false);
 		header('Location: ' . $this->to_absolute_uri($location), true, 201);
 	}
 
+	/**
+	 * Signal that the application has accepted but not yet processed the
+	 * request.
+	 *
+	 * @param  $location  Location to poll, if any. If not specified here,
+	 *                    give it in the body.
+	 */
 	public function accepted($location=null) {
 		if (is_null($location)) {
 			header('HTTP/1.1 202 Accepted');
@@ -210,7 +236,7 @@ class AFK_Context {
 			throw new AFK_Exception("Bad redirect code: $code");
 		}
 		// For backward compatibility, see RFC2616, SS10.3.4
-		if ($code == 303 && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
+		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
 			$code = 302;
 		}
 		if (is_null($to)) {
@@ -221,9 +247,14 @@ class AFK_Context {
 
 	/** Performs a permanent redirect. See ::redirect(). */
 	public function permanent_redirect($to) {
-		$this->redirect(301, $to);
+		$this->redirect(self::PERMANENT, $to);
 	}
 
+	/**
+	 * Signal that the request was malformed.
+	 *
+	 * @param  $msg  Description of how the message is malformed.
+	 */
 	public function bad_request($msg='') {
 		throw new AFK_HttpException($msg, 400);
 	}
@@ -245,7 +276,7 @@ class AFK_Context {
 	/** Sets the HTTP response code. */
 	public function set_response_code($code) {
 		// For backward compatibility, see RFC2616, SS10.3.4
-		if ($code == 303 && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
+		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
 			$code = 302;
 		}
 		if (array_search($code, array(204, 205, 407, 411, 413, 414, 415, 416, 417)) !== false) {
@@ -354,4 +385,3 @@ class AFK_Context {
 		return array_merge($this->ctx, array('ctx' => $this));
 	}
 }
-?>
