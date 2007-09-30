@@ -3,37 +3,30 @@ body {
 	padding: 0;
 	line-height: 1.5;
 }
-
 body, h1, h2, h3, h4, h5, h6 {
 	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Lucida, sans-serif;
 }
-
 #body {
 	font-size: 80%;
 }
-
 form {
 	margin: 0 auto;
 	padding: 0;
 }
-
 #errors {
 	border: 1px solid red;
 	padding: 1ex;
 	margin: 1ex 0;
 	width: 40em;
 }
-
 #errors ul {
 	margin: 0;
 	padding: 0;
 }
-
 #errors li {
 	margin: 0 0 0 1em;
 	padding: 0;
 }
-
 ol.pagination {
 	margin-left: 0;
 	margin-right: 0;
@@ -41,45 +34,37 @@ ol.pagination {
 	text-align: center;
 	list-style: none;
 }
-
 ol.pagination li {
 	display: inline;
 	padding: 0 0.5ex;
 }
 
 /*- Tabular Data -*/
-
 table.data {
 	border-collapse: collapse;
 	margin: 1em auto;
 	text-align: center;
 }
-
 table.data th, table.data td {
 	border-bottom: 1px solid #666;
 	padding: 0.25ex 0.5ex;
 }
-
 table.data th {
 	background: #666;
 	color: white;
 }
-
 th, td {
 	text-align: left;
 	vertical-align: top;
 }
-
 caption {
 	text-align: center;
 	margin: 1ex auto;
 	caption-side: bottom;
 }
-
 th {
 	white-space: nowrap;
 }
-
 .numeric, .currency {
 	text-align: right;
 }

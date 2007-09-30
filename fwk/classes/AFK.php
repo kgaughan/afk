@@ -37,7 +37,7 @@ class AFK {
 
 	/** Loads the named class from one of the registered class paths. */
 	public static function load_class($name) {
-		return self::load(self::$class_paths, $name);
+		return self::load(self::$class_paths, str_replace('_', '/', $name));
 	}
 
 	/** Adds a new directory to use when searching for helpers. */
