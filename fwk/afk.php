@@ -18,14 +18,9 @@
 define('CRLF', "\r\n");
 
 define('AFK_ROOT', dirname(__FILE__));
-define('AFK_VERSION', '1.2.2');
+define('AFK_VERSION', '1.2.3');
 
 require(AFK_ROOT . '/classes/AFK.php');
-
-AFK::register_autoloader();
-AFK::add_class_path(AFK_ROOT . '/classes');
-AFK::add_helper_path(AFK_ROOT . '/helpers');
-AFK_TemplateEngine::add_paths(AFK_ROOT . '/templates');
 
 // ---------------------------------------------------- Utility Functions --
 

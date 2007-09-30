@@ -111,8 +111,35 @@ class AFK {
 		}
 	}
 
+	/** Basic bootstrapping logic. Feel free to write your own. */
+	public static function bootstrap() {
+		self::register_autoloader();
+
+		self::add_helper_path(AFK_ROOT . '/helpers');
+		self::add_helper_path(APP_ROOT . '/lib/helpers');
+
+		self::add_class_path(AFK_ROOT . '/classes');
+		self::add_class_path(APP_ROOT . '/lib/classes');
+		self::add_class_path(APP_ROOT . '/classes');
+		self::add_class_path(APP_ROOT . '/handlers');
+
+		if (defined('APP_TEMPLATE_ROOT')) {
+			AFK_TemplateEngine::add_paths(APP_TEMPLATE_ROOT);
+		}
+
+		AFK_Registry::set_instance($registry = new AFK_Registry());
+
+		include(APP_ROOT . '/config.php');
+		if (file_exists(APP_ROOT . '/lib/lib.php')) {
+			include(APP_ROOT . '/lib/lib.php');
+		}
+
+		$registry->routes = routes();
+		return init();
+	}
+
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
-	public static function process_request($routes, $extra_filters=array()) {
+	public static function process_request(AFK_Routes $routes, $extra_filters=array()) {
 		self::fix_superglobals();
 
 		$p = new AFK_Pipeline();

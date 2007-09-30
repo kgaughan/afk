@@ -8,7 +8,6 @@ class AFK_RenderFilter implements AFK_Filter {
 		if ($ctx->rendering_is_allowed()) {
 			if (defined('APP_TEMPLATE_ROOT')) {
 				AFK_TemplateEngine::add_paths(
-					APP_TEMPLATE_ROOT,
 					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
 			}
 			$t = new AFK_TemplateEngine();
