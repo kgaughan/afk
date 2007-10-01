@@ -123,9 +123,8 @@ class AFK {
 		self::add_class_path(APP_ROOT . '/classes');
 		self::add_class_path(APP_ROOT . '/handlers');
 
-		if (defined('APP_TEMPLATE_ROOT')) {
-			AFK_TemplateEngine::add_paths(APP_TEMPLATE_ROOT);
-		}
+		// For internal templates.
+		AFK_TemplateEngine::add_paths(AFK_ROOT . '/templates');
 
 		AFK_Registry::set_instance($registry = new AFK_Registry());
 
