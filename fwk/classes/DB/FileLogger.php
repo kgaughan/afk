@@ -12,6 +12,6 @@ class DB_FileLogger extends DB_BasicLogger {
 
 	public function log($q) {
 		parent::log($q);
-		error_log($q, 3, $this->location . ';');
+		error_log("$q;\n", 3, $this->location);
 	}
 }
