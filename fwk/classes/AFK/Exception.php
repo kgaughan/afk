@@ -9,6 +9,6 @@ class AFK_Exception extends Exception {
 	}
 
 	public function __toString() {
-		return get_class($this) . ": [{$this->code}]: {$this->message}\n";
+		return get_class($this) . " in {$this->file} at {$this->line}:\nCode {$this->code}: {$this->message}\n\n";
 	}
 }
