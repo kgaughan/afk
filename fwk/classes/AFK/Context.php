@@ -70,7 +70,7 @@ class AFK_Context {
 	 *         e.g., it resolved to something outside the application.
 	 */
 	public function resolve($rel_path) {
-		$canon = $this->canonicalise_path($rel_path);
+		$canon = $this->to_absolute_uri($rel_path);
 		$root = $this->application_root();
 		if (substr_compare($canon, $root, 0, strlen($root)) == 0) {
 			return substr($canon, strlen($root) - 1);
@@ -138,7 +138,7 @@ class AFK_Context {
 			} else {
 				$len -= strlen($this->QUERY_STRING);
 			}
-			$root = substr($path, 0, $len);
+			$root = $this->get_host_prefix() . substr($path, 0, $len);
 		}
 		return $root;
 	}
