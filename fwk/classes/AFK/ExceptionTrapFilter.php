@@ -10,12 +10,14 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		try {
 			$pipe->do_next($ctx);
 		} catch (AFK_HttpException $he) {
+			$ctx->allow_rendering();
 			foreach ($he->get_headers() as $h) {
 				header($h);
 			}
 			$ctx->message = $he->getMessage();
 			$this->report_error($he->getCode(), $pipe, $ctx);
 		} catch (Exception $e) {
+			$ctx->allow_rendering();
 			$this->render_error500($ctx, $e);
 			$this->report_error(500, $pipe, $ctx);
 		}
@@ -42,7 +44,6 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		}
 
 		AFK::load_helper('html');
-		$ctx->allow_rendering();
 		$ctx->page_title = get_class($ex) . ' in ' .
 			$this->truncate_filename($ex->getFile());
 		$ctx->message = $ex->getMessage();
