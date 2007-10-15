@@ -4,9 +4,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	private $content_type;
 	private $schema_path;
 
-	public function __construct($content_type, $schema_path) {
+	public function __construct($content_type, $schema_location) {
 		$this->content_type = $content_type;
-		// APP_ROOT . '/schemas/blackreg.rng'
 		$this->schema_location = $schema_location;
 	}
 
@@ -37,7 +36,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		$errors = libxml_get_errors();
 		libxml_clear_errors();
 		libxml_use_internal_errors($old_use_errors);
-		if (count($errors) == 0) {
+		if (count($errors) > 0) {
 			$message = "Invalid document:\n\n * " .
 				implode("\n * ", array_map(array($this, 'error_to_string'), $errors));
 			throw new AFK_ParseException($message);
