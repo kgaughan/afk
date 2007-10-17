@@ -42,6 +42,9 @@ following structure:
 	assets/
 		Your application's assets (images, stylesheets, javascript, &c.)
 
+	assets/afk/
+		AFK's own assets.
+
 	assets/images/
 		Your application's image assets.
 
@@ -49,9 +52,6 @@ following structure:
 	assets/print.css
 	assets/screen.css
 		Basic stylesheets for you to use as a base for your own.
-
-	assets-fwk/
-		AFK's own assets.
 
 	classes/
 		Your application's classes.
@@ -116,7 +116,6 @@ You'll be presented with something like this:
 	RewriteEngine On
 	RewriteBase %%APPLICATION_URI_PATH%%
 	RewriteRule ^assets/.*         -                [L]
-	RewriteRule ^assets-fwk/.*     -                [L]
 	RewriteRule ^favicon\.ico      -                [L]
 	RewriteRule ^robots\.txt       -                [L]
 	RewriteRule ^dispatch\.php/.*  -                [L]

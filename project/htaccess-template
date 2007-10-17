@@ -1,7 +1,6 @@
 RewriteEngine On
 RewriteBase %%APPLICATION_URI_PATH%%
 RewriteRule ^assets/.*         -                [L]
-RewriteRule ^assets-fwk/.*     -                [L]
 RewriteRule ^favicon\.ico      -                [L]
 RewriteRule ^robots\.txt       -                [L]
 RewriteRule ^dispatch\.php/.*  -                [L]
