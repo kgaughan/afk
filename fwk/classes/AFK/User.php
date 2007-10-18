@@ -22,11 +22,11 @@ class AFK_User {
 		return null;
 	}
 
-	public function add_capabilities($to_add) {
+	public function add_capabilities(array $to_add) {
 		$this->caps = array_unique(array_merge($this->caps, $to_add));
 	}
 
-	public function remove_capabilities($to_remove) {
+	public function remove_capabilities(array $to_remove) {
 		$this->caps = array_diff($this->caps, $to_remove);
 	}
 

@@ -8,7 +8,7 @@ class AFK_HttpException extends AFK_Exception {
 		$this->add_headers($headers);
 	}
 
-	public function add_headers($headers) {
+	public function add_headers(array $headers) {
 		foreach ($headers as $n=>$v) {
 			if (is_array($v)) {
 				$v = implode(', ', $v);

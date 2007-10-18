@@ -18,7 +18,7 @@ class AFK_RouteFilter implements AFK_Filter {
 	 *                   after the request has been routed. In production,
 	 *                   this will be $_REQUEST.
 	 */
-	public function __construct(AFK_Routes $routes, $server, $request) {
+	public function __construct(AFK_Routes $routes, array $server, array $request) {
 		$this->routes = $routes;
 		$this->server = $server;
 		$this->request = $request;
@@ -46,7 +46,7 @@ class AFK_RouteFilter implements AFK_Filter {
 	}
 
 	/* Ensures the request URI doesn't contain double-slashes. */
-	private function ensure_canonicalised_uri($ctx) {
+	private function ensure_canonicalised_uri(AFK_Context $ctx) {
 		$canon = preg_replace('~(/)/+~', '$1', $ctx->REQUEST_URI);
 		if ($canon !== $ctx->REQUEST_URI) {
 			$ctx->permanent_redirect($canon);

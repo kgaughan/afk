@@ -1,5 +1,5 @@
 <?php
-function select_box($name, $elements, $default=null) {
+function select_box($name, array $elements, $default=null) {
 	$default = coalesce($default, AFK_Registry::context()->__get($name), null);
 	echo '<select name="', e($name), '" id="', e($name), '">';
 	foreach ($elements as $k=>$v) {

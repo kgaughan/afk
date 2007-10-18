@@ -269,7 +269,7 @@ class AFK_Context {
 	}
 
 	/** Triggers a HTTP No Such Method (405) response. */
-	public function no_such_method($available_methods) {
+	public function no_such_method(array $available_methods) {
 		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
 	}
 
@@ -343,7 +343,7 @@ class AFK_Context {
 	 * key and the value to associate with that key is taken from the request
 	 * context.
 	 */
-	public function to_query($vars) {
+	public function to_query(array $vars) {
 		$result = '';
 		foreach ($vars as $k=>$v) {
 			if (is_numeric($k)) {
@@ -372,7 +372,7 @@ class AFK_Context {
 	}
 
 	/** Use the given defaults if the named fields aren't set. */
-	public function defaults($defaults) {
+	public function defaults(array $defaults) {
 		foreach ($defaults as $k=>$v) {
 			if (!isset($this->ctx[$k])) {
 				$this->ctx[$k] = $v;

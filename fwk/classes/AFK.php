@@ -60,7 +60,7 @@ class AFK {
 	}
 
 	/** Searches a list of directories for the named PHP file. */
-	private static function load($paths, $name) {
+	private static function load(array $paths, $name) {
 		foreach ($paths as $path) {
 			$file = "$path/$name.php";
 			if (is_file($file)) {

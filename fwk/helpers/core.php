@@ -13,7 +13,7 @@ function le($path) {
  * Fetches an element from an array, returning a default value if the value
  * isn't there.
  */
-function g($ary, $i, $default='') {
+function g(array $ary, $i, $default='') {
 	if (isset($ary[$i])) {
 		return $ary[$i];
 	}
@@ -30,7 +30,7 @@ function check_etag($current_etag) {
 		explode(', ', g($_SERVER, 'HTTP_IF_NONE_MATCH', ''))));
 }
 
-function collect_column($rs, $name) {
+function collect_column(array $rs, $name) {
 	$values = array();
 	foreach ($rs as $r) {
 		if ($r[$name] != '') {

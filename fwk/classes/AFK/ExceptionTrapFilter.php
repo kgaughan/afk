@@ -60,7 +60,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	}
 
 	/* Converts an exception trace frame to a function/method name. */
-	private function frame_to_name($frame) {
+	private function frame_to_name(array $frame) {
 		$name = '';
 		if (isset($frame['class'])) {
 			$name .= $frame['class'] . $frame['type'];
@@ -92,7 +92,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	}
 
 	/* */
-	private function should_ignore($f) {
+	private function should_ignore(array $f) {
 		static $methods_to_ignore = array(
 			'AFK_Pipeline'       => array('start', 'do_next'),
 		//	'AFK_Filter'         => array('execute'),

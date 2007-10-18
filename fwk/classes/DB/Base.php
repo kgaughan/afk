@@ -164,7 +164,7 @@ abstract class DB_Base {
 	 *
 	 * @return Last insert ID.
 	 */
-	public function insert($table, $data) {
+	public function insert($table, array $data) {
 		if (count($data) == 0) {
 			return false;
 		}
@@ -176,7 +176,7 @@ abstract class DB_Base {
 	/**
 	 *
 	 */
-	public function update($table, $data, $qualifiers=array()) {
+	public function update($table, array $data, $qualifiers=array()) {
 		if (count($data) == 0) {
 			return false;
 		}
@@ -234,7 +234,7 @@ abstract class DB_Base {
 	 * convenience's sake when working with ranged queries, i.e., those that
 	 * use the IN operator) and objects passed in are serialised.
 	 */
-	protected function compose($q, $args) {
+	protected function compose($q, array $args) {
 		return vsprintf($q, array_map(array($this, 'make_safe'), $args));
 	}
 

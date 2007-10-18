@@ -25,7 +25,7 @@ function stylesheets($styles=array(), $where=null) {
 	echo "\n";
 }
 
-function javascript($scripts, $where=null) {
+function javascript(array $scripts, $where=null) {
 	$root_enc = e(afk_get_assets_location($where));
 	foreach ($scripts as $s) {
 		echo '<script type="text/javascript" src="', $root_enc, $s, '.js"></script>';

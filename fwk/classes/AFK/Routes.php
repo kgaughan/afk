@@ -58,7 +58,7 @@ class AFK_Routes {
 		return false;
 	}
 
-	private function combine($keys, $values) {
+	private function combine(array $keys, array $values) {
 		if (count($keys) > 0) {
 			return array_combine($keys, $values);
 		}
