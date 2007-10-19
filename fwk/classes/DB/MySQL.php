@@ -24,7 +24,9 @@ class DB_MySQL extends DB_Base {
 				$this->execute("SET SESSION collation_connection='{$charset}_general_ci'");
 				$this->execute("SET SESSION collation_database='{$charset}_general_ci'");
 			}
-			mysql_select_db($db, $this->dbh);
+			if (!mysql_select_db($db, $this->dbh)) {
+				throw new DB_Exception('Could not select database: ' . $this->get_last_error());
+			}
 		} else {
 			throw new DB_Exception('Could not connect to database.');
 		}
