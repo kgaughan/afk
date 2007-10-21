@@ -1,0 +1,30 @@
+
+Code Quality:
+
+ * Full test suite. Currently there's none, which really chafes.
+
+ * Further decoupling. One of the aims of AFK is that its various components
+   should be usable separately from the rest in so far as is possible without
+   making the compilation as a whole difficult to use together.
+
+
+Documentation:
+
+ * Documentation should be converted to LaTeX.
+
+ * Individual modules need to be documented more thoroughly.
+
+ * The tutorial needs to be completed.
+
+ * Make sure the class documentation is compatible with PhpDocumentor.
+
+
+Extra Libraries:
+
+ * Support for writing long-running single-threaded and multiprocess servers.
+
+
+Packaging:
+
+ * Make it installable with PEAR.
+
