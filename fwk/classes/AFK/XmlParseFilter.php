@@ -5,13 +5,16 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	private $schema_path;
 
 	public function __construct($content_type, $schema_location) {
+		if (!is_array($content_type)) {
+			$content_type = array($content_type);
+		}
 		$this->content_type = $content_type;
 		$this->schema_location = $schema_location;
 	}
 
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		list($request_content_type) = explode(';', $ctx->CONTENT_TYPE, 2);
-		if ($request_content_type === $this->content_type) {
+		if (array_search($request_content_type, $this->content_type, true) !== false) {
 			try {
 				$ctx->merge($this->parse($this->load_and_validate($ctx->_raw)));
 			} catch (AFK_ParseException $pex) {
@@ -38,6 +41,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_clear_errors();
 		libxml_use_internal_errors($old_use_errors);
 		if (count($errors) > 0) {
+			// TODO: Hack! This should be done more cleanly!
 			$message = "Invalid document:\n\n * " .
 				implode("\n * ", array_map(array($this, 'error_to_string'), $errors));
 			throw new AFK_ParseException($message);
