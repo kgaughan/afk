@@ -143,6 +143,11 @@ class AFK_Context {
 		return $root;
 	}
 
+	public function base_url() {
+		$parts = func_get_args();
+		return $this->application_root() . implode('/', array_map('rawurlencode', $parts));
+	}
+
 	/** @return The current request URI (without the query string.) */
 	public function request_uri() {
 		static $path = null;

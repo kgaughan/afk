@@ -9,36 +9,35 @@ class AFK_Registry {
 		return $old_inst;
 	}
 
-	public static function broker() {
-		return self::$inst->broker;
-	}
-
 	public static function context() {
-		return self::$inst->context;
-	}
-
-	public static function output_cache() {
-		return self::$inst->output_cache;
-	}
-
-	public static function slots() {
-		return self::$inst->slots;
+		return self::$inst->ctx;
 	}
 
 	public static function routes() {
 		return self::$inst->routes;
 	}
 
-	public $broker;
-	public $context;
-	public $output_cache;
-	public $slots;
-	public $routes;
+	public static function _($name) {
+		return self::$inst->__get($name);
+	}
+
+	private $registry = array();
 
 	public function __construct() {
 		$this->broker = new AFK_EventBroker();
-		$this->context = new AFK_Context();
+		$this->ctx = new AFK_Context();
 		$this->output_cache = new AFK_OutputCache();
 		$this->slots = new AFK_Slots();
+	}
+
+	public function __get($name) {
+		if (!isset($this->registry[$name])) {
+			throw new AFK_Exception("'$name' is not registered with the current AFK_Registry.");
+		}
+		return $this->registry[$name];
+	}
+
+	public function __set($name, $value) {
+		$this->registry[$name] = $value;
 	}
 }
