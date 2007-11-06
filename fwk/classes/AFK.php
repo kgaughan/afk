@@ -133,17 +133,17 @@ class AFK {
 			include(APP_ROOT . '/lib/lib.php');
 		}
 
-		$registry->routes = routes();
+		$registry->routes = routes()->get_router();
 		return init();
 	}
 
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
-	public static function process_request(AFK_Routes $routes, $extra_filters=array()) {
+	public static function process_request(AFK_Router $router, $extra_filters=array()) {
 		self::fix_superglobals();
 
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
-		$p->add(new AFK_RouteFilter($routes, $_SERVER, $_REQUEST));
+		$p->add(new AFK_RouteFilter($router, $_SERVER, $_REQUEST));
 		foreach ($extra_filters as $filter) {
 			$p->add($filter);
 		}
