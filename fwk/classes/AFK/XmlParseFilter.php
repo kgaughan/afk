@@ -27,12 +27,13 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	/**
 	 * @return Parsed and validated document, or false on failure.
 	 */
-	private function load_and_validate($xml) {
+	public function load_and_validate($xml) {
 		$old_use_errors = libxml_use_internal_errors(true);
 		libxml_clear_errors();
 
 		$result = false;
-		$doc = DOMDocument::loadXML($xml);
+		$doc = DOMDocument::loadXML($xml,
+			LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOCDATA);
 		if ($doc !== false && $doc->relaxNGValidate($this->schema_location)) {
 			$result = simplexml_import_dom($doc);
 		}
@@ -42,9 +43,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_use_internal_errors($old_use_errors);
 		if (count($errors) > 0) {
 			// TODO: Hack! This should be done more cleanly!
-			$message = "Invalid document:\n\n * " .
-				implode("\n * ", array_map(array($this, 'error_to_string'), $errors));
-			throw new AFK_ParseException($message);
+			throw new AFK_ParseException("Invalid document:\n" .
+				implode("\n", array_map(array($this, 'error_to_string'), $errors)));
 		}
 
 		return $result;
