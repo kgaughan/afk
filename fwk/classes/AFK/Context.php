@@ -14,12 +14,47 @@
  */
 class AFK_Context {
 
+	// Constants {{{
 	const PERMANENT = 301;
 	const SEE_OTHER = 303;
 	const TEMPORARY = 307;
+	// }}}
 
 	private $ctx = array();
-	private $allow_rendering = true;
+
+	/**
+	 * Creates a query string from the given array. If an array element has
+	 * a textual key, that's used as the query string key and the value is
+	 * used as the value. If the key is numeric, the value is used as the
+	 * key and the value to associate with that key is taken from the request
+	 * context.
+	 */
+	public function to_query(array $vars) {
+		$result = '';
+		foreach ($vars as $k => $v) {
+			if (is_numeric($k)) {
+				$k = $v;
+				$v = $this->ctx[$k];
+			}
+			if ($v != '') {
+				if ($result != '') {
+					$result .= '&';
+				}
+				$result .= rawurlencode($k) . '=' . rawurlencode($v);
+			}
+		}
+		if ($result != '') {
+			$result = '?' . $result;
+		}
+		return $result;
+	}
+
+	/** @return The context as an array. */
+	public function as_array() {
+		return array_merge($this->ctx, array('ctx' => $this));
+	}
+
+	// Array Merger {{{
 
 	/**
 	 * Merges the given arrays into the current request context; existing
@@ -42,6 +77,10 @@ class AFK_Context {
 		}
 	}
 
+	// }}}
+
+	// Magic Methods for Variables {{{
+
 	public function __isset($key) {
 		return isset($this->ctx[$key]);
 	}
@@ -60,6 +99,10 @@ class AFK_Context {
 	public function __set($key, $val) {
 		$this->ctx[$key] = $val;
 	}
+
+	// }}}
+
+	// URLs {{{
 
 	/**
 	 * Canonicalises a path relative to the current request URI to one
@@ -160,6 +203,10 @@ class AFK_Context {
 		return $path;
 	}
 
+	// }}}
+
+	// Request Information {{{
+
 	/** @return The HTTP method used for this request. */
 	public function method() {
 		static $method = null;
@@ -176,6 +223,12 @@ class AFK_Context {
 	public function is_secure() {
 		return isset($this->ctx['HTTPS']);
 	}
+
+	// }}}
+
+	// Views {{{
+
+	private $allow_rendering = true;
 
 	/**
 	 * @param  $default  Default view name to use.
@@ -204,6 +257,10 @@ class AFK_Context {
 	public function rendering_is_allowed() {
 		return $this->allow_rendering;
 	}
+
+	// }}}
+
+	// HTTP Response Helpers {{{
 
 	/**
 	 * Signal that the application has created a new resource.
@@ -341,32 +398,9 @@ class AFK_Context {
 		return '';
 	}
 
-	/**
-	 * Creates a query string from the given array. If an array element has
-	 * a textual key, that's used as the query string key and the value is
-	 * used as the value. If the key is numeric, the value is used as the
-	 * key and the value to associate with that key is taken from the request
-	 * context.
-	 */
-	public function to_query(array $vars) {
-		$result = '';
-		foreach ($vars as $k=>$v) {
-			if (is_numeric($k)) {
-				$k = $v;
-				$v = $this->ctx[$k];
-			}
-			if ($v != '') {
-				if ($result != '') {
-					$result .= '&';
-				}
-				$result .= rawurlencode($k) . '=' . rawurlencode($v);
-			}
-		}
-		if ($result != '') {
-			$result = '?' . $result;
-		}
-		return $result;
-	}
+	// }}}
+
+	// Defaults {{{
 
 	/** Default the named fields to empty strings. */
 	public function default_to_empty() {
@@ -385,8 +419,5 @@ class AFK_Context {
 		}
 	}
 
-	/** @return The context as an array. */
-	public function as_array() {
-		return array_merge($this->ctx, array('ctx' => $this));
-	}
+	// }}}
 }
