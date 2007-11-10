@@ -1,9 +1,21 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
+/**
+ * Represents a user.
+ *
+ * @author Keith Gaughan
+ */
 class AFK_User {
 
 	private $id;
 	private $username;
-	private $caps = array();
 
 	public function __construct($id, $username) {
 		$this->id = $id;
@@ -14,6 +26,10 @@ class AFK_User {
 		return $this->id;
 	}
 
+	public function get_display_name() {
+		return $this->username;
+	}
+
 	public function get_username() {
 		return $this->username;
 	}
@@ -22,6 +38,9 @@ class AFK_User {
 		return null;
 	}
 
+	// Capabilities {{{
+
+	private $caps = array();
 	public function add_capabilities(array $to_add) {
 		$this->caps = array_unique(array_merge($this->caps, $to_add));
 	}
@@ -35,4 +54,6 @@ class AFK_User {
 		$reqs = array_unique($reqs);
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
+
+	// }}}
 }

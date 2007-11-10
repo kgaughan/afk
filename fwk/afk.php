@@ -1,30 +1,24 @@
 <?php
 /*
- * afk.php
- * by Keith Gaughan
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
  *
- * Copyright (c) Keith Gaughan, 2007.
- * All Rights Reserved.
- *
- * Permission is given to use, modify and distribute modified and unmodified
- * versions of this software on condition that all copyright notices are
- * retained and a record of changes made to this is software is kept and
- * distributed with any modified version. No warranty, implied or otherwise,
- * is given on this software as to its fitness for any purpose. The author is
- * not liable for any damage, loss of data, or other misfortune caused as a
- * result of the use/misuse of this software.
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
  */
+
+// Essential Constants {{{
 
 define('CRLF', "\r\n");
 
 define('AFK_ROOT', dirname(__FILE__));
 define('AFK_VERSION', '1.2.3');
 
-require(AFK_ROOT . '/classes/AFK.php');
+// }}}
 
-// ---------------------------------------------------- Utility Functions --
+// Utility Functions {{{
 
-/** Returns the first non-empty argument in the arguments passed in. */
+/** @return The first non-empty argument in the arguments passed in. */
 function coalesce() {
 	$args = func_get_args();
 	$default = $args[0];
@@ -49,3 +43,7 @@ function ee() {
 	$args = func_get_args();
 	echo htmlspecialchars(implode('', $args), ENT_QUOTES, 'UTF-8');
 }
+
+// }}}
+
+require(AFK_ROOT . '/classes/AFK.php');

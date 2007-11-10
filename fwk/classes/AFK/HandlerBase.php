@@ -1,4 +1,12 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * Basic functionality common to all handlers.
  */
@@ -10,7 +18,7 @@ class AFK_HandlerBase implements AFK_Handler {
 			call_user_func(array($this, $method), $ctx);
 		} else {
 			$methods = $this->get_available_methods($ctx->view());
-			// Why 1? Because the OPTIONS method is always available.
+			// Why one? Because the OPTIONS method is always available.
 			if (count($methods) == 1) {
 				$ctx->not_found();
 			} else {
@@ -33,6 +41,10 @@ class AFK_HandlerBase implements AFK_Handler {
 		return '';
 	}
 
+	/**
+	 * Figures out which HTTP methods this handler will accept for the given
+	 * view.
+	 */
 	private function get_available_methods($view) {
 		static $allowed = array();
 		if (count($allowed) == 0) {

@@ -1,8 +1,18 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * A compiled representation of the routes.
  *
  * Does the actual matching; matching is done in specification order.
+ *
+ * @author Keith Gaughan
  */
 class AFK_Router {
 
@@ -11,6 +21,8 @@ class AFK_Router {
 
 	/** Fallback handler. */
 	private $fallback = null;
+
+	// Programmatic Routes Building {{{
 
 	/** If none of the routes match, this resource handler is used. */
 	public function fallback(array $defaults) {
@@ -23,6 +35,10 @@ class AFK_Router {
 		$this->routes[$regex] = array($keys, $defaults);
 	}
 
+	// }}}
+
+	// Route Searching {{{
+
 	/** Finds the first route that matches the given path. */
 	public function search($path) {
 		$result = $this->internal_search($path);
@@ -32,7 +48,7 @@ class AFK_Router {
 
 		// Tweak it to remove or append a trailing slash.
 		$path = substr($path, -1) == '/' ? substr($path, 0, -1) : "$path/";
-		foreach ($this->routes as $regex=>$_) {
+		foreach ($this->routes as $regex => $_) {
 			if ($this->match($regex, $path)) {
 				return $path;
 			}
@@ -42,7 +58,7 @@ class AFK_Router {
 	}
 
 	private function internal_search($path) {
-		foreach ($this->routes as $regex=>$v) {
+		foreach ($this->routes as $regex => $v) {
 			// This is only needed because PHP's parser is too dumb to allow
 			// the use for list() in the foreach.
 			list($keys, $defaults) = $v;
@@ -53,13 +69,6 @@ class AFK_Router {
 			}
 		}
 		return false;
-	}
-
-	private function combine(array $keys, array $values) {
-		if (count($keys) > 0) {
-			return array_combine($keys, $values);
-		}
-		return array();
 	}
 
 	/**
@@ -76,6 +85,10 @@ class AFK_Router {
 		}
 		return false;
 	}
+
+	// }}}
+
+	// Route Compilation {{{
 
 	/** Compiles a route into a regex and an array of placeholder keys. */
 	private function compile_route($route, array $patterns) {
@@ -132,4 +145,20 @@ class AFK_Router {
 	private function quote($s) {
 		return preg_quote($s, '`');
 	}
+
+	// }}}
+
+	// Utilities {{{
+
+	/**
+	 * Behaves like array_combine(), but is safe when there's no keys.
+	 */
+	private function combine(array $keys, array $values) {
+		if (count($keys) > 0) {
+			return array_combine($keys, $values);
+		}
+		return array();
+	}
+
+	// }}}
 }

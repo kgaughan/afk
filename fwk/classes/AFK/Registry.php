@@ -1,5 +1,24 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
+/**
+ * One of the singlemost crappy elements of AFK, this is essentially a way of
+ * having global variables without polluting the global scope, though aside
+ * for providing access to the current context and routes, it's not really
+ * meant for external use.
+ *
+ * This has one advantage: registries can be swapped in and out for testing
+ * purposes.
+ */
 class AFK_Registry {
+
+	// Swappable Implementation {{{
 
 	private static $inst;
 
@@ -8,6 +27,10 @@ class AFK_Registry {
 		self::$inst = $inst;
 		return $old_inst;
 	}
+
+	// }}}
+
+	// External Interface {{{
 
 	public static function context() {
 		return self::$inst->ctx;
@@ -20,6 +43,10 @@ class AFK_Registry {
 	public static function _($name) {
 		return self::$inst->__get($name);
 	}
+
+	// }}}
+
+	// Internal Instance Implementation {{{
 
 	private $registry = array();
 
@@ -40,4 +67,6 @@ class AFK_Registry {
 	public function __set($name, $value) {
 		$this->registry[$name] = $value;
 	}
+
+	// }}}
 }

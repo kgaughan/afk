@@ -1,8 +1,23 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
+/**
+ * Grabs the contents of the request when it's not form data and stuffs it
+ * into the context variable '_raw'.
+ */
 class AFK_RawRequestFilter implements AFK_Filter {
 
 	private $limit;
 
+	/**
+	 * @param  $limit  Maximum request size to accept. False for no limit.
+	 */
 	public function __construct($limit=false) {
 		$this->limit = $limit;
 	}
@@ -30,7 +45,7 @@ class AFK_RawRequestFilter implements AFK_Filter {
 			$data = fread($fp, $amount);
 			if (!feof($fp)) {
 				fclose($fp);
-				throw new AFK_HttpException('Request was too big, limit is ' . $this->limit, 413);
+				throw new AFK_HttpException("Request was too big, limit is {$this->limit}", 413);
 			}
 		}
 		fclose($fp);

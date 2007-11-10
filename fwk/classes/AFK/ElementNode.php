@@ -16,6 +16,10 @@ class AFK_ElementNode {
 
 	private $node;
 
+	/**
+	 * @param  $elem  Root element name.
+	 * @param  $nss   List of namespaces keyed by prefix.
+	 */
 	public function __construct($elem, $nss=array()) {
 		if (is_string($elem)) {
 			$xml = "<$elem";
@@ -35,11 +39,31 @@ class AFK_ElementNode {
 		}
 	}
 
+	// Attributes {{{
+
+	/**
+	 * Adds an attribute to this element.
+	 *
+	 * @return $this
+	 */
 	public function attr($name, $value='', $ns=null) {
 		$this->node->addAttribute($name, $value, $ns);
 		return $this;
 	}
 
+	// }}}
+
+	// Children {{{
+
+	/**
+	 * Creates a child element, returning that child node.
+	 *
+	 * @param  $name  Element name.
+	 * @param  $text  Text to insert into the element.
+	 * @param  $ns    Namespace to use, null for the default.
+	 *
+	 * @return Newly-created child node.
+	 */
 	public function child($name, $text=null, $ns=null) {
 		if ($text == '') {
 			$text = null;
@@ -50,11 +74,21 @@ class AFK_ElementNode {
 		return new AFK_ElementNode($child);
 	}
 
+	/**
+	 * Creates a child element, returning the *current* element.
+	 *
+	 * @return $this.
+	 */
 	public function with($name, $text=null, $ns=null) {
 		$this->child($name, $text, $ns);
 		return $this;
 	}
 
+	/// }}}
+
+	/**
+	 * @return The tree as a SimpleXMLElement.
+	 */
 	public function as_xml() {
 		return $this->node->asXML();
 	}

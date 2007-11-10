@@ -1,18 +1,23 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * A flexible yet compact template rendering system.
  */
 class AFK_TemplateEngine {
 
-	/* Paths to use when searching for templates. */
-	private static $paths = array();
-	/* Cached template locations. */
-	private static $locations = array();
-
 	/* Envelope stack for the current rendering contexts. */
 	private $envelopes = array();
 
 	private $current_template = '';
+
+	// Rendering {{{
 
 	private $context = array();
 
@@ -56,40 +61,6 @@ class AFK_TemplateEngine {
 		}
 	}
 
-	/** As ::render(), but the result is returned rather than echoed. */
-	public function buffered_render($name, $values=array()) {
-		ob_start();
-		ob_implicit_flush(false);
-		$this->render($name, $values);
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
-	}
-
-	/** As ::render_each(), but the result is returned rather than echoed. */
-	public function buffered_render_each($names, &$rows, $default=null) {
-		ob_start();
-		ob_implicit_flush(false);
-		$this->render_each($names, $rows, $default);
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
-	}
-
-	/**
-	 * @return The rendering depth of the current template, i.e., 0 when not
-	 *         in a template, 1 when rendering the root template, &c.
-	 * @note   Envelopes will be at the name depth as the templates that
-	 *         they envelope, as will any envelope enveloping an envelope.
-	 *         This is because they're considered to be part of the same
-	 *         rendering context.
-	 */
-	protected function depth() {
-		// The envelopes instance variable has one entry per rendering context,
-		// so the depth can be taken from the number of elements in it.
-		return count($this->envelopes);
-	}
-
 	/* Creates a dedicated scope for rendering a PHP template. */
 	private function internal_render($__path, &$__values) {
 		array_unshift($this->context, $__values);
@@ -111,6 +82,34 @@ class AFK_TemplateEngine {
 		array_shift($this->context);
 	}
 
+	// }}}
+
+	// Buffered Rendering {{{
+
+	/** As ::render(), but the result is returned rather than echoed. */
+	public function buffered_render($name, $values=array()) {
+		ob_start();
+		ob_implicit_flush(false);
+		$this->render($name, $values);
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $content;
+	}
+
+	/** As ::render_each(), but the result is returned rather than echoed. */
+	public function buffered_render_each($names, &$rows, $default=null) {
+		ob_start();
+		ob_implicit_flush(false);
+		$this->render_each($names, $rows, $default);
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $content;
+	}
+
+	// }}}
+
+	// Rendering Contexts {{{
+
 	/* Prepares the current template rendering context. */
 	private function start_rendering_context($name) {
 		$this->current_template = $name;
@@ -128,33 +127,14 @@ class AFK_TemplateEngine {
 		}
 	}
 
-	/**
-	 * Specifies the enveloping template to use with the current rendering
-	 * context. Only call this within a template! If one parameter is used,
-	 * the envelope template with that name is used, otherwise the one named
-	 * after the current template is used. If the named template can't be
-	 * found, the default envelope template is used.
-	 */
-	protected function with_envelope() {
-		$name = func_num_args() == 0 ? $this->current_template : func_get_arg(0);
+	// }}}
 
-		$end = count($this->envelopes) - 1;
-		if ($end < 0) {
-			throw new AFK_TemplateException(
-				"Um, ::with_envelope() can't be called outside of a template rendering context.");
-		}
+	// Template Searching {{{
 
-		if (is_null($this->envelopes[$end])) {
-			if ($this->internal_find($name . '.envelope') === false) {
-				$name = 'default';
-			}
-			$this->envelopes[$end] = $name;
-			ob_start();
-			ob_implicit_flush(false);
-		} elseif ($name != $this->envelopes[$end]) {
-			throw new AFK_TemplateException("Attempt to replace an envelope: $name");
-		}
-	}
+	/* Paths to use when searching for templates. */
+	private static $paths = array();
+	/* Cached template locations. */
+	private static $locations = array();
 
 	/**
 	 * Adds a number of template search directory paths in the order they'll
@@ -192,4 +172,52 @@ class AFK_TemplateEngine {
 		}
 		return false;
 	}
+
+	// }}}
+
+	// In-template Utilities {{{
+
+	/**
+	 * @return The rendering depth of the current template, i.e., 0 when not
+	 *         in a template, 1 when rendering the root template, &c.
+	 * @note   Envelopes will be at the name depth as the templates that
+	 *         they envelope, as will any envelope enveloping an envelope.
+	 *         This is because they're considered to be part of the same
+	 *         rendering context.
+	 */
+	protected function depth() {
+		// The envelopes instance variable has one entry per rendering context,
+		// so the depth can be taken from the number of elements in it.
+		return count($this->envelopes);
+	}
+
+	/**
+	 * Specifies the enveloping template to use with the current rendering
+	 * context. Only call this within a template! If one parameter is used,
+	 * the envelope template with that name is used, otherwise the one named
+	 * after the current template is used. If the named template can't be
+	 * found, the default envelope template is used.
+	 */
+	protected function with_envelope() {
+		$name = func_num_args() == 0 ? $this->current_template : func_get_arg(0);
+
+		$end = count($this->envelopes) - 1;
+		if ($end < 0) {
+			throw new AFK_TemplateException(
+				"Um, ::with_envelope() can't be called outside of a template rendering context.");
+		}
+
+		if (is_null($this->envelopes[$end])) {
+			if ($this->internal_find($name . '.envelope') === false) {
+				$name = 'default';
+			}
+			$this->envelopes[$end] = $name;
+			ob_start();
+			ob_implicit_flush(false);
+		} elseif ($name != $this->envelopes[$end]) {
+			throw new AFK_TemplateException("Attempt to replace an envelope: $name");
+		}
+	}
+
+	// }}}
 }

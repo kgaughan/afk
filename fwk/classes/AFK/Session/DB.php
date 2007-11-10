@@ -1,4 +1,12 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * A port to AFK of the new, cleaner session handler I wrote for Tempus Wiki.
  *
@@ -18,6 +26,8 @@
  * about every RDBMS out there.
  *
  * You will need an implementation of DB_Base to get this to work.
+ *
+ * @author Keith Gaughan
  */
 class AFK_Session_DB extends AFK_Session {
 

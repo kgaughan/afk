@@ -1,8 +1,24 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
+/**
+ * Represents the collection of all users.
+ *
+ * @author Keith Gaughan
+ */
 abstract class AFK_Users {
 
-	private static $impl = null;
 	private $instances = array();
+
+	// Implementation Assignment {{{
+
+	private static $impl = null;
 
 	public static function set_implementation(AFK_Users $impl) {
 		self::$impl = $impl;
@@ -14,7 +30,9 @@ abstract class AFK_Users {
 		}
 	}
 
-	/* Loading users. */
+	/// }}}
+
+	// Loading User Instances {{{
 
 	protected function add(AFK_User $inst) {
 		$this->instances[$inst->get_id()] = $inst;
@@ -34,7 +52,9 @@ abstract class AFK_Users {
 
 	protected abstract function load(array $ids);
 
-	/* Fetching users. */
+	// }}}
+
+	// Fetching Users {{{
 
 	protected function has($id) {
 		return isset($this->instances[$id]);
@@ -67,7 +87,9 @@ abstract class AFK_Users {
 		return self::$impl->internal_get($id);
 	}
 
-	/* Access control. */
+	// }}}
+
+	// Access Control {{{
 
 	public static function prerequisites() {
 		self::ensure_implementation();
@@ -85,4 +107,6 @@ abstract class AFK_Users {
 			throw new AFK_HttpException('You lack the required credentials.', 403);
 		}
 	}
+
+	// }}}
 }

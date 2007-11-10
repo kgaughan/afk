@@ -1,4 +1,12 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * Parses and routes the current request URL.
  */
@@ -24,6 +32,8 @@ class AFK_RouteFilter implements AFK_Filter {
 		$this->request = $request;
 	}
 
+	// Filter Execution {{{
+
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		$ctx->merge($this->server);
 		if ($this->ensure_canonicalised_uri($ctx)) {
@@ -45,7 +55,9 @@ class AFK_RouteFilter implements AFK_Filter {
 		}
 	}
 
-	/* Ensures the request URI doesn't contain double-slashes. */
+	// }}}
+
+	/** Ensures the request URI doesn't contain double-slashes. */
 	private function ensure_canonicalised_uri(AFK_Context $ctx) {
 		$canon = preg_replace('~(/)/+~', '$1', $ctx->REQUEST_URI);
 		if ($canon !== $ctx->REQUEST_URI) {

@@ -1,12 +1,22 @@
 <?php
+/*
+ * AFK - A minimalist PHP web development library.
+ * Copyright (c) Keith Gaughan, 2007. All Rights Reserved.
+ *
+ * For the full copyright and licence terms, please view the LICENCE file
+ * that was distributed with this source code.
+ */
+
 /**
  * A slot is a placeholder whose content can be generated in one place and
  * output in a completely different place elsewhere.
+ *
+ * @author Keith Gaughan
  */
 class AFK_Slots {
 
-	/* Stuff for handling slots. */
-	private $current = null;
+	// Slot Management {{{
+
 	private $slots = array();
 
 	/** Checks if the named slot has content. */
@@ -28,6 +38,12 @@ class AFK_Slots {
 	public function append($slot, $contents) {
 		$this->slots[$slot] .= $contents;
 	}
+
+	// }}}
+
+	// Slot Delimiting {{{
+
+	private $current = null;
 
 	/**
 	 * Delimit the start of a block of code which will generate content for
@@ -66,4 +82,6 @@ class AFK_Slots {
 		ob_end_clean();
 		$this->current = null;
 	}
+
+	// }}}
 }
