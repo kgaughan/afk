@@ -41,11 +41,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		list($request_content_type) = explode(';', $ctx->CONTENT_TYPE, 2);
 		if (array_search($request_content_type, $this->content_type, true) !== false) {
-			try {
-				$ctx->merge($this->parse($this->load_and_validate($ctx->_raw)));
-			} catch (AFK_ParseException $pex) {
-				$ctx->bad_request($pex->getMessage());
-			}
+			$ctx->merge($this->parse($this->load_and_validate($ctx->_raw)));
 		}
 		$pipe->do_next($ctx);
 	}
