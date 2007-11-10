@@ -14,6 +14,8 @@
  */
 class AFK {
 
+	// Autoloading {{{
+
 	private static $class_paths = array();
 	private static $helper_paths = array();
 	private static $loaded_helpers = array();
@@ -71,6 +73,10 @@ class AFK {
 		return false;
 	}
 
+	// }}}
+
+	// Diagnostics {{{
+
 	/** Does a clean HTML dump of the given variable. */
 	public static function dump() {
 		$vs = func_get_args();
@@ -85,31 +91,29 @@ class AFK {
 		echo $contents;
 	}
 
+	// }}}
+
+	// Workarounds {{{
+
 	/** Fixes the superglobals by removing any magic quotes, if present. */
 	public static function fix_superglobals() {
 		if (get_magic_quotes_gpc()) {
-			self::fix_magic_quotes($_GET);
-			self::fix_magic_quotes($_POST);
-			self::fix_magic_quotes($_COOKIE);
-			self::fix_magic_quotes($_REQUEST);
+			$cb = array('AFK', 'fix_magic_quotes');
+			array_walk_recursive($_GET, $cb);
+			array_walk_recursive($_POST, $cb);
+			array_walk_recursive($_COOKIE, $cb);
+			array_walk_recursive($_REQUEST, $cb);
 			set_magic_quotes_runtime(0);
 		}
 	}
 
-	/** Walks an array, fixing magic quotes. */
-	public static function fix_magic_quotes(&$a) {
-		$keys =& array_keys($a);
-		$n    =  count($keys);
-
-		for ($i = 0; $i < $n; $i++) {
-			$val =& $a[$keys[$i]];
-			if (is_array($val)) {
-				self::fix_magic_quotes($val);
-			} else {
-				$val = stripslashes($val);
-			}
-		}
+	private static function fix_magic_quotes(&$val, $_) {
+		$val = stripslashes($val);
 	}
+
+	/// }}}
+
+	// Framework {{{
 
 	/** Basic bootstrapping logic. Feel free to write your own. */
 	public static function bootstrap() {
@@ -151,4 +155,6 @@ class AFK {
 		$p->add(new AFK_RenderFilter());
 		$p->start(AFK_Registry::context());
 	}
+
+	// }}}
 }
