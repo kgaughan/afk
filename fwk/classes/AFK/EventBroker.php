@@ -15,58 +15,22 @@
 class AFK_EventBroker {
 
 	private $callbacks = array();
-	private $queue = array();
 
 	public function register($event, $callback, $singleton=false) {
 		if (!isset($this->callbacks[$event]) ||
 				($singleton && count($this->callbacks[$event]) > 0)) {
 			$this->callbacks[$event] = array();
 		}
-
-		if (is_string($callback) || is_array($callback)) {
-			$this->callbacks[$event][] = $callback;
-		} elseif (is_object($callback)) {
-			if (method_exists($callback, 'pre')) {
-				$this->register("pre:$event", array($callback, 'pre'), $singleton);
-			}
-			if (method_exists($callback, 'handle')) {
-				$this->register($event, array($callback, 'handle'), $singleton);
-			}
-			if (method_exists($callback, 'post')) {
-				$this->register("post:$event", array($callback, 'post'), $singleton);
-			}
-		}
+		$this->callbacks[$event][] = $callback;
 	}
 
-	public function announce($event, $value) {
-		$this->queue[] = array($event, $value);
-	}
-
-	public function clear() {
-		$this->queue = array();
-	}
-
-	public function process() {
-		while (count($this->queue) > 0) {
-			list($event, $value) = array_shift($this->queue);
-			$this->trigger($event, $value, true);
-		}
-	}
-
-	public function trigger($event, $value, $with_universal_observers=false) {
-		if ($with_universal_observers) {
-			$stages = array("pre:$event", "pre:all", $event, "all", "post:$event", "post:all");
-		} else {
-			$stages = array("pre:$event", $event, "post:$event");
-		}
-
-		foreach ($stages as $stage) {
+	public function trigger($event, $value) {
+		foreach (array("pre:$event", $event, "post:$event") as $stage) {
 			list($continue, $value) = $this->trigger_stage($stage, $value);
 			if (!$continue) {
 				break;
 			}
 		}
-
 		return array($continue, $value);
 	}
 
