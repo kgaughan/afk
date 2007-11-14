@@ -4,6 +4,14 @@
  */
 class DB_MySQL extends DB_Base {
 
+	/**
+	 * Used to prevent the creation of too-many unneeded connections and to
+	 * prevent the client libraries from recycling connections we don't want it
+	 * to.
+	 */
+	static $cache = array();
+
+	private $key = false;
 	private $dbh = false;
 	private $rs = false;
 
@@ -11,30 +19,43 @@ class DB_MySQL extends DB_Base {
 	 *
 	 */
 	public function __construct($host, $user, $pass, $db) {
-		$this->dbh = mysql_connect($host, $user, $pass);
-		if ($this->dbh) {
-			if (version_compare(mysql_get_server_info($this->dbh), '4.1.0', '>=')) {
-				$charset = defined('DB_CHARSET') ? constant('DB_CHARSET') : 'utf8';
-				$this->execute("SET NAMES $charset");
-				$this->execute("SET SESSION character_set_database='$charset'");
-				$this->execute("SET SESSION character_set_server='$charset'");
-				$this->execute("SET SESSION character_set_connection='$charset'");
-				$this->execute("SET SESSION character_set_results='$charset'");
-				$this->execute("SET SESSION character_set_client='$charset'");
-				$this->execute("SET SESSION collation_connection='{$charset}_general_ci'");
-				$this->execute("SET SESSION collation_database='{$charset}_general_ci'");
-			}
-			if (!mysql_select_db($db, $this->dbh)) {
-				throw new DB_Exception('Could not select database: ' . $this->get_last_error());
-			}
+		$this->key = "$host:$user:$db";
+		if (isset(self::$cache[$this->key])) {
+			list($this->dbh, $count) = self::$cache[$this->key];
+			self::$cache[$this->key] = array($this->dbh, $count + 1);
 		} else {
-			throw new DB_Exception('Could not connect to database.');
+			$this->dbh = mysql_connect($host, $user, $pass, true);
+			if ($this->dbh) {
+				if (version_compare(mysql_get_server_info($this->dbh), '4.1.0', '>=')) {
+					$charset = defined('DB_CHARSET') ? constant('DB_CHARSET') : 'utf8';
+					$this->execute("SET NAMES $charset");
+					$this->execute("SET SESSION character_set_database='$charset'");
+					$this->execute("SET SESSION character_set_server='$charset'");
+					$this->execute("SET SESSION character_set_connection='$charset'");
+					$this->execute("SET SESSION character_set_results='$charset'");
+					$this->execute("SET SESSION character_set_client='$charset'");
+					$this->execute("SET SESSION collation_connection='{$charset}_general_ci'");
+					$this->execute("SET SESSION collation_database='{$charset}_general_ci'");
+				}
+				if (!mysql_select_db($db, $this->dbh)) {
+					throw new DB_Exception('Could not select database: ' . $this->get_last_error());
+				}
+			} else {
+				throw new DB_Exception('Could not connect to database.');
+			}
+			self::$cache[$this->key] = array($this->dbh, 1);
 		}
 	}
 
 	public function close() {
 		if ($this->dbh) {
-			mysql_close($this->dbh);
+			list(, $count) = self::$cache[$this->key];
+			if ($count > 1) {
+				self::$cache[$this->key] = array($this->dbh, $count - 1);
+			} else {
+				mysql_close($this->dbh);
+				unset(self::$cache[$this->key]);
+			}
 			$this->dbh = false;
 			$this->rs = false;
 		}
