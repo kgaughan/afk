@@ -50,8 +50,20 @@ class AFK_Context {
 	}
 
 	/** @return The context as an array. */
-	public function as_array() {
-		return array_merge($this->ctx, array('ctx' => $this));
+	public function as_array($indices=false) {
+		if ($indices === false) {
+			return array_merge($this->ctx, array('ctx' => $this));
+		}
+		if (is_array($indices)) {
+			$extracted = array();
+			foreach ($indices as $i) {
+				if (isset($this->ctx[$i])) {
+					$extracted[$i] = $this->ctx[$i];
+				}
+			}
+			return $extracted;
+		}
+		return array();
 	}
 
 	// Array Merger {{{
