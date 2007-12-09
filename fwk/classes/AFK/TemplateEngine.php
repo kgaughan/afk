@@ -84,30 +84,6 @@ class AFK_TemplateEngine {
 
 	// }}}
 
-	// Buffered Rendering {{{
-
-	/** As ::render(), but the result is returned rather than echoed. */
-	public function buffered_render($name, $values=array()) {
-		ob_start();
-		ob_implicit_flush(false);
-		$this->render($name, $values);
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
-	}
-
-	/** As ::render_each(), but the result is returned rather than echoed. */
-	public function buffered_render_each($names, &$rows, $default=null) {
-		ob_start();
-		ob_implicit_flush(false);
-		$this->render_each($names, $rows, $default);
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
-	}
-
-	// }}}
-
 	// Rendering Contexts {{{
 
 	/* Prepares the current template rendering context. */
@@ -117,7 +93,7 @@ class AFK_TemplateEngine {
 	}
 
 	/* Concludes the current template rendering context, possibly wrapping it
-	 * with an enveloping template if one's been specified. */
+	   with an enveloping template if one's been specified. */
 	private function end_rendering_context(&$values) {
 		$envelope = array_pop($this->envelopes);
 		if (!is_null($envelope)) {
