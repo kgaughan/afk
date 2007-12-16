@@ -4,7 +4,7 @@ do_sync () {
 	local OLD_LOC=`pwd`
 	echo Syncing from ./$1 to $2/$1...
 	cd $1
-	rsync -rlptvz --delete --exclude="sync" --exclude="*~" --exclude=".htaccess" --exclude=".svn" --exclude=".*.sw?" --rsh=/usr/bin/ssh ./ "$2/$1"
+	rsync -rlptvz --delete --exclude="sync" --exclude="tests" --exclude="*~" --exclude=".htaccess" --exclude=".svn" --exclude=".*.sw?" --exclude="*.xcf" --rsh=/usr/bin/ssh ./ "$2/$1"
 	cd $OLD_LOC
 }
 
@@ -17,15 +17,17 @@ do_sync_all () {
 
 do_lint () {
 	local i=''
+	local exclusion=''
 
-	for i in `find . -name \*.php`; do
-		if ! php -l "$i"; then
-			echo $i has errors.
-			return 1
+	# Exclude directories and symlinks in ./lib - they come from elsewhere so
+	# we don't bother linting them.
+	for i in `ls ./lib`; do
+		if [ -d "./lib/$i" -o -L "./lib/$i" ]; then
+			exclusion="$exclusion -wholename ./lib/$i -prune -o"
 		fi
 	done
 
-	for i in `find . -name \*.inc`; do
+	for i in `find . $exclusion -name \*.php -o -name \*.inc`; do
 		if ! php -l "$i"; then
 			echo $i has errors.
 			return 1
