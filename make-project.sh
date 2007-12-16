@@ -1,10 +1,17 @@
 #!/bin/sh
 
+if [ -z "$1" ]; then
+	echo Syntax: `basename $0` "<root>"
+	exit 1
+fi
+
+ROOT=$1
+
 mkdir assets assets/images classes handlers templates tests lib lib/classes 2>/dev/null
 
 cat >.htaccess <<LEFIN
 RewriteEngine On
-RewriteBase %%APPLICATION_URI_PATH%%
+RewriteBase $ROOT
 RewriteRule ^assets/.*         -                [L]
 RewriteRule ^favicon\.ico      -                [L]
 RewriteRule ^robots\.txt       -                [L]
@@ -19,8 +26,8 @@ do_sync () {
 	local OLD_LOC=\`pwd\`
 	echo Syncing from ./\$1 to \$2/\$1...
 	cd \$1
-	rsync -rlptvz --rsh=\`which ssh\` --delete-during \
-		-C --exclude="sync" --exclude="tests" --exclude=".htaccess" --exclude=".*.sw?" --exclude="*.xcf" \
+	rsync -rlptvz --rsh=\`which ssh\` --del \\
+		-C --exclude="sync" --exclude="tests" --exclude=".htaccess" --exclude=".*.sw?" --exclude="*.xcf" \\
 		./ "\$2/\$1"
 	cd \$OLD_LOC
 }
