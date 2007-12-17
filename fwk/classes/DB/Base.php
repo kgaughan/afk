@@ -228,29 +228,44 @@ abstract class DB_Base {
 	/**
 	 * The poor man's prepared statements. The first argument is an SQL query
 	 * and the rest are a set of arguments to embed in it. The arguments are
-	 * converted to forms safe for use in a query. It's advised that you use
-	 * %s for your placeholders. Also not that if you pass in an array, it is
-	 * flattened and converted into a comma-separated list (this is for
-	 * convenience's sake when working with ranged queries, i.e., those that
-	 * use the IN operator) and objects passed in are serialised.
+	 * converted to forms safe for use in a query. Also note that if you pass
+	 * in an array, it is flattened and converted into a comma-separated list
+	 * (this is for convenience's sake when working with ranged queries, i.e.,
+	 * those that use the IN operator) and objects passed in are serialised.
 	 */
 	protected function compose($q, array $args) {
-		return vsprintf($q, array_map(array($this, 'make_safe'), $args));
+		$i = 0;
+		return preg_replace(
+			'/%(?:(\d+)[:$])?([sdf%])/e',
+			"\$this->get_arg('\\1' == '' && '\\2' != '%' ? \$i++ : '\\1', '\\2', \$args)",
+			$q);
+	}
+
+	private function get_arg($i, $type, $args) {
+		if (!isset($args[$i])) {
+			throw new DB_Exception("Bad placeholder index: $i");
+		}
+		switch ($type) {
+		case '%':
+			return '%';
+		case 's':
+			return $this->make_safe($args[$i]);
+		case 'd':
+			return intval($args[$i]);
+		case 'f':
+			return floatval($args[$i]);
+		}
+		throw new DB_Exception("Bad placeholder type: '$type'");
 	}
 
 	private function make_safe($v) {
 		if (is_array($v)) {
-			// The nice thing about this is that it will flatten
-			// multidimensional arrays.
 			return implode(', ', array_map(array($this, 'make_safe'), $v));
 		}
 		if (is_object($v)) {
 			return "'" . $this->e(serialize($v)) . "'";
 		}
-		if (!is_numeric($v)) {
-			return "'" . $this->e($v) . "'";
-		}
-		return $v;
+		return "'" . $this->e($v) . "'";
 	}
 
 	protected function log_query($q) {
