@@ -103,10 +103,14 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	 */
 	private function get_context_lines($file, $line_no, $amount=3) {
 		$context = array();
-		$lines = file($file);
-		for ($i = $line_no - $amount; $i <= $line_no + $amount; $i++) {
-			if ($i >= 0 && isset($lines[$i - 1])) {
-				$context[$i] = rtrim($lines[$i - 1]);
+		// TODO: Quick dumb hack. Need to deal with cases of generated code
+		// (such as in regexes) properly.
+		if (is_file($file)) {
+			$lines = file($file);
+			for ($i = $line_no - $amount; $i <= $line_no + $amount; $i++) {
+				if ($i >= 0 && isset($lines[$i - 1])) {
+					$context[$i] = rtrim($lines[$i - 1]);
+				}
 			}
 		}
 		return $context;
