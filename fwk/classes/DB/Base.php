@@ -234,26 +234,27 @@ abstract class DB_Base {
 	 * those that use the IN operator) and objects passed in are serialised.
 	 */
 	protected function compose($q, array $args) {
-		$i = 0;
+		$i = 1;
 		return preg_replace(
-			'/%(?:(\d+)[:$])?([sdf%])/e',
+			'/%(?:(\d+)[:$])?([sdfu%])/e',
 			"\$this->get_arg('\\1' == '' && '\\2' != '%' ? \$i++ : '\\1', '\\2', \$args)",
 			$q);
 	}
 
 	private function get_arg($i, $type, $args) {
-		if (!isset($args[$i])) {
+		if ($i > count($args)) {
 			throw new DB_Exception("Bad placeholder index: $i");
 		}
 		switch ($type) {
 		case '%':
 			return '%';
 		case 's':
-			return $this->make_safe($args[$i]);
+			return $this->make_safe($args[$i - 1]);
 		case 'd':
-			return intval($args[$i]);
+		case 'u':
+			return intval($args[$i - 1]);
 		case 'f':
-			return floatval($args[$i]);
+			return floatval($args[$i - 1]);
 		}
 		throw new DB_Exception("Bad placeholder type: '$type'");
 	}
