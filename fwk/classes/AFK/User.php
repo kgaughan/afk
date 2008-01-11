@@ -38,6 +38,10 @@ class AFK_User {
 		return null;
 	}
 
+	public function is_logged_in() {
+		return $this->id !== 0;
+	}
+
 	// Capabilities {{{
 
 	private $caps = array();
