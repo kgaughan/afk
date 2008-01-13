@@ -24,6 +24,7 @@
 	<h2>Request Context</h2>
 	<?php
 	$ctx->__unset('traceback');
+	$ctx->__unset('page_title');
 	AFK::dump($ctx);
 	?>
 </div>
@@ -31,6 +32,10 @@
 <address>
 <img src="<?php ee($ctx->application_root()) ?>assets/afk/images/logo.png"
 	width="205" height="53" alt="">
+This error page is based on the 500 page from
+<a href="http://djangoproject.com/">Django</a>,
+designed by <a href="http://wilsonminer.com/">Wilson Miner</a>.
+<br>
 Powered by
 AFK/<?php echo AFK_VERSION ?>:
 <?php
