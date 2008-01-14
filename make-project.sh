@@ -7,7 +7,7 @@ fi
 
 ROOT=$1
 
-mkdir assets assets/images classes handlers templates tests lib lib/classes 2>/dev/null
+mkdir -p assets/images classes handlers templates tests lib/classes 2>/dev/null
 
 cat >.htaccess <<LEFIN
 RewriteEngine On
