@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -z "$1" ]; then
-	echo Syntax: `basename $0` "<root>"
+	echo Syntax: `basename $0` "<webserver-application-root>"
 	exit 1
 fi
 
