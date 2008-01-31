@@ -248,25 +248,33 @@ abstract class DB_Base {
 		switch ($type) {
 		case '%':
 			return '%';
-		case 's':
-			return $this->make_safe($args[$i - 1]);
-		case 'd':
-		case 'u':
-			return intval($args[$i - 1]);
-		case 'f':
-			return floatval($args[$i - 1]);
+		case 's': case 'd': case 'u': case 'f':
+			return $this->make_safe($args[$i - 1], $type);
 		}
 		throw new DB_Exception("Bad placeholder type: '$type'");
 	}
 
-	private function make_safe($v) {
+	private function make_safe($v, $type) {
 		if (is_array($v)) {
-			return implode(', ', array_map(array($this, 'make_safe'), $v));
+			$checked = array();
+			foreach ($v as $elem) {
+				$checked[] = $this->make_safe($elem, $type);
+			}
+			return implode(', ', $checked);
 		}
 		if (is_object($v)) {
 			return "'" . $this->e(serialize($v)) . "'";
 		}
-		return "'" . $this->e($v) . "'";
+
+		switch ($type) {
+		case 's':
+			return "'" . $this->e($v) . "'";
+		case 'd': case 'u':
+			return intval($v);
+		case 'f':
+			return floatval($v);
+		}
+		throw new DB_Exception("make_safe: bad type '$type', should not get here");
 	}
 
 	protected function log_query($q) {
