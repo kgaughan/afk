@@ -50,7 +50,7 @@ class AFK_HttpException extends AFK_Exception {
 	 */
 	public function get_headers() {
 		$result = array();
-		foreach ($this->headers as $n=>$v) {
+		foreach ($this->headers as $n => $v) {
 			$result[] = "$n: $v";
 		}
 		return $result;

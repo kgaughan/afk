@@ -424,7 +424,7 @@ class AFK_Context {
 
 	/** Use the given defaults if the named fields aren't set. */
 	public function defaults(array $defaults) {
-		foreach ($defaults as $k=>$v) {
+		foreach ($defaults as $k => $v) {
 			if (!isset($this->ctx[$k])) {
 				$this->ctx[$k] = $v;
 			}

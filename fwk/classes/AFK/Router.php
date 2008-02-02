@@ -102,7 +102,7 @@ class AFK_Router {
 		$keys  = array();
 		$regex = '';
 		$parts = explode('{', $route);
-		foreach ($parts as $i=>$part) {
+		foreach ($parts as $i => $part) {
 			$matches = array();
 			if (preg_match('/^(?:([a-z_]+)})?([^a-z_]?.*)$/i', $part, $matches)) {
 				if (strlen($matches[1]) == 0) {

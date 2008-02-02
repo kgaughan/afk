@@ -15,7 +15,7 @@ function stylesheets($styles=array(), $where=null) {
 		}
 	}
 
-	foreach ($styles as $medium=>$stylesheet) {
+	foreach ($styles as $medium => $stylesheet) {
 		if (is_numeric($medium)) {
 			$medium = $stylesheet;
 		}

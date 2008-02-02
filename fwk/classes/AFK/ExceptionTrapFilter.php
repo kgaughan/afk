@@ -139,7 +139,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			'AFK_TemplateEngine' => array('internal_render'));
 		static $functions_to_ignore = array('require');
 		if (isset($f['class'])) {
-			foreach ($methods_to_ignore as $class=>$methods) {
+			foreach ($methods_to_ignore as $class => $methods) {
 				if ($class == $f['class'] || is_subclass_of($class, $f['class'])) {
 					return array_search($f['function'], $methods) !== false;
 				}

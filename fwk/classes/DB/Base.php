@@ -183,7 +183,7 @@ abstract class DB_Base {
 
 		$is_first = true;
 		$sql = "UPDATE $table SET ";
-		foreach ($data as $f=>$v) {
+		foreach ($data as $f => $v) {
 			if (!$is_first) {
 				$sql .= ', ';
 			} else {
@@ -195,7 +195,7 @@ abstract class DB_Base {
 		if (count($qualifiers) > 0) {
 			$sql .= ' WHERE ';
 			$is_first = true;
-			foreach ($qualifiers as $f=>$qual) {
+			foreach ($qualifiers as $f => $qual) {
 				if (!$is_first) {
 					$sql .= ' AND ';
 				} else {
@@ -254,7 +254,7 @@ abstract class DB_Base {
 		throw new DB_Exception("Bad placeholder type: '$type'");
 	}
 
-	private function make_safe($v, $type) {
+	private function make_safe($v, $type='s') {
 		if (is_array($v)) {
 			$checked = array();
 			foreach ($v as $elem) {

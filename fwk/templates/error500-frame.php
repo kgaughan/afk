@@ -5,7 +5,7 @@
 </div>
 <div class="context">
 	<ol>
-	<?php foreach ($context as $i=>$text) { ?>
+	<?php foreach ($context as $i => $text) { ?>
 	<li value="<?php echo $i ?>" class="<?php echo $i == $line ? 'ctx' : 'otr' ?>-line"><?php ee($text) ?></li>
 	<?php } ?>
 	</ol>

@@ -33,7 +33,7 @@ class AFK_Cache_Array implements AFK_Cache {
 
 	public function invalidate_all($max_age=0) {
 		$now = time();
-		foreach ($this->timestamps as $id=>$ts) {
+		foreach ($this->timestamps as $id => $ts) {
 			if ($ts + $max_age <= $now) {
 				$this->invalidate($id);
 			}
