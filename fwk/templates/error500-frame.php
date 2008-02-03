@@ -1,6 +1,12 @@
 <li class="frame <?php echo substr($file, 0, 4) == 'AFK:' ? 'internal hidden' : 'external' ?>">
 <div>
-<span class="method"><?php ee($method) ?></span>
+<span class="method"><?php
+if (empty($method)) {
+	echo '&mdash;';
+} else {
+	ee($method);
+}
+?></span>
 <code><?php ee($file) ?></code>
 </div>
 <div class="context">

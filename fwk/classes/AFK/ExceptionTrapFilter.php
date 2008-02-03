@@ -60,14 +60,24 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 
 	private function render_error500(AFK_Context $ctx, Exception $ex) {
 		$traceback = array();
-		$traceback[] = $this->make_traceback_frame($ex->getFile(), $ex->getLine());
-		foreach ($ex->getTrace() as $f) {
-			if (!empty($f['file']) && !$this->should_ignore($f)) {
+		$last_file = $ex->getFile();
+		$last_line = $ex->getLine();
+		$trace = $ex->getTrace();
+		foreach ($trace as $f) {
+			if (!empty($last_file) && !$this->should_ignore($f)) {
 				 $traceback[] = $this->make_traceback_frame(
-					$f['file'], $f['line'],
+					$last_file, $last_line,
 					$this->frame_to_name($f));
 			}
+			if (isset($f['file'])) {
+				$last_file = $f['file'];
+				$last_line = $f['line'];
+			} else {
+				$last_file = null;
+				$last_line = null;
+			}
 		}
+		$traceback[] = $this->make_traceback_frame($last_file, $last_line);
 
 		AFK::load_helper('html');
 		$ctx->page_title = sprintf('%s [%s]',
@@ -82,7 +92,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			'file'    => $this->truncate_filename($file),
 			'line'    => $line,
 			'context' => $this->get_context_lines($file, $line),
-			'method'  => "$function()");
+			'method'  => $function === '' ? '' : "$function()");
 	}
 
 	/**
@@ -90,6 +100,26 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	 */
 	private function frame_to_name(array $frame) {
 		$name = '';
+		if (substr($frame['function'], 0, 14) == 'call_user_func') {
+			$array_args = substr($frame['function'], 0, -6) == '_array';
+			if (is_array($frame['args'][0])) {
+				$frame['function'] = $frame['args'][0][1];
+				if (is_object($frame['args'][0][0])) {
+					$frame['class'] = get_class($frame['args'][0][0]);
+					$frame['type'] = '->';
+				} else {
+					$frame['class'] = $frame['args'][0][0];
+					$frame['type'] = '::';
+				}
+			} else {
+				$frame['function'] = $frame['args'][0];
+			}
+			if ($array_args) {
+				$frame['args'] = $frame['args'][1];
+			} else {
+				array_shift($frame['args']);
+			}
+		}
 		if (isset($frame['class'])) {
 			$name .= $frame['class'] . $frame['type'];
 		}
@@ -134,9 +164,16 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	 */
 	private function should_ignore(array $f) {
 		static $methods_to_ignore = array(
-			'AFK_Pipeline'       => array('start', 'do_next'),
-		//	'AFK_Filter'         => array('execute'),
-			'AFK_TemplateEngine' => array('internal_render'));
+			'AFK_Pipeline'            => array('start', 'do_next'),
+			'AFK_DispatchFilter'      => array('execute'),
+			'AFK_HandlerBase'         => array('handle'),
+			'AFK'                     => array('process_request'),
+			'AFK_TemplateEngine'      => array('internal_render'),
+			// These are needed because AFK_Filter is an interface. :-(
+			// PHP sucks.
+			'AFK_DispatchFilter'      => array('execute'),
+			'AFK_RouteFilter'         => array('execute'),
+			'AFK_ExceptionTrapFilter' => array('execute'));
 		static $functions_to_ignore = array('require');
 		if (isset($f['class'])) {
 			foreach ($methods_to_ignore as $class => $methods) {
