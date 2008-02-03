@@ -88,6 +88,11 @@ ul.traceback li.internal {
 #request-info {
 	background: #f6f6f6;
 }
+#request-info pre {
+	overflow: auto;
+	width: 100%;
+	max-height: 60em;
+}
 address {
 	overflow: hidden;
 }
