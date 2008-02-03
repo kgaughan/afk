@@ -100,26 +100,37 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	 */
 	private function frame_to_name(array $frame) {
 		$name = '';
+
+		// Handle calls via call_user_func*().
 		if (substr($frame['function'], 0, 14) == 'call_user_func') {
 			$array_args = substr($frame['function'], 0, -6) == '_array';
-			if (is_array($frame['args'][0])) {
-				$frame['function'] = $frame['args'][0][1];
-				if (is_object($frame['args'][0][0])) {
-					$frame['class'] = get_class($frame['args'][0][0]);
+			$args = $frame['args'];
+			if (is_array($args[0])) {
+				// Calling a static or instance method
+				list($owner, $method) = $frame['args'][0];
+				$frame['function'] = $method;
+				if (is_object($owner)) {
+					// Instance method.
+					$frame['class'] = get_class($owner);
 					$frame['type'] = '->';
 				} else {
-					$frame['class'] = $frame['args'][0][0];
+					// Class method.
+					$frame['class'] = $owner;
 					$frame['type'] = '::';
 				}
 			} else {
-				$frame['function'] = $frame['args'][0];
+				// Function.
+				$frame['function'] = $args[0];
 			}
 			if ($array_args) {
-				$frame['args'] = $frame['args'][1];
+				// call_user_func_array()
+				$frame['args'] = $args[1];
 			} else {
+				// call_user_func()
 				array_shift($frame['args']);
 			}
 		}
+
 		if (isset($frame['class'])) {
 			$name .= $frame['class'] . $frame['type'];
 		}
