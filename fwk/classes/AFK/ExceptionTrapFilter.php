@@ -64,7 +64,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		$last_line = $ex->getLine();
 		$trace = $ex->getTrace();
 		foreach ($trace as $f) {
-			if (!empty($last_file) && !$this->should_ignore($f)) {
+			if (!empty($last_file)) {
 				 $traceback[] = $this->make_traceback_frame(
 					$last_file, $last_line,
 					$this->frame_to_name($f));
@@ -157,33 +157,6 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			return substr($filename, strlen(APP_ROOT) + 1);
 		}
 		return $filename;
-	}
-
-	/**
-	 *
-	 */
-	private function should_ignore(array $f) {
-		static $methods_to_ignore = array(
-			'AFK_Pipeline'            => array('start', 'do_next'),
-			'AFK_DispatchFilter'      => array('execute'),
-			'AFK_HandlerBase'         => array('handle'),
-			'AFK'                     => array('process_request'),
-			'AFK_TemplateEngine'      => array('internal_render'),
-			// These are needed because AFK_Filter is an interface. :-(
-			// PHP sucks.
-			'AFK_DispatchFilter'      => array('execute'),
-			'AFK_RouteFilter'         => array('execute'),
-			'AFK_ExceptionTrapFilter' => array('execute'));
-		static $functions_to_ignore = array('require');
-		if (isset($f['class'])) {
-			foreach ($methods_to_ignore as $class => $methods) {
-				if ($class == $f['class'] || is_subclass_of($class, $f['class'])) {
-					return array_search($f['function'], $methods) !== false;
-				}
-			}
-			return false;
-		}
-		return array_search($f['function'], $functions_to_ignore) !== false;
 	}
 
 	// }}}
