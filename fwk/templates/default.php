@@ -7,7 +7,7 @@
 
 </head><body>
 
-<h1><img src="<?php ee($ctx->application_root(), 'assets/afk/images/logo.png') ?>" width="205" height="53" alt="AFK"></h1>
+<h1><span><img src="<?php ee($ctx->application_root(), 'assets/afk/images/logo.png') ?>" width="205" height="53" alt="AFK"></span></h1>
 
 <div id="body">
 
