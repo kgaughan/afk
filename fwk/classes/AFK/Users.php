@@ -91,6 +91,51 @@ abstract class AFK_Users {
 
 	// Access Control {{{
 
+	public function act_as_effective_user($id) {
+		self::ensure_implementation();
+		// We delegate it to the actual implementation.
+		self::$impl->act_as_effective_user_impl($id);
+	}
+
+	public function revert_to_actual_user() {
+		self::ensure_implementation();
+		// We delegate it to the actual implementation.
+		self::$impl->revert_to_actual_user_impl();
+	}
+
+	/**
+	 * Temporarily behave as if the application was being executed by the
+	 * user/account with id $id. Please note that if the user is already
+	 * logged in, this should not overwrite the actual logged-in user's id.
+	 * Here's an example implementation:
+	 *
+	 * <code>
+	 * if (is_null($this->actual_id)) {
+	 *     $this->actual_id = $this->id;
+	 * }
+	 * $this->id = $id;
+	 * </code>
+	 */
+	public function act_as_effective_user_impl($id) {
+		// Subclass should implement this.
+		throw new Exception(get_class($this) . '::' . __METHOD__ . ' not implemented.');
+	}
+
+	/**
+	 * Switch back to the user who's actually logged in. Here's an example
+	 * implementation:
+	 *
+	 * <code>
+	 * if (!is_null($this->actual_id)) {
+	 *     $this->id = $this->actual_id;
+	 * }
+	 * </code>
+	 */
+	public function revert_to_actual_user_impl() {
+		// Subclass should implement this.
+		throw new Exception(get_class($this) . '::' . __METHOD__ . ' not implemented.');
+	}
+
 	public static function prerequisites() {
 		self::ensure_implementation();
 		$reqs = func_get_args();
