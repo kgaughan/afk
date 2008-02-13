@@ -10,16 +10,16 @@
 /**
  * A persistent output cache.
  *
- * Use the cache like this:
+ * Use the cache, load the 'cache' helper and call it like this:
  *
- * <?php if (AFK_OutputCache::start('foo')) { ?>
+ * <?php if (cache('foo')) { ?>
  *     ...expensive to generate content...
- * <?php AFK_OutputCache::end() } ?>
+ * <?php cache_end() } ?>
  */
 class AFK_OutputCache {
 
 	/* Cache backend in use. */
-	private $backend = null;
+	private $backend;
 
 	/* ID of current cache block. */
 	private $id;
@@ -65,7 +65,6 @@ class AFK_OutputCache {
 
 	/** Removes an item from the cache. */
 	public function remove($id) {
-		$this->ensure_backend();
 		$this->backend->invalidate($id);
 	}
 }

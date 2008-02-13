@@ -243,9 +243,13 @@ function init() {
 
 	if (defined('DB_NAME') && DB_NAME != '') {
 		\$db = new DB_MySQL(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-		\$db->set_logger(new DB_BasicLogger());
-		new AFK_Session_DB(\$db, 'sessions');
-		AFK_Cache::set_backend(new Cache_DB(\$db, 'cache'));
+
+		// If you need sessions, you might need this:
+		// new AFK_Session_DB(\$db, 'sessions');
+
+		// If you need output caching, you'll need this:
+		// AFK::load_helper('cache');
+		// cache_install(new AFK_Cache_DB(\$db, 'cache'));
 	}
 
 	session_start();
