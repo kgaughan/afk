@@ -266,6 +266,10 @@ abstract class DB_Base {
 			return "'" . $this->e(serialize($v)) . "'";
 		}
 
+		if (is_null($v)) {
+			return 'NULL';
+		}
+
 		switch ($type) {
 		case 's':
 			return "'" . $this->e($v) . "'";
