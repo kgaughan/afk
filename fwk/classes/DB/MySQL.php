@@ -15,6 +15,8 @@ class DB_MySQL extends DB_Base {
 	private $dbh = false;
 	private $rs = false;
 
+	private $depth = 0;
+
 	/**
 	 *
 	 */
@@ -49,6 +51,9 @@ class DB_MySQL extends DB_Base {
 
 	public function close() {
 		if ($this->dbh) {
+			while ($this->depth > 0) {
+				$this->rollback();
+			}
 			list(, $count) = self::$cache[$this->key];
 			if ($count > 1) {
 				self::$cache[$this->key] = array($this->dbh, $count - 1);
@@ -122,14 +127,23 @@ class DB_MySQL extends DB_Base {
 	}
 
 	public function begin() {
-		return $this->execute('SET AUTOCOMMIT=0') && $this->execute('BEGIN');
+		$this->depth++;
+		if ($this->depth == 1) {
+			return $this->execute('SET AUTOCOMMIT=0') && $this->execute('BEGIN');
+		}
 	}
 
 	public function commit() {
-		return $this->execute('COMMIT') && $this->execute('SET AUTOCOMMIT=1');
+		$this->depth--;
+		if ($this->depth == 0) {
+			return $this->execute('COMMIT') && $this->execute('SET AUTOCOMMIT=1');
+		}
 	}
 
 	public function rollback() {
-		return $this->execute('ROLLBACK') && $this->execute('SET AUTOCOMMIT=1');
+		$this->depth--;
+		if ($this->depth == 0) {
+			return $this->execute('ROLLBACK') && $this->execute('SET AUTOCOMMIT=1');
+		}
 	}
 }
