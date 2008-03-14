@@ -347,6 +347,10 @@ class AFK_Context {
 		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
 	}
 
+	public function conflict($msg='') {
+		throw new AFK_HttpException($msg, 409);
+	}
+
 	/** Sets the HTTP response code. */
 	public function set_response_code($code) {
 		// For backward compatibility, see RFC2616, SS10.3.4
