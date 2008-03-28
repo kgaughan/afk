@@ -69,7 +69,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 					$last_file, $last_line,
 					$this->frame_to_name($f));
 			}
-			if (isset($f['file'])) {
+			if (array_key_exists('file', $f)) {
 				$last_file = $f['file'];
 				$last_line = $f['line'];
 			} else {
@@ -131,7 +131,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			}
 		}
 
-		if (isset($frame['class'])) {
+		if (array_key_exists('class', $frame)) {
 			$name .= $frame['class'] . $frame['type'];
 		}
 		$name .= $frame['function'];
@@ -149,7 +149,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		if (is_file($file)) {
 			$lines = file($file);
 			for ($i = $line_no - $amount; $i <= $line_no + $amount; $i++) {
-				if ($i >= 0 && isset($lines[$i - 1])) {
+				if ($i >= 0 && array_key_exists($i - 1, $lines)) {
 					$context[$i] = rtrim($lines[$i - 1]);
 				}
 			}

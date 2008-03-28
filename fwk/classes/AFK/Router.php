@@ -121,7 +121,7 @@ class AFK_Router {
 	}
 
 	private function to_pattern($name, $trailer, array $patterns) {
-		if (isset($patterns[$name])) {
+		if (array_key_exists($name, $patterns)) {
 			$p = $patterns[$name];
 			if (is_array($p)) {
 				$p = implode('|', array_map(array($this, 'quote'), $p));

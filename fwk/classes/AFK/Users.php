@@ -57,7 +57,7 @@ abstract class AFK_Users {
 	// Fetching Users {{{
 
 	protected function has($id) {
-		return isset($this->instances[$id]);
+		return array_key_exists($id, $this->instances);
 	}
 
 	private function internal_get($id) {

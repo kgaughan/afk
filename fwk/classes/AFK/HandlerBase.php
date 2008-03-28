@@ -53,7 +53,7 @@ class AFK_HandlerBase implements AFK_Handler {
 			foreach ($methods as $m) {
 				$parts = explode('_', $m, 3);
 				if ($parts[0] == 'on' && count($parts) > 1) {
-					$m_view = isset($parts[2]) ? $parts[2] : '';
+					$m_view = array_key_exists(2, $parts) ? $parts[2] : '';
 					if ($m_view == '' || $m_view == $view) {
 						$allowed[] = strtoupper($parts[1]);
 					}

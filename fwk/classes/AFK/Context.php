@@ -57,7 +57,7 @@ class AFK_Context {
 		if (is_array($indices)) {
 			$extracted = array();
 			foreach ($indices as $i) {
-				if (isset($this->ctx[$i])) {
+				if (array_key_exists($i, $this->ctx)) {
 					$extracted[$i] = $this->ctx[$i];
 				}
 			}
@@ -94,7 +94,7 @@ class AFK_Context {
 	// Magic Methods for Variables {{{
 
 	public function __isset($key) {
-		return isset($this->ctx[$key]);
+		return array_key_exists($key, $this->ctx);
 	}
 
 	public function __unset($key) {
@@ -233,7 +233,7 @@ class AFK_Context {
 
 	/** @return True if this request is running over SSL/TLS. */
 	public function is_secure() {
-		return isset($this->ctx['HTTPS']);
+		return $this->__isset('HTTPS');
 	}
 
 	// }}}
@@ -347,6 +347,7 @@ class AFK_Context {
 		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
 	}
 
+	/** Triggers a HTTP Conflict (409) response. */
 	public function conflict($msg='') {
 		throw new AFK_HttpException($msg, 409);
 	}
@@ -357,7 +358,7 @@ class AFK_Context {
 		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
 			$code = 302;
 		}
-		if (array_search($code, array(204, 205, 407, 411, 413, 414, 415, 416, 417)) !== false) {
+		if (in_array($code, array(204, 205, 407, 411, 413, 414, 415, 416, 417))) {
 			$this->allow_rendering(false);
 		}
 		header("HTTP/1.1 $code " . $this->get_response_msg($code));
@@ -422,14 +423,14 @@ class AFK_Context {
 	public function default_to_empty() {
 		$fields = func_get_args();
 		foreach ($fields as $k) {
-			$this->ctx[$k] = isset($this->ctx[$k]) ? trim($this->ctx[$k]) : '';
+			$this->ctx[$k] = $this->__isset($k) ? trim($this->ctx[$k]) : '';
 		}
 	}
 
 	/** Use the given defaults if the named fields aren't set. */
 	public function defaults(array $defaults) {
 		foreach ($defaults as $k => $v) {
-			if (!isset($this->ctx[$k])) {
+			if (!$this->__isset($k)) {
 				$this->ctx[$k] = $v;
 			}
 		}

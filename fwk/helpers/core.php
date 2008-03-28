@@ -14,7 +14,7 @@ function le($path) {
  * isn't there.
  */
 function g(array $ary, $i, $default='') {
-	if (isset($ary[$i])) {
+	if (array_key_exists($i, $ary)) {
 		return $ary[$i];
 	}
 	return $default;
@@ -26,8 +26,7 @@ function g(array $ary, $i, $default='') {
  */
 function check_etag($current_etag) {
 	// A bit simplistic for now, but should work ok.
-	return is_numeric(array_search("\"$current_etag\"",
-		explode(', ', g($_SERVER, 'HTTP_IF_NONE_MATCH', ''))));
+	return in_array("\"$current_etag\"", explode(', ', g($_SERVER, 'HTTP_IF_NONE_MATCH', '')));
 }
 
 function collect_column(array $rs, $name) {

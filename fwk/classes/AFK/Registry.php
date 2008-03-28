@@ -58,7 +58,7 @@ class AFK_Registry {
 	}
 
 	public function __get($name) {
-		if (!isset($this->registry[$name])) {
+		if (!array_key_exists($name, $this->registry)) {
 			throw new AFK_Exception("'$name' is not registered with the current AFK_Registry.");
 		}
 		return $this->registry[$name];

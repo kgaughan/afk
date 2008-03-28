@@ -43,7 +43,7 @@ class AFK_EventBroker {
 	 *                     stage?
 	 */
 	public function register($stage, $callback, $singleton=false) {
-		if (!isset($this->callbacks[$stage]) ||
+		if (!array_key_exists($stage, $this->callbacks) ||
 				($singleton && count($this->callbacks[$stage]) > 0)) {
 			$this->callbacks[$stage] = array($callback);
 		} else {
@@ -76,7 +76,7 @@ class AFK_EventBroker {
 
 	/** Internal processing of an event stage. */
 	private function trigger_stage($stage, $value) {
-		if (isset($this->callbacks[$stage])) {
+		if (array_key_exists($stage, $this->callbacks)) {
 			foreach ($this->callbacks[$stage] as $cb) {
 				list($continue, $value) = call_user_func($cb, $stage, $value);
 				if (!$continue) {

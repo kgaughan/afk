@@ -37,7 +37,7 @@ class AFK_HttpException extends AFK_Exception {
 				$v = implode(', ', $v);
 			}
 			$v = str_replace("\n", "\t\r\n", $v);
-			if (isset($this->headers[$n])) {
+			if (array_key_exists($n, $this->headers)) {
 				$this->headers[$n] .= ', ' . $v;
 			} else {
 				$this->headers[$n] = $v;

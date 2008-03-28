@@ -22,7 +22,7 @@ class DB_MySQL extends DB_Base {
 	 */
 	public function __construct($host, $user, $pass, $db) {
 		$this->key = "$host:$user:$db";
-		if (isset(self::$cache[$this->key])) {
+		if (array_key_exists($this->key, self::$cache)) {
 			list($this->dbh, $count) = self::$cache[$this->key];
 			self::$cache[$this->key] = array($this->dbh, $count + 1);
 		} else {

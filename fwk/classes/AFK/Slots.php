@@ -21,7 +21,7 @@ class AFK_Slots {
 
 	/** Checks if the named slot has content. */
 	public function has($slot) {
-		return isset($this->slots[$slot]);
+		return array_key_exists($slot, $this->slots);
 	}
 
 	/** Writes out the content in the given slot. */

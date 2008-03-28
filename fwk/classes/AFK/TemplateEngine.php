@@ -134,7 +134,7 @@ class AFK_TemplateEngine {
 	}
 
 	private function internal_find($name) {
-		if (isset(self::$locations[$name])) {
+		if (array_key_exists($name, self::$locations)) {
 			return self::$locations[$name];
 		}
 		if (count(self::$paths) == 0) {

@@ -1,25 +1,27 @@
 <?php
+define('_AFK_NOTIFICATIONS_KEY', '__notifications');
+
 function add_notification($type, $message) {
-	if (!isset($_SESSION['__notifications'])) {
-		$_SESSION['__notifications'] = array();
+	if (!array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
+		$_SESSION[_AFK_NOTIFICATIONS_KEY] = array();
 	}
-	if (!isset($_SESSION['__notifications'][$type])) {
-		$_SESSION['__notifications'][$type] = array();
+	if (!array_key_exists($type, $_SESSION[_AFK_NOTIFICATIONS_KEY])) {
+		$_SESSION[_AFK_NOTIFICATIONS_KEY][$type] = array();
 	}
-	$_SESSION['__notifications'][$type][] = $message;
+	$_SESSION[_AFK_NOTIFICATIONS_KEY][$type][] = $message;
 }
 
 function display_notifications() {
-	if (isset($_SESSION['__notifications'])) {
-		ksort($_SESSION['__notifications']);
-		foreach ($_SESSION['__notifications'] as $type => $messages) {
+	if (array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
+		ksort($_SESSION[_AFK_NOTIFICATIONS_KEY]);
+		foreach ($_SESSION[_AFK_NOTIFICATIONS_KEY] as $type => $messages) {
 			echo "<div class=\"notification $type\"><ul>";
 			foreach ($messages as $message) {
 				echo "<li>", e($message), "</li>";
 			}
 			echo "</ul></div>";
 		}
-		unset($_SESSION['__notifications']);
+		unset($_SESSION[_AFK_NOTIFICATIONS_KEY]);
 	}
 }
 

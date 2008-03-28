@@ -41,7 +41,7 @@ class AFK_Cache_Array implements AFK_Cache {
 	}
 
 	public function load($id, $max_age=300) {
-		if (isset($this->cache[$id]) && $this->timestamps[$id] + $max_age > time()) {
+		if (array_key_exists($id, $this->cache) && $this->timestamps[$id] + $max_age > time()) {
 			return $this->cache[$id];
 		}
 		return null;

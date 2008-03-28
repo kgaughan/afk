@@ -66,7 +66,7 @@ class AFK {
 	public static function load_helper() {
 		$helpers = func_get_args();
 		foreach ($helpers as $name) {
-			if (!isset(self::$loaded_helpers[$name]) && self::load(self::$helper_paths, $name) === false) {
+			if (!array_key_exists($name, self::$loaded_helpers) && self::load(self::$helper_paths, $name) === false) {
 				throw new AFK_Exception("Unknown helper: $name");
 			} else {
 				// There's no significance to the stored value: we're just using
