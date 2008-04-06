@@ -12,15 +12,13 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Context {
+class AFK_Context extends AFK_Environment {
 
 	// Constants {{{
 	const PERMANENT = 301;
 	const SEE_OTHER = 303;
 	const TEMPORARY = 307;
 	// }}}
-
-	private $ctx = array();
 
 	/**
 	 * Creates a query string from the given array. If an array element has
@@ -29,12 +27,12 @@ class AFK_Context {
 	 * key and the value to associate with that key is taken from the request
 	 * context.
 	 */
-	public function to_query(array $vars) {
+	public function to_query(array $vars) { // {{{
 		$result = '';
 		foreach ($vars as $k => $v) {
 			if (is_numeric($k)) {
 				$k = $v;
-				$v = $this->ctx[$k];
+				$v = $this->__get($k);
 			}
 			if ($v != '') {
 				if ($result != '') {
@@ -47,72 +45,16 @@ class AFK_Context {
 			$result = '?' . $result;
 		}
 		return $result;
-	}
-
-	/** @return The context as an array. */
-	public function as_array($indices=false) {
-		if ($indices === false) {
-			return array_merge($this->ctx, array('ctx' => $this));
-		}
-		if (is_array($indices)) {
-			$extracted = array();
-			foreach ($indices as $i) {
-				if (array_key_exists($i, $this->ctx)) {
-					$extracted[$i] = $this->ctx[$i];
-				}
-			}
-			return $extracted;
-		}
-		return array();
-	}
-
-	// Array Merger {{{
-
-	/**
-	 * Merges the given arrays into the current request context; existing
-	 * values are not overwritten.
-	 */
-	public function merge() {
-		$args = func_get_args();
-		foreach ($args as $a) {
-			// Values already in the context are preserved.
-			$this->ctx = array_merge($a, $this->ctx);
-		}
-	}
+	} // }}}
 
 	/** Merges an array into the context, but if it's empty, cause a 404. */
-	public function merge_or_not_found($ary, $msg='') {
+	public function merge_or_not_found($ary, $msg='') { // {{{
 		if (empty($ary)) {
 			$this->not_found($msg);
 		} else {
 			$this->merge($ary);
 		}
-	}
-
-	// }}}
-
-	// Magic Methods for Variables {{{
-
-	public function __isset($key) {
-		return array_key_exists($key, $this->ctx);
-	}
-
-	public function __unset($key) {
-		unset($this->ctx[$key]);
-	}
-
-	public function __get($key) {
-		if ($this->__isset($key)) {
-			return $this->ctx[$key];
-		}
-		return null;
-	}
-
-	public function __set($key, $val) {
-		$this->ctx[$key] = $val;
-	}
-
-	// }}}
+	} // }}}
 
 	// URLs {{{
 
@@ -413,27 +355,6 @@ class AFK_Context {
 		case 505: return 'HTTP Version Not Supported';
 		}
 		return '';
-	}
-
-	// }}}
-
-	// Defaults {{{
-
-	/** Default the named fields to empty strings. */
-	public function default_to_empty() {
-		$fields = func_get_args();
-		foreach ($fields as $k) {
-			$this->ctx[$k] = $this->__isset($k) ? trim($this->ctx[$k]) : '';
-		}
-	}
-
-	/** Use the given defaults if the named fields aren't set. */
-	public function defaults(array $defaults) {
-		foreach ($defaults as $k => $v) {
-			if (!$this->__isset($k)) {
-				$this->ctx[$k] = $v;
-			}
-		}
 	}
 
 	// }}}

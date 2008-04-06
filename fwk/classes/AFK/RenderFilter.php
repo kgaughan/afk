@@ -24,7 +24,8 @@ class AFK_RenderFilter implements AFK_Filter {
 				ob_start();
 				ob_implicit_flush(false);
 				$ctx->defaults(array('page_title' => ''));
-				$t->render($ctx->view('default'), $ctx->as_array());
+				$env = array_merge($ctx->as_array(), compact('ctx'));
+				$t->render($ctx->view('default'), $env);
 				$pipe->do_next($ctx);
 				ob_end_flush();
 			} catch (Exception $e) {
