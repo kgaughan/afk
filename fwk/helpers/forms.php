@@ -53,7 +53,7 @@ function select_box($name, array $elements, $default=null) {
  */
 function carry_hidden_values() {
 	$names = func_get_args();
-	write_hidden_fields(AFK_Registry::context()->as_array($names), '');
+	hidden_fields(AFK_Registry::context()->as_array($names), '');
 }
 
 /**
@@ -63,7 +63,7 @@ function hidden_fields(array $data, $prefix='') {
 	foreach ($data as $name => $value) {
 		$field = $prefix == '' ? $name : $prefix . '[' . $name . ']';
 		if (is_array($value)) {
-			write_hidden_fields($value, $field);
+			hidden_fields($value, $field);
 		} else {
 			echo '<input type="hidden" name="', e($field), '" value="', e($value), '">';
 		}
