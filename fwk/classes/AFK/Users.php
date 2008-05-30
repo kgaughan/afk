@@ -140,7 +140,7 @@ abstract class AFK_Users {
 		self::ensure_implementation();
 		$reqs = func_get_args();
 		$user = self::current();
-		if (is_null($user) || !$user->is_logged_in() || !call_user_func_array(array($user, 'can'), $reqs)) {
+		if (is_null($user) || !call_user_func_array(array($user, 'can'), $reqs)) {
 			self::$impl->require_auth();
 		}
 	}
