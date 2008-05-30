@@ -246,6 +246,8 @@ class AFK_Context extends AFK_Environment {
 	 *
 	 * @param  The redirect type. Defaults to 'See Other' (303).
 	 * @param  Where to redirect to. Defaults to the current URI.
+	 *
+	 * @note   For RFC2161 compliance, this does _not_ turn off rendering.
 	 */
 	public function redirect($code=303, $to=null) {
 		if ($code < 300 || $code > 307 || $code == 306 || $code == 304) {
@@ -270,26 +272,43 @@ class AFK_Context extends AFK_Environment {
 	 * Signal that the request was malformed.
 	 *
 	 * @param  $msg  Description of how the message is malformed.
+	 *
+	 * @note   This method triggers an immediate non-local jump.
 	 */
 	public function bad_request($msg='') {
 		throw new AFK_HttpException($msg, 400);
 	}
 
+	/**
+	 * @note   This method triggers an immediate non-local jump.
+	 */
 	public function forbidden($msg='') {
 		throw new AFK_HttpException($msg, 403);
 	}
 
-	/** Triggers a HTTP Not Found (404) response. */
+	/**
+	 * Triggers a HTTP Not Found (404) response.
+	 *
+	 * @note   This method triggers an immediate non-local jump.
+	 */
 	public function not_found($msg='') {
 		throw new AFK_HttpException($msg, 404);
 	}
 
-	/** Triggers a HTTP No Such Method (405) response. */
+	/**
+	 * Triggers a HTTP No Such Method (405) response.
+	 *
+	 * @note   This method triggers an immediate non-local jump.
+	 */
 	public function no_such_method(array $available_methods) {
 		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
 	}
 
-	/** Triggers a HTTP Conflict (409) response. */
+	/**
+	 * Triggers a HTTP Conflict (409) response.
+	 *
+	 * @note   This method triggers an immediate non-local jump.
+	 */
 	public function conflict($msg='') {
 		throw new AFK_HttpException($msg, 409);
 	}
