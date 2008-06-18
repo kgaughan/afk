@@ -35,7 +35,11 @@ abstract class DB_Base {
 	 * number of rows affected if it ran successfully, otherwise false if it
 	 * didn't.
 	 */
-	abstract public function execute();
+	public function execute() {
+		$args = func_get_args();
+		$q = array_shift($args);
+		return $this->vexecute($q, $args);
+	}
 
 	/**
 	 * Run a query against the database currently connected to. This class
@@ -45,7 +49,27 @@ abstract class DB_Base {
 	 * to the compose method. It returns true if the query runs successfully,
 	 * and false if it didn't.
 	 */
-	abstract public function query();
+	public function query() {
+		$args = func_get_args();
+		$q = array_shift($args);
+		return $this->vquery($q, $args);
+	}
+
+	/**
+	 * Variant of execute() that allows arguments to be specified as an array.
+	 *
+	 * @note If you're implementing this class, execute() wraps this, so this
+	 *       is the method to implement.
+	 */
+	abstract public function vexecute($q, array $args);
+
+	/**
+	 * Variant of query() that allows arguments to be specified as an array.
+	 *
+	 * @note If you're implementing this class, execute() wraps this, so this
+	 *       is the method to implement.
+	 */
+	abstract public function vquery($q, array $args);
 
 	/**
 	 * Fetch the next tuple in the current resultset as an associative array.
@@ -241,7 +265,7 @@ abstract class DB_Base {
 			$q);
 	}
 
-	private function get_arg($i, $type, $args) {
+	private function get_arg($i, $type, array $args) {
 		if ($i > count($args)) {
 			throw new DB_Exception("Bad placeholder index: $i");
 		}

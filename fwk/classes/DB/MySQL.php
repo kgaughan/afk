@@ -70,9 +70,7 @@ class DB_MySQL extends DB_Base {
 		return $this->dbh !== false;
 	}
 
-	public function execute() {
-		$args = func_get_args();
-		$q = array_shift($args);
+	public function vexecute($q, array $args) {
 		if (count($args) > 0) {
 			$q = $this->compose($q, $args);
 		}
@@ -88,9 +86,7 @@ class DB_MySQL extends DB_Base {
 		return mysql_affected_rows($this->dbh);
 	}
 
-	public function query() {
-		$args = func_get_args();
-		$q = array_shift($args);
+	public function vquery($q, array $args) {
 		if (count($args) > 0) {
 			$q = $this->compose($q, $args);
 		}
