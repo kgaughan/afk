@@ -54,11 +54,15 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	 * @return Parsed and validated document.
 	 */
 	public function load_and_validate($xml) {
+		if ($xml == '') {
+			throw new AFK_ParseException("Invalid document:\nEmpty request!");
+		}
+
 		$old_use_errors = libxml_use_internal_errors(true);
 		libxml_clear_errors();
 
 		$result = false;
-		$doc = DOMDocument::loadXML($xml,
+		$doc = @DOMDocument::loadXML($xml,
 			LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOCDATA);
 		if ($doc !== false && $doc->relaxNGValidate($this->schema)) {
 			$result = simplexml_import_dom($doc);
