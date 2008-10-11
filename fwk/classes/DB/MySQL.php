@@ -125,21 +125,24 @@ class DB_MySQL extends DB_Base {
 	public function begin() {
 		$this->depth++;
 		if ($this->depth == 1) {
-			return $this->execute('SET AUTOCOMMIT=0') && $this->execute('BEGIN');
+			$this->execute('SET AUTOCOMMIT=0');
+			$this->execute('BEGIN');
 		}
 	}
 
 	public function commit() {
 		$this->depth--;
 		if ($this->depth == 0) {
-			return $this->execute('COMMIT') && $this->execute('SET AUTOCOMMIT=1');
+			$this->execute('COMMIT');
+			$this->execute('SET AUTOCOMMIT=1');
 		}
 	}
 
 	public function rollback() {
 		$this->depth--;
 		if ($this->depth == 0) {
-			return $this->execute('ROLLBACK') && $this->execute('SET AUTOCOMMIT=1');
+			$this->execute('ROLLBACK');
+			$this->execute('SET AUTOCOMMIT=1');
 		}
 	}
 }

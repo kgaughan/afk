@@ -188,13 +188,14 @@ abstract class DB_Base {
 	 *
 	 * @return Last insert ID.
 	 */
-	public function insert($table, array $data) {
+	public function insert($table, array $data, $delayed=false) {
 		if (count($data) == 0) {
 			return false;
 		}
+		$flags  = $delayed ? '/*! DELAYED */ ' : '';
 		$keys   = implode(', ',   array_keys($data));
 		$values = implode("', '", array_map(array($this, 'e'), array_values($data)));
-		return $this->execute("INSERT INTO $table ($keys) VALUES ('$values')");
+		return $this->execute("INSERT $flags INTO $table ($keys) VALUES ('$values')");
 	}
 
 	/**
