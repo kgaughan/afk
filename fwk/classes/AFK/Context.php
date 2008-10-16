@@ -251,7 +251,7 @@ class AFK_Context extends AFK_Environment {
 	 */
 	public function redirect($code=303, $to=null) {
 		if ($code < 300 || $code > 307 || $code == 306 || $code == 304) {
-			throw new AFK_Exception("Bad redirect code: $code");
+			throw new AFK_Exception(sprintf("Bad redirect code: %s", $code));
 		}
 		// For backward compatibility, see RFC2616, SS10.3.4
 		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {

@@ -19,6 +19,7 @@ class AFK_Exception extends Exception {
 	}
 
 	public function __toString() {
-		return get_class($this) . " in {$this->file} at {$this->line}:\nCode {$this->code}: {$this->message}\n\n";
+		return sprintf("%s in %s at line %d:\nCode %d: %s\n\n",
+			get_class($this), $this->file, $this->line, $this->code, $this->message);
 	}
 }

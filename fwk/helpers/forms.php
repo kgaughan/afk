@@ -1,6 +1,11 @@
 <?php
 define('_AFK_NOTIFICATIONS_KEY', '__notifications');
 
+/**
+ * Records a form notification message. Note that this code requires
+ * session support so that is can persist the notifications across
+ * requests.
+ */
 function add_notification($type, $message) {
 	if (!array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
 		$_SESSION[_AFK_NOTIFICATIONS_KEY] = array();
@@ -11,6 +16,9 @@ function add_notification($type, $message) {
 	$_SESSION[_AFK_NOTIFICATIONS_KEY][$type][] = $message;
 }
 
+/**
+ * Displays and clears any currently recorded form notifications.
+ */
 function display_notifications() {
 	if (array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
 		ksort($_SESSION[_AFK_NOTIFICATIONS_KEY]);
@@ -25,6 +33,12 @@ function display_notifications() {
 	}
 }
 
+/**
+ * Generates a select dropdown form element. The default selected element
+ * is chosen by checking if the current context has an entry for that named
+ * element, and if so using that as the default, otherwise using the
+ * specified fallback default.
+ */
 function select_box($name, array $elements, $default=null) {
 	$default = coalesce(AFK_Registry::context()->__get($name), $default);
 	if (count($elements) > 1) {
@@ -49,7 +63,7 @@ function select_box($name, array $elements, $default=null) {
 }
 
 /**
- *
+ * Renders the named entries in the current context as hidden form fields.
  */
 function carry_hidden_values() {
 	$names = func_get_args();
@@ -57,7 +71,7 @@ function carry_hidden_values() {
 }
 
 /**
- *
+ * Renders the given array as a set of hidden form fields.
  */
 function hidden_fields(array $data, $prefix='') {
 	foreach ($data as $name => $value) {

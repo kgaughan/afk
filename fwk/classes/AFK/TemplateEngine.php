@@ -128,7 +128,7 @@ class AFK_TemplateEngine {
 	protected function find($name, $fallback=null) {
 		$location = $this->internal_find($name);
 		if ($location === false) {
-			throw new AFK_TemplateException("Unknown template: $name");
+			throw new AFK_TemplateException(sprintf("Unknown template: %s", $name));
 		}
 		return $location;
 	}
@@ -191,7 +191,7 @@ class AFK_TemplateEngine {
 			ob_start();
 			ob_implicit_flush(false);
 		} elseif ($name != $this->envelopes[$end]) {
-			throw new AFK_TemplateException("Attempt to replace an envelope: $name");
+			throw new AFK_TemplateException(sprintf("Attempt to replace an envelope: %s", $name));
 		}
 	}
 

@@ -29,6 +29,9 @@ function check_etag($current_etag) {
 	return in_array("\"$current_etag\"", explode(', ', g($_SERVER, 'HTTP_IF_NONE_MATCH', '')));
 }
 
+/**
+ * Given a result set, gets all the unique values in the named column.
+ */
 function collect_column(array $rs, $name) {
 	$values = array();
 	foreach ($rs as $r) {

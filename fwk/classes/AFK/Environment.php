@@ -8,9 +8,8 @@
  */
 
 /**
- *
+ * Represents an execution environment.
  */
-
 class AFK_Environment {
 
 	private $env = array();

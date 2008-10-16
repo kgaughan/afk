@@ -45,7 +45,7 @@ class AFK_RawRequestFilter implements AFK_Filter {
 			$data = fread($fp, $amount);
 			if (!feof($fp)) {
 				fclose($fp);
-				throw new AFK_HttpException("Request was too big, limit is {$this->limit}", 413);
+				throw new AFK_HttpException(sprintf("Request was too big, limit is %d", $this->limit), 413);
 			}
 		}
 		fclose($fp);

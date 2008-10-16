@@ -21,7 +21,7 @@ class AFK_DispatchFilter implements AFK_Filter {
 		}
 		$handler_class = $ctx->_handler . 'Handler';
 		if (!class_exists($handler_class)) {
-			throw new AFK_Exception("No such handler: $handler_class");
+			throw new AFK_Exception(sprintf("No such handler: %s", $handler_class));
 		}
 		$handler = new $handler_class();
 		$handler->handle($ctx);

@@ -1,4 +1,7 @@
 <?php
+/**
+ * Removes all non-digit characters from the given string.
+ */
 function scrub_creditcard_number($cc) {
 	return preg_replace('/[^0-9]/', '', $cc);
 }

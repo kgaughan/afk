@@ -1,5 +1,8 @@
 <?php
-function afk_get_assets_location($where) {
+/**
+ * @return The full URL path of the application's assets drectory.
+ */
+function afk_get_assets_location($where=null) {
 	if (is_null($where)) {
 		return AFK_Registry::context()->application_root() . 'assets/';
 	}

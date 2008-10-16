@@ -73,8 +73,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_use_internal_errors($old_use_errors);
 		if (count($errors) > 0) {
 			// TODO: Hack! This should be done more cleanly!
-			throw new AFK_ParseException("Invalid document:\n" .
-				implode("\n", array_map(array($this, 'error_to_string'), $errors)));
+			throw new AFK_ParseException(sprintf("Invalid document:\n%s",
+				implode("\n", array_map(array($this, 'error_to_string'), $errors))));
 		}
 
 		return $result;
@@ -100,7 +100,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		if (is_callable($callable)) {
 			return call_user_func($callable, $doc);
 		}
-		throw new AFK_ParseException(
-			"Cannot accept messages rooted by the '" . $doc->getName() . "' element.");
+		throw new AFK_ParseException(sprintf(
+			"Cannot accept messages rooted by the '%s' element.",
+			$doc->getName()));
 	}
 }

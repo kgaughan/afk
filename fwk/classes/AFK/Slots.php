@@ -56,7 +56,9 @@ class AFK_Slots {
 	 */
 	public function start($slot) {
 		if (!is_null($this->current)) {
-			throw new AFK_SlotException("Cannot start new slot '$slot': already in slot '{$this->current}'.");
+			throw new AFK_SlotException(sprintf(
+				"Cannot start new slot '%s': already in slot '%s'.",
+				$slot, $this->current));
 		}
 		$this->current = $slot;
 		ob_start();
