@@ -4,7 +4,7 @@ function has_slot($slot) {
 }
 
 function get_slot($slot, $default='') {
-	AFK_Registry::_('slots')->get($slot, $default);
+	return AFK_Registry::_('slots')->get($slot, $default);
 }
 
 function start_slot($slot) {

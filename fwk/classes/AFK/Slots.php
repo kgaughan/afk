@@ -26,7 +26,12 @@ class AFK_Slots {
 
 	/** Writes out the content in the given slot. */
 	public function get($slot, $default='') {
-		echo $this->has($slot) ? $this->slots[$slot] : $default;
+		if ($this->has($slot)) {
+			echo $this->slots[$slot];
+			return true;
+		}
+		echo $default;
+		return false;
 	}
 
 	/** Sets the contents of the given slot. */
