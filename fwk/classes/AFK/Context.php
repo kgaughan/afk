@@ -83,7 +83,7 @@ class AFK_Context extends AFK_Environment {
 	 */
 	public function to_absolute_uri($path) {
 		if (strpos($path, '://') !== false) {
-			return $this->scrub_path($path);
+			return AFK_Urls::scrub_path($path);
 		}
 		return $this->get_host_prefix() . $this->canonicalise_path($path);
 	}
@@ -96,7 +96,7 @@ class AFK_Context extends AFK_Environment {
 			}
 			$path = $prefix . $path;
 		}
-		return $this->scrub_path($path);
+		return AFK_Urls::scrub_path($path);
 	}
 
 	private function get_host_prefix() {
@@ -109,19 +109,6 @@ class AFK_Context extends AFK_Environment {
 			}
 		}
 		return $prefix;
-	}
-
-	private function scrub_path($path) {
-		// Attempt to canonicalise the path, removing any instances of '..'
-		// and '.'. Why? Mainly because it's likely that the client dealing
-		// with the request will likely not be smart enough to deal with them
-		// itself. This code sucks, and no, realpath() won't work here.
-		$path = preg_replace('~/(\.(/|$))+~', '/', $path);
-		$c = 0;
-		do {
-			$path = preg_replace('~/[^./;?]([^./?;][^/?;]*)?/\.\.(/|$)~', '/', $path, -1, $c);
-		} while ($c > 0);
-		return $path;
 	}
 
 	/** @return The root URL path of the application. */

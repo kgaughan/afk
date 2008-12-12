@@ -33,6 +33,35 @@ function display_notifications() {
 	}
 }
 
+function get_field($name, $default=null) {
+	return coalesce(AFK_Registry::context()->__get($name), $default);
+}
+
+function radio_field($name, array $elements, $default=null) {
+	$selected = get_field($name, $default);
+	if (count($elements) > 1) {
+		$i = 0;
+		foreach ($elements as $k => $v) {
+			echo '<label><input type="radio" name="', e($name), '" ';
+			if ($k == $selected) {
+				echo 'checked="checked" ';
+			}
+			echo 'value="', e($k), '">', ee($v), '</label>';
+			if (++$i < count($elements)) {
+				echo "<br>\n";
+			}
+		}
+	} elseif (count($elements) == 1) {
+		// This is in a loop so we can be sure what the array key is.
+		// If there's only one, it's selected by default.
+		foreach ($elements as $k => $v) {
+			echo '<input type="hidden" name="', e($name), '" value="', e($k), '">', e($v);
+		}
+	} else {
+		echo '&mdash;';
+	}
+}
+
 /**
  * Generates a select dropdown form element. The default selected element
  * is chosen by checking if the current context has an entry for that named
@@ -40,12 +69,12 @@ function display_notifications() {
  * specified fallback default.
  */
 function select_box($name, array $elements, $default=null) {
-	$default = coalesce(AFK_Registry::context()->__get($name), $default);
+	$selected = get_field($name, $default);
 	if (count($elements) > 1) {
 		echo '<select name="', e($name), '" id="', e($name), '">';
 		foreach ($elements as $k => $v) {
 			echo '<option';
-			if ($k == $default) {
+			if ($k == $selected) {
 				echo ' selected="selected"';
 			}
 			echo ' value="', e($k), '">', e($v), '</option>';
