@@ -145,6 +145,43 @@ abstract class DB_Base {
 	}
 
 	/**
+	 * Returns an associative array derived from a query resultset. The
+	 * first column in each row is used as the key and the rest as the
+	 * value the key maps to.
+	 */
+	public function query_row_map() {
+		$args = func_get_args();
+		$result = array();
+		if (call_user_func_array(array($this, 'query'), $args)) {
+			while ($r = $this->fetch(DB_ASSOC)) {
+				$k = array_shift($r);
+				$result[$k] = $r;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Returns an multimap (a map where the same key maps onto multipl values)
+	 * derived from a query resultset. The first column in each row is used as
+	 * the key and the second as a value the key maps to.
+	 */
+	public function query_multimap() {
+		$args = func_get_args();
+		$result = array();
+		if (call_user_func_array(array($this, 'query'), $args)) {
+			while ($r = $this->fetch(DB_NUM)) {
+				if (array_key_exists($r[0], $result)) {
+					$result[$r[0]][] = $r[1];
+				} else {
+					$result[$r[0]] = array($r[1]);
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
 	 * Convenience method to query the database and convert the resultset into
 	 * an array.
 	 */
