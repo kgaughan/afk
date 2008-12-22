@@ -17,12 +17,10 @@ class AFK_Cache_File implements AFK_Cache {
 	private $cache_path;
 
 	/**
-	 * Initialises the class.
-	 *
-	 * @param  $cache_path  Path to the cache directory. Must end in a slash.
+	 * @param  $path  Path to the cache directory. Must end in a slash.
 	 */
-	public function __construct($cache_path) {
-		$this->cache_path = $cache_path;
+	public function __construct($path) {
+		$this->cache_path = $path;
 	}
 
 	public function invalidate($id) {
@@ -34,8 +32,9 @@ class AFK_Cache_File implements AFK_Cache {
 
 	public function invalidate_all($max_age=0) {
 		$dh = dir($this->cache_path);
+		$cutoff = time() - $max_age;
 		while ($file = $dh->read()) {
-			if (filemtime($this->cache_path . $file) < time() - $max_age) {
+			if (filemtime($this->cache_path . $file) < $cutoff) {
 				unlink($this->cache_path . $file);
 			}
 		}

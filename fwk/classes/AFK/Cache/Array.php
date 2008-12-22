@@ -15,6 +15,12 @@
  * works, i.e., where AFK_Cache_Null is insufficient. This caching mechanism
  * is not, however, meant to be used in production code.
  *
+ * This cache is also useful as a request local cache to be chained together
+ * with, say, AFK_Cache_DB using AFK_Cache_Chain if it happens that the same
+ * cached information is typically needed multiple times in the same request,
+ * or with AFK_Cache_File if the application is running on a cluster of
+ * machines.
+ *
  * Please note that if you are exercising something which uses caching, it
  * ought to be tested using both AFK_Cache_Array and AFK_Cache_Null as both
  * implement different elements of the AFK_Cache interface contract that code
@@ -32,9 +38,9 @@ class AFK_Cache_Array implements AFK_Cache {
 	}
 
 	public function invalidate_all($max_age=0) {
-		$now = time();
+		$cutoff = time() - $max_age;
 		foreach ($this->timestamps as $id => $ts) {
-			if ($ts + $max_age <= $now) {
+			if ($ts < $cutoff) {
 				$this->invalidate($id);
 			}
 		}
