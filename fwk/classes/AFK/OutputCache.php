@@ -21,11 +21,12 @@ class AFK_OutputCache {
 	/* Cache backend in use. */
 	private $backend;
 
-	/* ID of current cache block. */
-	private $id;
+	/* Stack of current cache blocks. */
+	private $ids;
 
 	public function __construct() {
 		$this->set_backend(new AFK_Cache_Null());
+		$this->ids = array();
 	}
 
 	/**
@@ -53,13 +54,16 @@ class AFK_OutputCache {
 		}
 		ob_start();
 		ob_implicit_flush(false);
-		$this->id = $id;
+		array_push($this->ids, $id);
 		return true;
 	}
 
 	/** Marks the end the cache block. */
 	public function end() {
-		$this->backend->save($this->id, ob_get_contents());
+		if (count($this->ids) == 0) {
+			throw new AFK_Exception('AFK_OutputCache->end() called when not in an output cache block.');
+		}
+		$this->backend->save(array_pop($this->ids), ob_get_contents());
 		ob_end_flush();
 	}
 
