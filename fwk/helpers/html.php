@@ -22,8 +22,13 @@ function stylesheets($styles=array(), $where=null) {
 		if (is_numeric($medium)) {
 			$medium = $stylesheet;
 		}
-		echo '<link rel="stylesheet" type="text/css" media="', $medium;
-		echo '" href="', $root_enc, $stylesheet, '.css">';
+		if (!is_array($stylesheet)) {
+			$stylesheet = array($stylesheet);
+		}
+		foreach ($stylesheet as $s) {
+			echo '<link rel="stylesheet" type="text/css" media="', $medium;
+			echo '" href="', $root_enc, $s, '.css">';
+		}
 	}
 	echo "\n";
 }
