@@ -55,6 +55,9 @@ class AFK_Session_DB extends AFK_Session {
 	}
 
 	public function write($id, $data) {
+		if ($data == '') {
+			return $this->destroy($id);
+		}
 		$n = $this->dbh->query_value("
 			SELECT	COUNT(*)
 			FROM	{$this->table}
