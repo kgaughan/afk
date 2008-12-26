@@ -45,3 +45,8 @@ function echo_title() {
 	$args = func_get_args();
 	echo implode(' - ', array_filter(array_map('e', $args)));
 }
+
+function favicon() {
+	echo '<link rel="shortcut icon" type="image/x-icon" href="';
+	echo e(AFK_Registry::context()->application_root()), 'favicon.ico">';
+}
