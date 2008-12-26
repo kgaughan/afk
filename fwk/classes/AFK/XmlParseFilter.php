@@ -28,7 +28,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	 *                        or string.
 	 * @param  $schema        Location of schema to validate against.
 	 */
-	public function __construct($content_type, $schema) {
+	public function __construct($content_type, $schema=false) {
 		if (!is_array($content_type)) {
 			$content_type = array($content_type);
 		}
@@ -64,7 +64,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		$result = false;
 		$doc = @DOMDocument::loadXML($xml,
 			LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOCDATA);
-		if ($doc !== false && $doc->relaxNGValidate($this->schema)) {
+		if ($doc !== false && ($this->schema === false || $this->validate($doc, $this->schema))) {
 			$result = simplexml_import_dom($doc);
 		}
 
@@ -80,17 +80,29 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		return $result;
 	}
 
+	/**
+	 * Validates the documents if a schema was given.
+	 */
+	protected function validate(DOMDocument $doc, $schema) {
+		 return $doc->relaxNGValidate($schema);
+	}
+
 	private function error_to_string($error) {
-		$message = " at line {$error->line}, column {$error->column}: {$error->message}";
-		switch ($error->level) {
+		return sprintf("%s at line %s, column %s: %s",
+			$this->get_level_name($error->level),
+			$error->line, $error->column, trim($error->message));
+	}
+
+	private function get_level_name($level) {
+		switch ($level) {
 		case LIBXML_ERR_WARNING:
-			return "Warning" . $message;
+			return "Warning";
 		case LIBXML_ERR_ERROR:
-			return "Error" . $message;
+			return "Error";
 		case LIBXML_ERR_FATAL:
-			return "Fatal Error" . $message;
+			return "Fatal error";
 		}
-		return "Unknown" . $message;
+		return "Unknown error";
 	}
 
 	// }}}
