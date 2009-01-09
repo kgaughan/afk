@@ -47,6 +47,10 @@ class AFK_ElementNode {
 	 * @return $this
 	 */
 	public function attr($name, $value='', $ns=null) {
+		// Workaround for dumbass PHP bug #46769.
+		if (!is_null($ns) && strpos($name, ':') === false) {
+			$name = "ipitythefool:$name";
+		}
 		$this->node->addAttribute($name, $value, $ns);
 		return $this;
 	}
