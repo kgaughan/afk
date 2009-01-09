@@ -14,7 +14,7 @@
  */
 class AFK_ElementNode {
 
-	private $node;
+	private $_node;
 
 	/**
 	 * @param  $elem  Root element name.
@@ -23,7 +23,7 @@ class AFK_ElementNode {
 	public function __construct($elem, $nss=array()) {
 		if (is_string($elem)) {
 			$xml = "<$elem";
-			foreach ($nss as $ns=>$uri) {
+			foreach ($nss as $ns => $uri) {
 				$xml .= ' xmlns';
 				if (!is_numeric($ns)) {
 					$xml .= ':' . $ns;
@@ -32,10 +32,10 @@ class AFK_ElementNode {
 			}
 			$xml .= '/>';
 
-			$this->node = new SimpleXMLElement($xml);
+			$this->_node = new SimpleXMLElement($xml);
 		} else {
 			// Otherwise, this is a subnode we're creating.
-			$this->node = $elem;
+			$this->_node = $elem;
 		}
 	}
 
@@ -51,8 +51,12 @@ class AFK_ElementNode {
 		if (!is_null($ns) && strpos($name, ':') === false) {
 			$name = "ipitythefool:$name";
 		}
-		$this->node->addAttribute($name, $value, $ns);
+		$this->_node->addAttribute($name, $value, $ns);
 		return $this;
+	}
+
+	public function __set($name, $value) {
+		$this->attr($name, $value);
 	}
 
 	// }}}
@@ -74,8 +78,14 @@ class AFK_ElementNode {
 		} elseif (!is_null($text)) {
 			$text = e($text);
 		}
-		$child = $this->node->addChild($name, $text, $ns);
+		$child = $this->_node->addChild($name, $text, $ns);
 		return new AFK_ElementNode($child);
+	}
+
+	public function __call($name, array $args) {
+		$text = count($args) > 0 ? $args[0] : null;
+		$ns = count($args) > 1 ? $args[1] : null;
+		return $this->child($name, $text, $ns);
 	}
 
 	/**
@@ -94,6 +104,6 @@ class AFK_ElementNode {
 	 * @return The tree as a SimpleXMLElement.
 	 */
 	public function as_xml() {
-		return $this->node->asXML();
+		return $this->_node->asXML();
 	}
 }
