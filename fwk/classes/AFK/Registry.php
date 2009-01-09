@@ -23,9 +23,12 @@ class AFK_Registry {
 	private static $inst;
 
 	public static function set_instance(AFK_Registry $inst) {
-		$old_inst = self::$inst;
-		self::$inst = $inst;
+		list($old_inst, self::$inst) = array(self::$inst, $inst);
 		return $old_inst;
+	}
+
+	public static function clone_current_instance() {
+		return clone self::$inst;
 	}
 
 	// }}}
