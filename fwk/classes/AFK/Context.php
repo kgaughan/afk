@@ -14,10 +14,18 @@
  */
 class AFK_Context extends AFK_Environment {
 
-	// Constants {{{
+	// Important HTTP response status codes {{{
+	const OK = 200;
+	const CREATED = 201;
+	const ACCEPTED = 202;
 	const PERMANENT = 301;
 	const SEE_OTHER = 303;
 	const TEMPORARY = 307;
+	const BAD_REQUEST = 400;
+	const FORBIDDEN = 403;
+	const NOT_FOUND = 404;
+	const BAD_METHOD = 405;
+	const CONFLICT = 409;
 	// }}}
 
 	/**
@@ -208,13 +216,24 @@ class AFK_Context extends AFK_Environment {
 	// HTTP Response Helpers {{{
 
 	/**
+	 * Wraps the PHP header() function to allow testing.
+	 */
+	public function header($header, $replace=true, $status=null) {
+		if (is_null($status)) {
+			header($header, $replace);
+		} else {
+			header($header, $replace, $status);
+		}
+	}
+
+	/**
 	 * Signal that the application has created a new resource.
 	 *
 	 * @param  $location  Path to the new resource.
 	 */
 	public function created($location) {
 		$this->allow_rendering(false);
-		header('Location: ' . $this->to_absolute_uri($location), true, 201);
+		$this->header('Location: ' . $this->to_absolute_uri($location), true, self::CREATED);
 	}
 
 	/**
@@ -226,9 +245,9 @@ class AFK_Context extends AFK_Environment {
 	 */
 	public function accepted($location=null) {
 		if (is_null($location)) {
-			header('HTTP/1.1 202 Accepted');
+			$this->header('HTTP/1.1 202 Accepted');
 		} else {
-			header('Location: ' . $this->to_absolute_uri($location), true, 202);
+			$this->header('Location: ' . $this->to_absolute_uri($location), true, self::ACCEPTED);
 		}
 	}
 
@@ -251,7 +270,7 @@ class AFK_Context extends AFK_Environment {
 		if (is_null($to)) {
 			$to = $this->REQUEST_URI;
 		}
-		header('Location: ' . $this->to_absolute_uri($to), true, $code);
+		$this->header('Location: ' . $this->to_absolute_uri($to), true, $code);
 	}
 
 	/** Performs a permanent redirect. See ::redirect(). */
@@ -267,14 +286,14 @@ class AFK_Context extends AFK_Environment {
 	 * @note   This method triggers an immediate non-local jump.
 	 */
 	public function bad_request($msg='') {
-		throw new AFK_HttpException($msg, 400);
+		throw new AFK_HttpException($msg, self::BAD_REQUEST);
 	}
 
 	/**
 	 * @note   This method triggers an immediate non-local jump.
 	 */
 	public function forbidden($msg='') {
-		throw new AFK_HttpException($msg, 403);
+		throw new AFK_HttpException($msg, self::FORBIDDEN);
 	}
 
 	/**
@@ -283,7 +302,7 @@ class AFK_Context extends AFK_Environment {
 	 * @note   This method triggers an immediate non-local jump.
 	 */
 	public function not_found($msg='') {
-		throw new AFK_HttpException($msg, 404);
+		throw new AFK_HttpException($msg, self::NOT_FOUND);
 	}
 
 	/**
@@ -292,7 +311,7 @@ class AFK_Context extends AFK_Environment {
 	 * @note   This method triggers an immediate non-local jump.
 	 */
 	public function no_such_method(array $available_methods) {
-		throw new AFK_HttpException('', 405, array('Allow' => $available_methods));
+		throw new AFK_HttpException('', self::BAD_METHOD, array('Allow' => $available_methods));
 	}
 
 	/**
@@ -301,7 +320,7 @@ class AFK_Context extends AFK_Environment {
 	 * @note   This method triggers an immediate non-local jump.
 	 */
 	public function conflict($msg='') {
-		throw new AFK_HttpException($msg, 409);
+		throw new AFK_HttpException($msg, self::CONFLICT);
 	}
 
 	/** Sets the HTTP response code. */
@@ -313,7 +332,7 @@ class AFK_Context extends AFK_Environment {
 		if (in_array($code, array(204, 205, 407, 411, 413, 414, 415, 416, 417))) {
 			$this->allow_rendering(false);
 		}
-		header("HTTP/1.1 $code " . $this->get_response_msg($code));
+		$this->header("HTTP/1.1 $code " . $this->get_response_msg($code));
 	}
 
 	private function get_response_msg($code) {

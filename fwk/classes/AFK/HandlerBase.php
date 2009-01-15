@@ -14,7 +14,7 @@ class AFK_HandlerBase implements AFK_Handler {
 
 	public function handle(AFK_Context $ctx) {
 		$methods = $this->get_available_methods($ctx->view());
-		header('Allow: ' . implode(', ', $methods));
+		$ctx->header('Allow: ' . implode(', ', $methods));
 		$handler_method = $this->get_handler_method($ctx->method(), $ctx->view());
 		if ($handler_method != '') {
 			call_user_func(array($this, $handler_method), $ctx);

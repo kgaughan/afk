@@ -62,6 +62,14 @@ function radio_field($name, array $elements, $default=null) {
 	}
 }
 
+function checkbox_field($name, $value) {
+	echo '<input type="checkbox" name="', e($name), '" value="', e($value);
+	if (get_field($name) == $value) {
+		echo '" checked="checked';
+	}
+	echo '">';
+}
+
 /**
  * Generates a select dropdown form element. The default selected element
  * is chosen by checking if the current context has an entry for that named

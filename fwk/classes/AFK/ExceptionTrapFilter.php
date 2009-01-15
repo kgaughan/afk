@@ -36,7 +36,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		} catch (AFK_HttpException $he) {
 			$ctx->allow_rendering();
 			foreach ($he->get_headers() as $h) {
-				header($h);
+				$ctx->header($h);
 			}
 			$ctx->message = $he->getMessage();
 			$this->report_error($he->getCode(), $pipe, $ctx);

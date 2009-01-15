@@ -40,7 +40,8 @@ abstract class AFK_Plugin {
 
 	public function __construct() {
 		// So that plugins know where they are.
-		$this->root = dirname(__FILE__);
+		$robj = new ReflectionObject($this);
+		$this->root = dirname($robj->getFileName());
 
 		// Register event listeners.
 		$evts = $this->get_events();

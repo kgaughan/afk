@@ -1,4 +1,4 @@
-<?php header('Content-Type: text/html; charset=utf-8') ?>
+<?php $ctx->header('Content-Type: text/html; charset=utf-8') ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html><head>
