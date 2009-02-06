@@ -99,7 +99,7 @@ class AFK_Router {
 			if (preg_match('/^(?:([a-z_]+)})?([^a-z_]?.*)$/i', $part, $matches)) {
 				if (strlen($matches[1]) == 0) {
 					// No placeholder: most likely the first segment.
-					$regex .= preg_quote($matches[0], '`');
+					$regex .= $this->quote($matches[0]);
 				} else {
 					$keys[] = $matches[1];
 					$regex .= $this->to_pattern($matches[1], $matches[2], $patterns);
@@ -123,7 +123,7 @@ class AFK_Router {
 		} else {
 			$p = '[^' . $this->escape_class_character($trailer[0]) . ']+';
 		}
-		return "($p)" . preg_quote($trailer, '`');
+		return "($p)" . $this->quote($trailer);
 	}
 
 	/** Escapes a character if it has a special meaning in a character class. */
