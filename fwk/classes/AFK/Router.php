@@ -19,15 +19,7 @@ class AFK_Router {
 	/** Maps routes to handlers. */
 	private $routes = array();
 
-	/** Fallback handler. */
-	private $fallback = null;
-
 	// Programmatic Routes Building {{{
-
-	/** If none of the routes match, this resource handler is used. */
-	public function fallback(array $defaults) {
-		$this->fallback = $defaults;
-	}
 
 	/** Adds a route and an associated resource handler. */
 	public function route($route, $defaults=array(), $patterns=array()) {
@@ -54,7 +46,7 @@ class AFK_Router {
 			}
 		}
 
-		return $this->fallback;
+		throw new AFK_HttpException('', AFK_Context::NOT_FOUND);
 	}
 
 	private function internal_search($path) {
