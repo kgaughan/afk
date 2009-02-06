@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /
+RewriteRule ^assets/.*         -                [L]
+RewriteRule ^favicon\.ico      -                [L]
+RewriteRule ^robots\.txt       -                [L]
+RewriteRule ^dispatch\.php/.*  -                [L]
+RewriteRule ^(.*)$             dispatch.php/$1  [QSA,L]

@@ -1,0 +1,9 @@
+*~
+.*.sw?
+*.xcf
+.svn
+.htaccess
+sync
+tests
+deployment
+documentation

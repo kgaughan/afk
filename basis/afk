@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+cd `dirname $0`
+
+# Project initialisation.
+if test ! -f "lib/afk/libsync.sh"; then
+	if test "$1" != "create"; then
+		echo "No project: only the 'create' command is available." >&2
+		echo "Usage: $0 create <afk-path>" >&2
+		exit 1
+	fi
+	if test ! -f "$2/fwk/libsync.sh"; then
+		echo "The given path does not appear to be a copy of AFK." >&2
+		echo "Usage: $0 create <afk-path>" >&2
+		exit 1
+	fi
+	. $2/fwk/libsync.sh
+	afk_make_directory_structure $2
+	echo "Project created. If you're using subversion, you might want to"
+	echo "remove the symlinks to AFK's code and assets libraries and"
+	echo "replace them with svn:externals properties to pull the expected"
+	echo "files in from a repository."
+	exit
+fi
+
+. lib/afk/libsync.sh
+# Start of user-editable section.
+# --------------------------------------------------------------------------
+# Add your extensions in here:
+
+# --------------------------------------------------------------------------
+# End of user-editable section.
+
+dispatch "$@"
