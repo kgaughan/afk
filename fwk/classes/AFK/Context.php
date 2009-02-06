@@ -35,7 +35,7 @@ class AFK_Context extends AFK_Environment {
 	 * key and the value to associate with that key is taken from the request
 	 * context.
 	 */
-	public function to_query(array $vars) { // {{{
+	public function to_query(array $vars, $prefix='?', $separator='&') { // {{{
 		$result = '';
 		foreach ($vars as $k => $v) {
 			if (is_numeric($k)) {
@@ -44,13 +44,13 @@ class AFK_Context extends AFK_Environment {
 			}
 			if ($v != '') {
 				if ($result != '') {
-					$result .= '&';
+					$result .= $separator;
 				}
 				$result .= rawurlencode($k) . '=' . rawurlencode($v);
 			}
 		}
 		if ($result != '') {
-			$result = '?' . $result;
+			$result = $prefix . $result;
 		}
 		return $result;
 	} // }}}
