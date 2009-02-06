@@ -49,6 +49,8 @@ $quips = array(
 	'For great freedom!',
 	'Poking badgers with spoons for fun and profit!',
 	'PROFIT!!!',
+	'How many roads must a man walk down? 42, I guess.',
+	'Does my app look big in this?',
 	"The bicycle to PHP's training wheels.",
 	'Making PHP suck less.',
 	"We don' need no steeking frameworks!",
