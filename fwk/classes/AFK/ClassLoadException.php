@@ -10,10 +10,4 @@
 /**
  * Thrown when there are problems loading classes, obviously.
  */
-class AFK_ClassLoadException extends AFK_HttpException {
-
-	public function __construct($msg) {
-		// i.e. 500 Internal Server Error status code.
-		parent::__construct($msg, 500);
-	}
-}
+class AFK_ClassLoadException extends AFK_Exception { }

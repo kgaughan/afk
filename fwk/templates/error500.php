@@ -16,8 +16,12 @@
 </div>
 
 <div id="traceback">
+<?php if (isset($traceback) && count($traceback) > 0) { ?>
 	<h2>Traceback <span>(<?php echo count($traceback) ?> frames, innermost first, click to expand AFK internals)</span></h2>
 	<ul class="traceback"><?php $this->render_each('error500-frame', $traceback) ?></ul>
+<?php } else { ?>
+	<p>No traceback.</p>
+<?php } ?>
 </div>
 
 <div id="request-info">
