@@ -8,9 +8,9 @@ define('DB_NUM',   1);
  */
 abstract class DB_Base {
 
-	private $logger = null;
+	private $logger = false;
 
-	public function set_logger($logger) {
+	public function set_logger(DB_Logger $logger) {
 		$this->logger = $logger;
 	}
 
@@ -344,7 +344,7 @@ abstract class DB_Base {
 	}
 
 	protected function log_query($q) {
-		if (!is_null($this->logger)) {
+		if ($this->logger !== false) {
 			$this->logger->log($q);
 		}
 	}
