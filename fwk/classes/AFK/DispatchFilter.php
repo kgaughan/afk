@@ -20,8 +20,13 @@ class AFK_DispatchFilter implements AFK_Filter {
 			throw new AFK_Exception('No handler specified.');
 		}
 		$handler_class = $ctx->_handler . 'Handler';
-		if (!class_exists($handler_class)) {
-			throw new AFK_Exception(sprintf("No such handler: %s", $handler_class));
+		try {
+			// The next line will trigger an AFK_ClassLoadException if no such
+			// handler exists. It also ensures that the autoloader will be
+			// called. Simply attempting to instantiate the class does not.
+			class_exists($handler_class);
+		} catch (AFK_ClassLoadException $clex) {
+			throw new AFK_ClassLoadException(sprintf("No such handler: %s (%s)", $handler_class, $clex->getMessage()));
 		}
 		$handler = new $handler_class();
 		$handler->handle($ctx);

@@ -21,9 +21,6 @@ class AFK {
 	private static $loaded_helpers = array();
 
 	public static function register_autoloader() {
-		require dirname(__FILE__) . '/AFK/Exception.php';
-		require dirname(__FILE__) . '/AFK/HttpException.php';
-		require dirname(__FILE__) . '/AFK/ClassLoadException.php';
 		if (function_exists('spl_autoload_register')) {
 			// Attempt to register an autoloader cleanly...
 			spl_autoload_register(array(__CLASS__, 'load_class'));
@@ -44,7 +41,7 @@ class AFK {
 	public static function load_class($name) {
 		$location = self::load(self::$class_paths, str_replace('_', '/', $name));
 		if ($location === false) {
-			throw new AFK_ClassLoadException("Could not load '$name': No file matching that name.");
+			throw new AFK_ClassLoadException("Could not load '$name': No class file matching that name.");
 		}
 		if (!self::class_or_interface_is_loaded($name)) {
 			throw new AFK_ClassLoadException("Count not load '$name': '$location' did not contain it.");
@@ -171,4 +168,21 @@ class AFK {
 	}
 
 	// }}}
+}
+
+/**
+ * Common logic for AFK-specific exceptions.
+ *
+ * @author Keith Gaughan
+ */
+class AFK_Exception extends Exception {
+
+	public function __construct($msg, $code=0) {
+		parent::__construct($msg, $code);
+	}
+
+	public function __toString() {
+		return sprintf("%s in %s at line %d:\nCode %d: %s\n\n",
+			get_class($this), $this->file, $this->line, $this->code, $this->message);
+	}
 }
