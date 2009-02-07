@@ -19,15 +19,12 @@ function add_notification($type, $message) {
 /**
  * Displays and clears any currently recorded form notifications.
  */
-function display_notifications() {
+function display_notifications($template='notifications') {
 	if (array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
 		ksort($_SESSION[_AFK_NOTIFICATIONS_KEY]);
+		$t = new AFK_TemplateEngine();
 		foreach ($_SESSION[_AFK_NOTIFICATIONS_KEY] as $type => $messages) {
-			echo "<div class=\"notification $type\"><ul>";
-			foreach ($messages as $message) {
-				echo "<li>", e($message), "</li>";
-			}
-			echo "</ul></div>";
+			$t->render($template, compact('type', 'messages'));
 		}
 		unset($_SESSION[_AFK_NOTIFICATIONS_KEY]);
 	}

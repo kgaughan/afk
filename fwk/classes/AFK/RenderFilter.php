@@ -19,12 +19,12 @@ class AFK_RenderFilter implements AFK_Filter {
 					APP_TEMPLATE_ROOT,
 					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
 			}
+			$ctx->defaults(array('page_title' => ''));
+			$env = array_merge($ctx->as_array(), compact('ctx'));
 			$t = new AFK_TemplateEngine();
 			try {
 				ob_start();
 				ob_implicit_flush(false);
-				$ctx->defaults(array('page_title' => ''));
-				$env = array_merge($ctx->as_array(), compact('ctx'));
 				$t->render($ctx->view('default'), $env);
 				$pipe->do_next($ctx);
 				ob_end_flush();
