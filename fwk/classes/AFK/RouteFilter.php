@@ -12,12 +12,12 @@
  */
 class AFK_RouteFilter implements AFK_Filter {
 
+	private $map;
 	private $server;
-	private $router;
 	private $request;
 
 	/**
-	 * @param  $router   Router to use when parsing the request.
+	 * @param  $map      Routing map to use when parsing the request.
 	 * @param  $server   Server variables to use. These have the highest
 	 *                   priority and are added to the request context
 	 *                   first. In production, this will be $_SERVER.
@@ -26,8 +26,8 @@ class AFK_RouteFilter implements AFK_Filter {
 	 *                   after the request has been routed. In production,
 	 *                   this will be $_REQUEST.
 	 */
-	public function __construct(AFK_Router $router, array $server, array $request) {
-		$this->router = $router;
+	public function __construct(AFK_RouteMap $map, array $server, array $request) {
+		$this->map = $map;
 		$this->server = $server;
 		$this->request = $request;
 	}
@@ -37,10 +37,10 @@ class AFK_RouteFilter implements AFK_Filter {
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		$ctx->merge($this->server);
 		if ($this->ensure_canonicalised_uri($ctx)) {
-			$result = $this->router->search($ctx->PATH_INFO);
+			$result = $this->map->search($ctx->PATH_INFO);
 			if (is_array($result)) {
 				// The result is the attributes.
-				$ctx->merge($this->server, $result, $this->request);
+				$ctx->merge($result, $this->request);
 				$pipe->do_next($ctx);
 			} else {
 				// Result is a normalised URL. The original request URL was
