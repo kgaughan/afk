@@ -4,13 +4,13 @@ cd `dirname $0`
 # Project initialisation.
 if test ! -f "lib/afk/libsync.sh"; then
 	if test "$1" != "create"; then
-		echo "No project: only the 'create' command is available." >&2
-		echo "Usage: $0 create <afk-path>" >&2
+		echo "No project: only the 'create' subcommand is available." >&2
+		echo "Usage: create <afk-path>" >&2
 		exit 1
 	fi
 	if test ! -f "$2/fwk/libsync.sh"; then
 		echo "The given path does not appear to be a copy of AFK." >&2
-		echo "Usage: $0 create <afk-path>" >&2
+		echo "Usage: create <afk-path>" >&2
 		exit 1
 	fi
 	. $2/fwk/libsync.sh
