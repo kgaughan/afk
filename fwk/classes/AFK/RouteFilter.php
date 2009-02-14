@@ -45,8 +45,9 @@ class AFK_RouteFilter implements AFK_Filter {
 			} else {
 				// Result is a normalised URL. The original request URL was
 				// most likely missing a trailing slash or had one it
-				// shouldn't have had.
-				$path = $ctx->application_root() . $result;
+				// shouldn't have had. Also, ensure there's no duplicate
+				// slashes.
+				$path = $ctx->application_root() . substr($result, 1);
 				if ($ctx->QUERY_STRING != '') {
 					$path .= '?' . $ctx->QUERY_STRING;
 				}
