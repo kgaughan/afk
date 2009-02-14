@@ -11,7 +11,6 @@ define('WITH_LOGGING', STATUS == 'LIVE' || STATUS == 'STAGING');
 function routes() {
 	$r = new AFK_Routes();
 	$r->route('/', array('_handler' => 'Root'));
-	$r->fallback(array('_handler' => 'AFK_Default'));
 	return $r;
 }
 
