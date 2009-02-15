@@ -41,7 +41,11 @@ class AFK_Slots {
 
 	/** Appends content to the given slot. */
 	public function append($slot, $contents) {
-		$this->slots[$slot] .= $contents;
+		if ($this->has($slot)) {
+			$this->slots[$slot] .= $contents;
+		} else {
+			$this->slots[$slot] = $contents;
+		}
 	}
 
 	// }}}
