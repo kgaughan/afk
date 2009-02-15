@@ -12,7 +12,7 @@ if (empty($method)) {
 <div class="context">
 	<ol>
 	<?php foreach ($context as $i => $text) { ?>
-	<li value="<?php echo $i ?>" class="<?php echo $i == $line ? 'ctx' : 'otr' ?>-line"><?php ee($text) ?></li>
+	<li value="<?php echo $i ?>" class="<?php echo $i == $line ? 'ctx' : 'otr' ?>-line"><?php ee(str_replace("\t", "    ", $text)) ?></li>
 	<?php } ?>
 	</ol>
 </div>
