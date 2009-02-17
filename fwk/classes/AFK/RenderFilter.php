@@ -16,8 +16,8 @@ class AFK_RenderFilter implements AFK_Filter {
 		if ($ctx->rendering_is_allowed()) {
 			if (defined('APP_TEMPLATE_ROOT')) {
 				AFK_TemplateEngine::add_paths(
-					APP_TEMPLATE_ROOT,
-					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
+					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler),
+					APP_TEMPLATE_ROOT);
 			}
 			$ctx->defaults(array('page_title' => ''));
 			$env = array_merge($ctx->as_array(), compact('ctx'));

@@ -125,7 +125,7 @@ class AFK_TemplateEngine {
 	}
 
 	/* Searches the template directories for a named template. */
-	protected function find($name, $fallback=null) {
+	protected function find($name) {
 		$location = $this->internal_find($name);
 		if ($location === false) {
 			throw new AFK_TemplateException(sprintf("Unknown template: %s", $name));
@@ -141,9 +141,10 @@ class AFK_TemplateEngine {
 			throw new AFK_TemplateException('No template search paths specified!');
 		}
 		foreach (self::$paths as $d) {
-			if (file_exists("$d/$name.php")) {
-				self::$locations[$name] = "$d/$name.php";
-				return "$d/$name.php";
+			$path = "$d/$name.php";
+			if (file_exists($path)) {
+				self::$locations[$name] = $path;
+				return $path;
 			}
 		}
 		return false;
