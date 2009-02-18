@@ -78,9 +78,6 @@ abstract class AFK_Users {
 		if (!$this->has($id)) {
 			$this->load(array($id));
 			if (!$this->has($id)) {
-				if ($id === self::ANONYMOUS) {
-					return null;
-				}
 				throw new AFK_Exception(sprintf("Bad user ID: %s", $id));
 			}
 		}
