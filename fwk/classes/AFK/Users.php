@@ -40,8 +40,12 @@ abstract class AFK_Users {
 
 	// Loading User Instances {{{
 
-	protected function add(AFK_User $inst) {
-		$this->instances[$inst->get_id()] = $inst;
+	protected function add($inst) {
+		if (is_null($inst)) {
+			$this->instances[self::ANONYMOUS] = null;
+		} else {
+			$this->instances[$inst->get_id()] = $inst;
+		}
 	}
 
 	public static function preload(array $ids) {
