@@ -44,6 +44,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 			$doc = $this->load_and_validate($ctx->_raw);
 			$ctx->_root_element = $doc->getName();
 			$ctx->merge($this->parse($doc));
+			unset($doc);
 		}
 		$pipe->do_next($ctx);
 	}

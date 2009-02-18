@@ -22,6 +22,7 @@ class AFK_Context extends AFK_Environment {
 	const SEE_OTHER = 303;
 	const TEMPORARY = 307;
 	const BAD_REQUEST = 400;
+	const UNAUTHORISED = 401;
 	const FORBIDDEN = 403;
 	const NOT_FOUND = 404;
 	const BAD_METHOD = 405;

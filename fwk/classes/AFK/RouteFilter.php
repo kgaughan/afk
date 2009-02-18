@@ -41,6 +41,7 @@ class AFK_RouteFilter implements AFK_Filter {
 			if (is_array($result)) {
 				// The result is the attributes.
 				$ctx->merge($result, $this->request);
+				unset($result);
 				$pipe->do_next($ctx);
 			} else {
 				// Result is a normalised URL. The original request URL was

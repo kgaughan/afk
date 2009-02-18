@@ -118,7 +118,6 @@ class AFK_TemplateEngine {
 	 */
 	public static function add_paths() {
 		$paths = func_get_args();
-		$paths = array_reverse($paths);
 		foreach ($paths as $path) {
 			array_unshift(self::$paths, $path);
 		}

@@ -30,6 +30,7 @@ class AFK_DispatchFilter implements AFK_Filter {
 		}
 		$handler = new $handler_class();
 		$handler->handle($ctx);
+		unset($hander_class, $handler);
 		$pipe->do_next($ctx);
 	}
 }

@@ -25,7 +25,7 @@ class AFK_Environment {
 	} // }}}
 
 	public function __get($key) { // {{{
-		if ($this->__isset($key)) {
+		if (array_key_exists($key, $this->env)) {
 			return $this->env[$key];
 		}
 		return null;
@@ -43,8 +43,8 @@ class AFK_Environment {
 	public function default_to_empty() { // {{{
 		$fields = func_get_args();
 		foreach ($fields as $k) {
-			if (!$this->__isset($k)) {
-				$this->__set($k, '');
+			if (!array_key_exists($k, $this->env)) {
+				$this->env[$k] = '';
 			}
 		}
 	} // }}}
@@ -52,8 +52,8 @@ class AFK_Environment {
 	/** Use the given defaults if the named fields aren't set. */
 	public function defaults(array $defaults) { // {{{
 		foreach ($defaults as $k => $v) {
-			if (!$this->__isset($k)) {
-				$this->__set($k, $v);
+			if (!array_key_exists($k, $this->env)) {
+				$this->env[$k] = $v;
 			}
 		}
 	} // }}}
@@ -73,15 +73,15 @@ class AFK_Environment {
 	} // }}}
 
 	/** @return Part or all of the environment as an array. */
-	public function as_array($indices=false) { // {{{
-		if ($indices === false) {
+	public function as_array($keys=false) { // {{{
+		if ($keys === false) {
 			return $this->env;
 		}
-		if (is_array($indices)) {
+		if (is_array($keys)) {
 			$extracted = array();
-			foreach ($indices as $i) {
-				if ($this->__isset($i)) {
-					$extracted[$i] = $this->__get($i);
+			foreach ($keys as $k) {
+				if (!array_key_exists($k, $this->env)) {
+					$extracted[$k] = $this->env[$k];
 				}
 			}
 			return $extracted;

@@ -13,7 +13,6 @@
 class AFK_ParseException extends AFK_HttpException {
 
 	public function __construct($msg) {
-		// i.e. 400 Bad Request status code.
-		parent::__construct($msg, 400);
+		parent::__construct($msg, AFK_Context::BAD_REQUEST);
 	}
 }
