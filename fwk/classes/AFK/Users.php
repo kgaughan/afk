@@ -14,7 +14,13 @@
  */
 abstract class AFK_Users {
 
+	const ANONYMOUS = 0;
+
 	private $instances = array();
+
+	public function __construct() {
+		$this->add($this->get_anonymous_user());
+	}
 
 	// Implementation Assignment {{{
 
@@ -50,6 +56,10 @@ abstract class AFK_Users {
 		}
 	}
 
+	protected function get_anonymous_user() {
+		return null;
+	}
+
 	protected abstract function load(array $ids);
 
 	// }}}
@@ -64,7 +74,7 @@ abstract class AFK_Users {
 		if (!$this->has($id)) {
 			$this->load(array($id));
 			if (!$this->has($id)) {
-				if ($id === 0) {
+				if ($id === self::ANONYMOUS) {
 					return null;
 				}
 				throw new AFK_Exception(sprintf("Bad user ID: %s", $id));
@@ -74,7 +84,7 @@ abstract class AFK_Users {
 	}
 
 	protected function get_current_user_id() {
-		return 0;
+		return self::ANONYMOUS;
 	}
 
 	public static function current() {
@@ -91,13 +101,13 @@ abstract class AFK_Users {
 
 	// Access Control {{{
 
-	public function act_as_effective_user($id) {
+	public static function act_as_effective_user($id) {
 		self::ensure_implementation();
 		// We delegate it to the actual implementation.
 		self::$impl->act_as_effective_user_impl($id);
 	}
 
-	public function revert_to_actual_user() {
+	public static function revert_to_actual_user() {
 		self::ensure_implementation();
 		// We delegate it to the actual implementation.
 		self::$impl->revert_to_actual_user_impl();
@@ -149,7 +159,9 @@ abstract class AFK_Users {
 		static $called = false;
 		if (!$called) {
 			$called = true;
-			throw new AFK_HttpException('You lack the required credentials.', 403);
+			throw new AFK_HttpException(
+				'You lack the required credentials.',
+				AFK_Context::FORBIDDEN);
 		}
 	}
 

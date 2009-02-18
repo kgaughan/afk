@@ -13,25 +13,26 @@
 abstract class AFK_HttpAuthUsers extends AFK_Users {
 
 	private $realm;
+	private $id;
 
 	public function __construct($realm) {
+		parent::__construct();
 		$this->realm = $realm;
+		$this->id = null;
 	}
 
 	protected function get_current_user_id() {
-		static $id = null;
-
 		$ctx = AFK_Registry::context();
-		if (is_null($id) && $ctx->__isset('PHP_AUTH_USER')) {
-			$id = $this->authenticate($ctx->PHP_AUTH_USER,
+		if (is_null($this->id) && $ctx->__isset('PHP_AUTH_USER')) {
+			$this->id = $this->authenticate($ctx->PHP_AUTH_USER,
 				md5("{$ctx->PHP_AUTH_USER}:{$this->realm}:{$ctx->PHP_AUTH_PW}"));
 		}
 
-		if (is_null($id)) {
-			$this->require_auth();
+		if (!is_null($this->id)) {
+			return $this->id;
 		}
 
-		return $id;
+		return AFK_Users::ANONYMOUS;
 	}
 
 	protected abstract function authenticate($username, $hash);
@@ -42,7 +43,8 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 			$called = true;
 			// TODO: Support Digest too.
 			throw new AFK_HttpException(
-				'You are not authorised for access.', 401,
+				'You are not authorised for access.',
+				AFK_Context::UNAUTHORISED,
 				array('WWW-Authenticate' => "Basic realm=\"{$this->realm}\""));
 		}
 	}
