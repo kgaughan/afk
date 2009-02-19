@@ -14,11 +14,27 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 
 	private $realm;
 	private $id;
+	private $actual_id;
 
 	public function __construct($realm) {
 		parent::__construct();
 		$this->realm = $realm;
 		$this->id = null;
+		$this->actual_id = null;
+	}
+
+	public function act_as_effective_user_impl($id) {
+		if (is_null($this->actual_id)) {
+			$this->actual_id = $this->id;
+		}
+		$this->id = $id;
+	}
+
+	public function revert_to_actual_user_impl() {
+		if (!is_null($this->actual_id)) {
+			$this->id = $this->actual_id;
+			$this->actual_id = null;
+		}
 	}
 
 	protected function get_current_user_id() {

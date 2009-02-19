@@ -156,6 +156,12 @@ abstract class AFK_Users {
 		}
 	}
 
+	public static function force_auth() {
+		if (is_null(self::current())) {
+			self::$impl->require_auth();
+		}
+	}
+
 	protected function require_auth() {
 		static $called = false;
 		if (!$called) {
