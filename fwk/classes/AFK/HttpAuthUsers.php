@@ -12,56 +12,54 @@
  */
 abstract class AFK_HttpAuthUsers extends AFK_Users {
 
-	private $realm;
 	private $id;
 	private $actual_id;
 
-	public function __construct($realm) {
+	public function __construct() {
 		parent::__construct();
-		$this->realm = $realm;
-		$this->id = null;
-		$this->actual_id = null;
+		$this->id = false;
+		$this->actual_id = false;
 	}
 
 	public function act_as_effective_user_impl($id) {
-		if (is_null($this->actual_id)) {
+		if ($this->actual_id === false) {
 			$this->actual_id = $this->id;
 		}
 		$this->id = $id;
 	}
 
 	public function revert_to_actual_user_impl() {
-		if (!is_null($this->actual_id)) {
+		if ($this->actual_id !== false) {
 			$this->id = $this->actual_id;
-			$this->actual_id = null;
+			$this->actual_id = false;
 		}
 	}
 
 	protected function get_current_user_id() {
-		$ctx = AFK_Registry::context();
-		if (is_null($this->id) && $ctx->__isset('PHP_AUTH_USER')) {
-			$this->id = $this->authenticate($ctx->PHP_AUTH_USER,
-				md5("{$ctx->PHP_AUTH_USER}:{$this->realm}:{$ctx->PHP_AUTH_PW}"));
+		if ($this->id === false && ($id = $this->check()) !== false) {
+			$this->id = $id;
 		}
-
-		if (!is_null($this->id)) {
-			return $this->id;
-		}
-
-		return AFK_Users::ANONYMOUS;
+		return $this->id !== false ? $this->id : AFK_Users::ANONYMOUS;
 	}
 
-	protected abstract function authenticate($username, $hash);
+	private function check() {
+		$ctx = AFK_Registry::context();
+		$details = $this->authenticate(AFK_HttpAuth::get_username($ctx));
+		if ($details !== false) {
+			list($id, $expected) = $details;
+			if (AFK_HttpAuth::check($ctx, $expected)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @return array(id, a1_hash), or false if no such user.
+	 */
+	protected abstract function authenticate($username);
 
 	protected function require_auth() {
-		static $called = false;
-		if (!$called) {
-			$called = true;
-			// TODO: Support Digest too.
-			throw new AFK_HttpException(
-				'You are not authorised for access.',
-				AFK_Context::UNAUTHORISED,
-				array('WWW-Authenticate' => "Basic realm=\"{$this->realm}\""));
-		}
+		AFK_HttpAuth::force_authentication();
 	}
 }
