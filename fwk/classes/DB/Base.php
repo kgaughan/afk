@@ -9,9 +9,18 @@ define('DB_NUM',   1);
 abstract class DB_Base {
 
 	private $logger = false;
+	private $cache;
+
+	public function __construct() {
+		$this->cache = new AFK_Cache_Null();
+	}
 
 	public function set_logger(DB_Logger $logger) {
 		$this->logger = $logger;
+	}
+
+	public function set_cache(AFK_Cache $cache) {
+		$this->cache = $cache;
 	}
 
 	public function get_logger() {
@@ -91,6 +100,15 @@ abstract class DB_Base {
 		return false;
 	}
 
+	public function cached_query_row($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_row($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
+	}
+
 	public function query_tuple() {
 		$args = func_get_args();
 		if (call_user_func_array(array($this, 'query'), $args) &&
@@ -98,6 +116,15 @@ abstract class DB_Base {
 			return $r;
 		}
 		return false;
+	}
+
+	public function cached_query_tuple($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_tuple($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
 	}
 
 	/**
@@ -113,6 +140,15 @@ abstract class DB_Base {
 		return null;
 	}
 
+	public function cached_query_value($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_value($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
+	}
+
 	/**
 	 * Like query_value(), but operates over the whole resultset, pulling the
 	 * first value of each tuple into an array.
@@ -126,6 +162,15 @@ abstract class DB_Base {
 			}
 		}
 		return $result;
+	}
+
+	public function cached_query_list($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_list($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
 	}
 
 	/**
@@ -144,6 +189,15 @@ abstract class DB_Base {
 		return $result;
 	}
 
+	public function cached_query_map($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_map($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
+	}
+
 	/**
 	 * Returns an associative array derived from a query resultset. The
 	 * first column in each row is used as the key and the rest as the
@@ -159,6 +213,15 @@ abstract class DB_Base {
 			}
 		}
 		return $result;
+	}
+
+	public function cached_query_row_map($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_row_map($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
 	}
 
 	/**
@@ -181,6 +244,15 @@ abstract class DB_Base {
 		return $result;
 	}
 
+	public function cached_query_multimap($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_multimap($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
+	}
+
 	/**
 	 * Convenience method to query the database and convert the resultset into
 	 * an array.
@@ -193,6 +265,15 @@ abstract class DB_Base {
 			$rows[] = $r;
 		}
 		return $rows;
+	}
+
+	public function cached_query_all($max_age, $q) {
+		$r = $this->cache->load($q, $max_age);
+		if (is_null($r)) {
+			$r = $this->query_all($q);
+			$this->cache->save($q, $r);
+		}
+		return $r;
 	}
 
 	/**

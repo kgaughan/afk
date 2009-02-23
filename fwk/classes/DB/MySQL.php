@@ -21,6 +21,7 @@ class DB_MySQL extends DB_Base {
 	 *
 	 */
 	public function __construct($host, $user, $pass, $db) {
+		parent::__construct();
 		$this->key = "$host:$user:$db";
 		if (array_key_exists($this->key, self::$cache)) {
 			list($this->dbh, $count) = self::$cache[$this->key];
