@@ -80,7 +80,7 @@ class AFK_Environment {
 		if (is_array($keys)) {
 			$extracted = array();
 			foreach ($keys as $k) {
-				if (!array_key_exists($k, $this->env)) {
+				if (array_key_exists($k, $this->env)) {
 					$extracted[$k] = $this->env[$k];
 				}
 			}
