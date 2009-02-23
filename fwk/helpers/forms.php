@@ -7,26 +7,46 @@ define('_AFK_NOTIFICATIONS_KEY', '__notifications');
  * requests.
  */
 function add_notification($type, $message) {
-	if (!array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
-		$_SESSION[_AFK_NOTIFICATIONS_KEY] = array();
+	if (isset($_SESSION)) {
+		if (array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
+			$_SESSION[_AFK_NOTIFICATIONS_KEY] = array();
+		}
+		if (!array_key_exists($type, $_SESSION[_AFK_NOTIFICATIONS_KEY])) {
+			$_SESSION[_AFK_NOTIFICATIONS_KEY][$type] = array();
+		}
+		$_SESSION[_AFK_NOTIFICATIONS_KEY][$type][] = $message;
+	} else {
+		$ctx = AFK_Registry::context();
+		if (!isset($ctx->__notifications)) {
+			$ctx->__notifications = array();
+		}
+		if (!array_key_exists($type, $ctx->__notifications)) {
+			$ctx->__notifications[$type] = array();
+		}
+		$ctx->__notifications[$type][] = $message;
 	}
-	if (!array_key_exists($type, $_SESSION[_AFK_NOTIFICATIONS_KEY])) {
-		$_SESSION[_AFK_NOTIFICATIONS_KEY][$type] = array();
-	}
-	$_SESSION[_AFK_NOTIFICATIONS_KEY][$type][] = $message;
 }
 
 /**
  * Displays and clears any currently recorded form notifications.
  */
 function display_notifications($template='notifications') {
-	if (array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
-		ksort($_SESSION[_AFK_NOTIFICATIONS_KEY]);
-		$t = new AFK_TemplateEngine();
-		foreach ($_SESSION[_AFK_NOTIFICATIONS_KEY] as $type => $messages) {
-			$t->render($template, compact('type', 'messages'));
-		}
+	if (isset($_SESSION) && array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
+		$notifications = $_SESSION[_AFK_NOTIFICATIONS_KEY];
 		unset($_SESSION[_AFK_NOTIFICATIONS_KEY]);
+	} else {
+		$ctx = AFK_Registry::context();
+		if (isset($ctx->__notifications)) {
+			$notifications = $ctx->__notifications;
+		} else {
+			return;
+		}
+	}
+
+	ksort($notifications);
+	$t = new AFK_TemplateEngine();
+	foreach ($notifications as $type => $messages) {
+		$t->render($template, compact('type', 'messages'));
 	}
 }
 
