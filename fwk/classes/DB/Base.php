@@ -1,6 +1,6 @@
 <?php
 define('DB_ASSOC', 0);
-define('DB_NUM',   1);
+define('DB_NUM', 1);
 
 /**
  * Wrapper around the various DB drivers to abstract away various repetitive
@@ -310,8 +310,8 @@ abstract class DB_Base {
 		if (count($data) == 0) {
 			return false;
 		}
-		$flags  = $delayed ? '/*! DELAYED */ ' : '';
-		$keys   = implode(', ',   array_keys($data));
+		$flags = $delayed ? '/*! DELAYED */ ' : '';
+		$keys = implode(', ', array_keys($data));
 		$values = implode("', '", array_map(array($this, 'e'), array_values($data)));
 		return $this->execute("INSERT $flags INTO $table ($keys) VALUES ('$values')");
 	}

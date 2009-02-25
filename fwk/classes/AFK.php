@@ -78,7 +78,7 @@ class AFK {
 		foreach ($paths as $path) {
 			$file = "$path/$name.php";
 			if (is_file($file)) {
-				require $file;
+				include $file;
 				return $file;
 			}
 		}
@@ -142,9 +142,9 @@ class AFK {
 			self::add_class_path(APP_ROOT . '/classes');
 			self::add_class_path(APP_ROOT . '/handlers');
 
-			include(APP_ROOT . '/config.php');
+			include APP_ROOT . '/config.php';
 			if (file_exists(APP_ROOT . '/lib/lib.php')) {
-				include(APP_ROOT . '/lib/lib.php');
+				include APP_ROOT . '/lib/lib.php';
 			}
 		}
 
@@ -182,7 +182,8 @@ class AFK_Exception extends Exception {
 	}
 
 	public function __toString() {
-		return sprintf("%s in %s at line %d:\nCode %d: %s\n\n",
+		return sprintf(
+			"%s in %s at line %d:\nCode %d: %s\n\n",
 			get_class($this), $this->file, $this->line, $this->code, $this->message);
 	}
 }

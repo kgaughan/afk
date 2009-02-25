@@ -73,7 +73,7 @@ abstract class AFK_Plugin {
 		foreach ($active as $name) {
 			$d = "$location/$name";
 			if (is_dir($d) && is_file("$d/plugin.php") && is_file("$d/about.ini")) {
-				require "$d/plugin.php";
+				include "$d/plugin.php";
 			}
 		}
 	}

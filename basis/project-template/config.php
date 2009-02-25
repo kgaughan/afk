@@ -1,8 +1,8 @@
 <?php
 if (file_exists(APP_ROOT . '/site-config.php')) {
-	require(APP_ROOT . '/site-config.php');
+	include APP_ROOT . '/site-config.php';
 } else {
-	require(APP_ROOT . '/deployment/configurations/default.php');
+	include APP_ROOT . '/deployment/configurations/default.php';
 }
 
 define('APP_VERSION', '0.0.0');

@@ -68,7 +68,7 @@ class AFK_TemplateEngine {
 			foreach ($this->context as $__c) {
 				extract($__c, EXTR_SKIP);
 			}
-			require($__path);
+			include $__path;
 		} catch (Exception $__e) {
 			// Prevent envelopes from inadvertantly wrapping the error.
 			foreach ($this->envelopes as $env) {

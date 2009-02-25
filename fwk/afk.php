@@ -46,4 +46,4 @@ function ee() {
 
 // }}}
 
-require(AFK_ROOT . '/classes/AFK.php');
+require AFK_ROOT . '/classes/AFK.php';

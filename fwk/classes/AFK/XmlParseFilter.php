@@ -65,7 +65,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_clear_errors();
 
 		$result = false;
-		$doc = @DOMDocument::loadXML($xml,
+		$doc = @DOMDocument::loadXML(
+			$xml,
 			LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOCDATA);
 		if ($doc !== false && ($this->schema === false || $this->validate($doc, $this->schema))) {
 			$result = simplexml_import_dom($doc);
@@ -76,8 +77,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_use_internal_errors($old_use_errors);
 		if (count($errors) > 0) {
 			// TODO: Hack! This should be done more cleanly!
-			throw new AFK_ParseException(sprintf("Invalid document:\n%s",
-				implode("\n", array_map(array($this, 'error_to_string'), $errors))));
+			throw new AFK_ParseException(sprintf(
+				"Invalid document:\n%s", $this->join_errors($errors)));
 		}
 
 		return $result;
@@ -90,8 +91,13 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		 return $doc->relaxNGValidate($schema);
 	}
 
+	private function join_errors(array $errors) {
+		return implode("\n", array_map(array($this, 'error_to_string'), $errors));
+	}
+
 	private function error_to_string($error) {
-		return sprintf("%s at line %s, column %s: %s",
+		return sprintf(
+			"%s at line %s, column %s: %s",
 			$this->get_level_name($error->level),
 			$error->line, $error->column, trim($error->message));
 	}

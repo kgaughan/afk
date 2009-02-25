@@ -54,7 +54,7 @@ class AFK_OutputCache {
 		}
 		ob_start();
 		ob_implicit_flush(false);
-		array_push($this->ids, $id);
+		$this->ids[] = $id;
 		return true;
 	}
 
