@@ -7,6 +7,7 @@
 
 require_once 'PHPUnit/Framework.php';
 require_once dirname(__FILE__) . '/fwk/afk.php';
+AFK::bootstrap();
 
 function routes() {
 	return new AFK_Routes();
