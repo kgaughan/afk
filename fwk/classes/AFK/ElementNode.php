@@ -8,35 +8,50 @@
  */
 
 /**
- * A wrapper around SimpleXML to make building XML documents easier.
+ * A wrapper around the DOM to make building XML documents easier.
  *
  * @author Keith Gaughan
  */
 class AFK_ElementNode {
 
-	private $_node;
+	const CHARSET = 'utf-8';
+
+	private $node;
+	private $ns;
 
 	/**
 	 * @param  $elem  Root element name.
-	 * @param  $nss   List of namespaces keyed by prefix.
+	 * @param  $nss   Namespace of the root element.
 	 */
-	public function __construct($elem, $nss=array()) {
-		if (is_string($elem)) {
-			$xml = "<$elem";
-			foreach ($nss as $ns => $uri) {
-				$xml .= ' xmlns';
-				if (!is_numeric($ns)) {
-					$xml .= ':' . $ns;
-				}
-				$xml .= '="' . e($uri) . '"';
-			}
-			$xml .= '/>';
-
-			$this->_node = new SimpleXMLElement($xml);
+	public function __construct($elem, $ns=null) {
+		$this->ns = $ns;
+		if (is_object($elem) && get_class($elem) == 'DOMElement') {
+			// Subnode.
+			$dom = $elem->ownerDocument;
+			$this->node = $elem;
 		} else {
-			// Otherwise, this is a subnode we're creating.
-			$this->_node = $elem;
+			// Root element.
+			$dom = new DOMDocument('1.0', self::CHARSET);
+			if (is_null($ns)) {
+				$this->node = $dom->createElement($elem);
+			} else {
+				$this->node = $dom->createElementNS($ns, $elem);
+			}
+			$dom->appendChild($this->node);
 		}
+	}
+
+	/**
+	 * @return The tree serialised as text.
+	 */
+	public function as_xml() {
+		$dom = $this->node->ownerDocument;
+		$dom->normalizeDocument();
+		return $dom->saveXML($this->node);
+	}
+
+	private function e($text) {
+		return htmlspecialchars($text, ENT_QUOTES, self::CHARSET);
 	}
 
 	// Attributes {{{
@@ -46,12 +61,16 @@ class AFK_ElementNode {
 	 *
 	 * @return $this
 	 */
-	public function attr($name, $value='', $ns=null) {
-		// Workaround for dumbass PHP bug #46769.
-		if (!is_null($ns) && strpos($name, ':') === false) {
-			$name = "ipitythefool:$name";
+	public function attr($name, $value, $ns=null) {
+		if (is_null($ns)) {
+			$this->node->setAttribute($name, $value);
+		} else {
+			$prefix = $this->node->ownerDocument->lookupPrefix($ns);
+			if ($prefix != '') {
+				$name = "$prefix:$name";
+			}
+			$this->node->setAttributeNS($ns, $name, $value);
 		}
-		$this->_node->addAttribute($name, $value, $ns);
 		return $this;
 	}
 
@@ -68,7 +87,7 @@ class AFK_ElementNode {
 	 *
 	 * @param  $name  Element name.
 	 * @param  $text  Text to insert into the element.
-	 * @param  $ns    Namespace to use, null for the default.
+	 * @param  $ns    Namespace to use, null to inherit from its parent.
 	 *
 	 * @return Newly-created child node.
 	 */
@@ -76,10 +95,23 @@ class AFK_ElementNode {
 		if ($text == '') {
 			$text = null;
 		} elseif (!is_null($text)) {
-			$text = e($text);
+			$text = $this->e($text);
 		}
-		$child = $this->_node->addChild($name, $text, $ns);
-		return new AFK_ElementNode($child);
+		if (is_null($ns)) {
+			$ns = $this->ns;
+		}
+		$dom = $this->node->ownerDocument;
+		if (is_null($ns)) {
+			$child = $dom->createElement($name, $text);
+		} else {
+			$prefix = $dom->lookupPrefix($ns);
+			if ($prefix != '') {
+				$name = "$prefix:$name";
+			}
+			$child = $dom->createElementNS($ns, $name, $text);
+		}
+		$this->node->appendChild($child);
+		return new AFK_ElementNode($child, $this->ns);
 	}
 
 	public function __call($name, array $args) {
@@ -98,12 +130,15 @@ class AFK_ElementNode {
 		return $this;
 	}
 
-	/// }}}
-
-	/**
-	 * @return The tree as a SimpleXMLElement.
-	 */
-	public function as_xml() {
-		return $this->_node->asXML();
+	public function with_raw($raw) {
+		$dom = $this->node->ownerDocument;
+		$this->node->appendChild($dom->createTextNode($raw));
+		return $this;
 	}
+
+	public function with_text($text) {
+		return $this->with_raw($this->e($text));
+	}
+
+	/// }}}
 }
