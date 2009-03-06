@@ -19,12 +19,16 @@ abstract class DB_Base {
 		$this->logger = $logger;
 	}
 
+	public function get_logger() {
+		return $this->logger;
+	}
+
 	public function set_cache(AFK_Cache $cache) {
 		$this->cache = $cache;
 	}
 
-	public function get_logger() {
-		return $this->logger;
+	public function invalidate($q) {
+		$this->cache->invalidate($q);
 	}
 
 	/**
@@ -355,7 +359,7 @@ abstract class DB_Base {
 	 * Escapes a string in a driver dependent manner to make it safe to use
 	 * in queries.
 	 */
-	protected function e($s) {
+	public function e($s) {
 		// Better than nothing.
 		return addslashes($s);
 	}

@@ -112,7 +112,7 @@ class DB_MySQL extends DB_Base {
 		return $r;
 	}
 
-	protected function e($s) {
+	public function e($s) {
 		if (function_exists('mysql_real_escape_string')) {
 			return mysql_real_escape_string($s, $this->dbh);
 		}
