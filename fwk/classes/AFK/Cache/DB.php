@@ -11,9 +11,9 @@
  * To create the appropriate, you'll need to run something like the following:
  *
  * CREATE TABLE cache (
- *     id   CHAR(32) NOT NULL,
- *     ts   INTEGER  NOT NULL,
- *     data TEXT     NOT NULL,
+ *     id   CHAR(32)         NOT NULL,
+ *     ts   INTEGER UNSIGNED NOT NULL,
+ *     data TEXT             NOT NULL,
  *
  *     PRIMARY KEY (id),
  *     INDEX ix_timestamp (ts)
