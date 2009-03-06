@@ -42,12 +42,19 @@ class AFK_ElementNode {
 	}
 
 	/**
-	 * @return The tree serialised as text.
+	 * @return The tree serialised as an XML document.
 	 */
 	public function as_xml() {
 		$dom = $this->node->ownerDocument;
 		$dom->normalizeDocument();
-		return $dom->saveXML($this->node);
+		return $dom->saveXML();
+	}
+
+	/**
+	 * @return The current node serialised as an XML document fragment.
+	 */
+	public function as_xml_fragment() {
+		return $this->node->ownerDocument->saveXML($this->node);
 	}
 
 	private function e($text) {
