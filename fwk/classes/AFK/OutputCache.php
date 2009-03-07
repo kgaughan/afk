@@ -14,7 +14,7 @@
  *
  * <?php if (cache('foo')) { ?>
  *     ...expensive to generate content...
- * <?php cache_end() } ?>
+ * <?php cache_end(); } ?>
  */
 class AFK_OutputCache {
 

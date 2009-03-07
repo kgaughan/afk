@@ -20,6 +20,7 @@ class AFK_Context extends AFK_Environment {
 	const ACCEPTED = 202;
 	const PERMANENT = 301;
 	const SEE_OTHER = 303;
+	const NOT_MODIFIED = 304;
 	const TEMPORARY = 307;
 	const BAD_REQUEST = 400;
 	const UNAUTHORISED = 401;
@@ -277,6 +278,17 @@ class AFK_Context extends AFK_Environment {
 	/** Performs a permanent redirect. See ::redirect(). */
 	public function permanent_redirect($to) {
 		$this->redirect(self::PERMANENT, $to);
+	}
+
+	public function try_not_modified($etag) {
+		$status = self::OK;
+		$etag = '"' . $etag . '"';
+		if (in_array($etag, explode(', ', coalesce($this->HTTP_IF_NONE_MATCH, '')))) {
+			$status = self::NOT_MODIFIED;
+			$this->allow_rendering(false);
+		}
+		$this->header('ETag: ' . $etag, true, $status);
+		return $status == self::NOT_MODIFIED;
 	}
 
 	/**
