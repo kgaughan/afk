@@ -19,6 +19,7 @@ class AFK_Context extends AFK_Environment {
 	const CREATED = 201;
 	const ACCEPTED = 202;
 	const PERMANENT = 301;
+	const FOUND = 302;
 	const SEE_OTHER = 303;
 	const NOT_MODIFIED = 304;
 	const TEMPORARY = 307;
@@ -247,7 +248,7 @@ class AFK_Context extends AFK_Environment {
 	 */
 	public function accepted($location=null) {
 		if (is_null($location)) {
-			$this->header('HTTP/1.1 202 Accepted');
+			$this->set_response_code(self::ACCEPTED);
 		} else {
 			$this->header('Location: ' . $this->to_absolute_uri($location), true, self::ACCEPTED);
 		}
@@ -262,12 +263,12 @@ class AFK_Context extends AFK_Environment {
 	 * @note   For RFC2161 compliance, this does _not_ turn off rendering.
 	 */
 	public function redirect($code=303, $to=null) {
-		if ($code < 300 || $code > 307 || $code == 306 || $code == 304) {
+		if ($code < 300 || $code > 307 || $code == 306 || $code == self::NOT_MODIFIED) {
 			throw new AFK_Exception(sprintf("Bad redirect code: %s", $code));
 		}
 		// For backward compatibility, see RFC2616, SS10.3.4
 		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
-			$code = 302;
+			$code = self::FOUND;
 		}
 		if (is_null($to)) {
 			$to = $this->REQUEST_URI;
@@ -340,15 +341,15 @@ class AFK_Context extends AFK_Environment {
 	public function set_response_code($code) {
 		// For backward compatibility, see RFC2616, SS10.3.4
 		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
-			$code = 302;
+			$code = self::FOUND;
 		}
-		if (in_array($code, array(204, 205, 407, 411, 413, 414, 415, 416, 417))) {
+		if (in_array($code, array(204, 205, 304, 407, 411, 413, 414, 415, 416, 417))) {
 			$this->allow_rendering(false);
 		}
-		$this->header("HTTP/1.1 $code " . $this->get_response_msg($code));
+		$this->header("{$this->SERVER_PROTOCOL} $code " . $this->get_status_msg($code));
 	}
 
-	private function get_response_msg($code) {
+	private function get_status_msg($code) {
 		switch ($code) {
 		// Informational.
 		case 100: return 'Continue';
