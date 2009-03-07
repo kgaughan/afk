@@ -21,15 +21,6 @@ function g(array $ary, $i, $default='') {
 }
 
 /**
- * Checks if the current ETag for a resource matches one of those sent
- * back by the client.
- */
-function check_etag($current_etag) {
-	// A bit simplistic for now, but should work ok.
-	return in_array("\"$current_etag\"", explode(', ', g($_SERVER, 'HTTP_IF_NONE_MATCH', '')));
-}
-
-/**
  * Given a result set, gets all the unique values in the named column.
  */
 function collect_column(array $rs, $name) {
