@@ -7,21 +7,25 @@
  * that was distributed with this source code.
  */
 
-class AFK_HttpAuth_Basic extends AFK_HttpAuth {
+class AFK_HttpAuth_Basic implements AFK_HttpAuth {
 
-	protected function check_impl(AFK_Environment $env, $expected) {
-		$a1 = $env->PHP_AUTH_USER . ':' . self::$realm . ':' . $env->PHP_AUTH_PW;
-		return $expected == md5($a1);
-	}
+	private $a1 = false;
 
-	/**
-	 *
-	 */
-	protected function get_name() {
+	public function get_name() {
 		return 'Basic';
 	}
 
-	protected function get_authenticate_header() {
-		return 'Basic realm="' . self::$realm . '"';
+	public function get_authenticate_header($realm) {
+		return 'Basic realm="' . $realm . '"';
+	}
+
+	public function initialise($realm, $data) {
+		list($username, $password) = explode(':', base64_decode($data), 2);
+		$this->a1 = md5("$username:$realm:$password");
+		return $username;
+	}
+
+	public function verify($expected) {
+		return $this->a1 == $expected;
 	}
 }

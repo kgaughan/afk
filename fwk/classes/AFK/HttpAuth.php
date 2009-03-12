@@ -7,54 +7,41 @@
  * that was distributed with this source code.
  */
 
-abstract class AFK_HttpAuth {
+interface AFK_HttpAuth {
 
-	protected static $realm = 'Realm';
-	private static $methods = array();
+	/**
+	 * @return The name of this auth method as it would appear in the
+	 *         Authorization and WWW-Authenticate headers.
+	 */
+	function get_name();
 
-	public static function set_realm($realm) {
-		self::$realm = $realm;
-	}
+	/**
+	 * @param  $realm  The authentication realm to use.
+	 *
+	 * @return The data part of the WWW-Authenticate header.
+	 */
+	function get_authenticate_header($realm);
 
-	public static function add_method(AFK_HttpAuth $method) {
-		self::$methods[$method->get_name()] = $method;
-	}
+	/**
+	 * Initialises the authentication method with the authorisation data
+	 * from the Authorize header.
+	 *
+	 * @param  $realm  The authentication realm to use.
+	 * @param  $data   The contents of the Authorize header, less the method.
+	 *
+	 * @return The username specified in the Authorize header.
+	 */
+	function initialise($realm, $data);
 
-	private static function collect_authenticate_headers() {
-		$headers = array();
-		foreach (self::$methods as $method) {
-			$headers[] = $method->get_authenticate_header();
-		}
-		return $headers;
-	}
-
-	public static function check(AFK_Environment $env, $expected) {
-		foreach (self::$methods as $method) {
-			if ($method->check_impl($env, $expected)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static function force_authentication() {
-		static $called = false;
-		if (!$called) {
-			$called = true;
-			throw new AFK_HttpException(
-				'You are not authorised for access.',
-				AFK_Context::UNAUTHORISED,
-				array('WWW-Authenticate' => self::collect_authenticate_headers()));
-		}
-	}
-
-	public static function get_username(AFK_Environment $env) {
-		return isset($env->PHP_AUTH_USER) ? $env->PHP_AUTH_USER : false;
-	}
-
-	protected abstract function check_impl(AFK_Environment $env, $expected);
-
-	protected abstract function get_name();
-
-	protected abstract function get_authenticate_header();
+	/**
+	 * Checks that the authorisation data the authentication method was
+	 * initialised with matches the expected authorisation data for the
+	 * user being authenticated.
+	 *
+	 * @param  $expected  The expected authorisation data, such as a
+	 *                    password, A1 hash (Basic/Digest), &c.
+	 *
+	 * @return True if there's a match, otherwise false.
+	 */
+	function verify($expected);
 }

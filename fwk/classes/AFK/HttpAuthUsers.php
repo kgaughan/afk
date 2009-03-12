@@ -12,6 +12,9 @@
  */
 abstract class AFK_HttpAuthUsers extends AFK_Users {
 
+	private static $realm = 'Realm';
+	private static $methods = array();
+
 	private $id;
 	private $actual_id;
 
@@ -19,6 +22,58 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		parent::__construct();
 		$this->id = false;
 		$this->actual_id = false;
+	}
+
+	public static function set_realm($realm) {
+		self::$realm = $realm;
+	}
+
+	public static function add_method(AFK_HttpAuth $method) {
+		self::$methods[$method->get_name()] = $method;
+	}
+
+	private function collect_authenticate_headers() {
+		$headers = array();
+		foreach (self::$methods as $method) {
+			$headers[] = $method->get_name() . ' ' . $method->get_authenticate_header(self::$realm);
+		}
+		return $headers;
+	}
+
+	private function get_header(AFK_Environment $ctx) {
+		$header = false;
+		if (isset($ctx->HTTP_AUTHORIZATION)) {
+			$header = $ctx->HTTP_AUTHORIZATION;
+		} elseif (isset($ctx->Authorization)) {
+			$header = $ctx->Authorization;
+		} elseif (function_exists('apache_request_headers')) {
+			$headers = apache_request_headers();
+			if (array_key_exists('Authorization', $headers)) {
+				$header = $headers['Authorization'];
+			}
+		}
+		if ($header !== false) {
+			return explode(' ', $header, 2);
+		}
+		return false;
+	}
+
+	private function check() {
+		$header = $this->get_header(AFK_Registry::context());
+		if ($header !== false) {
+			list($method_name, $data) = $header;
+			$method = self::$methods[$method_name];
+
+			$username = $method->initialise(self::$realm, $data);
+			$authentication_info = $this->authenticate($username);
+			if ($authentication_info !== false) {
+				list($id, $expected) = $authentication_info;
+				if ($method->verify($expected)) {
+					return $id;
+				}
+			}
+		}
+		return false;
 	}
 
 	public function act_as_effective_user_impl($id) {
@@ -42,24 +97,20 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		return $this->id !== false ? $this->id : AFK_Users::ANONYMOUS;
 	}
 
-	private function check() {
-		$ctx = AFK_Registry::context();
-		$details = $this->authenticate(AFK_HttpAuth::get_username($ctx));
-		if ($details !== false) {
-			list($id, $expected) = $details;
-			if (AFK_HttpAuth::check($ctx, $expected)) {
-				return $id;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * @return array(id, a1_hash), or false if no such user.
 	 */
 	protected abstract function authenticate($username);
 
 	protected function require_auth() {
-		AFK_HttpAuth::force_authentication();
+		static $called = false;
+		if (!$called) {
+			$called = true;
+			throw new AFK_HttpException(
+				'You are not authorised for access.',
+				AFK_Context::UNAUTHORISED,
+				array('WWW-Authenticate' => $this->collect_authenticate_headers()));
+		}
+
 	}
 }
