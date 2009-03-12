@@ -59,7 +59,8 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 	}
 
 	private function check() {
-		$header = $this->get_header(AFK_Registry::context());
+		$ctx = AFK_Registry::context();
+		$header = $this->get_header($ctx);
 		if ($header !== false) {
 			list($method_name, $data) = $header;
 			$method = self::$methods[$method_name];
@@ -68,7 +69,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 			$authentication_info = $this->authenticate($username);
 			if ($authentication_info !== false) {
 				list($id, $expected) = $authentication_info;
-				if ($method->verify($expected)) {
+				if ($method->verify($ctx, $expected)) {
 					return $id;
 				}
 			}

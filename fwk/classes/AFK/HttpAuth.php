@@ -38,10 +38,12 @@ interface AFK_HttpAuth {
 	 * initialised with matches the expected authorisation data for the
 	 * user being authenticated.
 	 *
+	 * @param  $env       The current environment (such as the request
+	 *                    context).
 	 * @param  $expected  The expected authorisation data, such as a
 	 *                    password, A1 hash (Basic/Digest), &c.
 	 *
 	 * @return True if there's a match, otherwise false.
 	 */
-	function verify($expected);
+	function verify(AFK_Environment $env, $expected);
 }

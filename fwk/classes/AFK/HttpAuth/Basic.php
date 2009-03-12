@@ -25,7 +25,7 @@ class AFK_HttpAuth_Basic implements AFK_HttpAuth {
 		return $username;
 	}
 
-	public function verify($expected) {
+	public function verify(AFK_Environment $env, $expected) {
 		return $this->a1 == $expected;
 	}
 }
