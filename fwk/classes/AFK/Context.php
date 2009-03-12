@@ -126,8 +126,8 @@ class AFK_Context extends AFK_Environment {
 		return $prefix;
 	}
 
-	/** @return The root URL path of the application. */
-	public function application_root() {
+	/** @return The root path of the application. */
+	public function application_root_path() {
 		static $root = null;
 		if (is_null($root)) {
 			$path = $this->REQUEST_URI;
@@ -137,9 +137,14 @@ class AFK_Context extends AFK_Environment {
 			} else {
 				$len -= strlen($this->QUERY_STRING);
 			}
-			$root = $this->get_host_prefix() . substr($path, 0, $len);
+			$root = substr($path, 0, $len);
 		}
 		return $root;
+	}
+
+	/** @return The root URL of the application. */
+	public function application_root() {
+		return $this->get_host_prefix() . $this->application_root_path();
 	}
 
 	public function base_url() {
