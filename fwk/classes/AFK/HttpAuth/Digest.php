@@ -14,11 +14,13 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 	private $nonce_lifetime;
 	private $fields;
 	private $realm;
+	private $stale;
 
 	public function __construct($opaque, $private_key, $nonce_lifetime=300) {
 		$this->opaque = $opaque;
 		$this->private_key = $private_key;
 		$this->nonce_lifetime = $nonce_lifetime;
+		$this->stale = false;
 	}
 
 	public function get_name() {
@@ -29,8 +31,9 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 		$ctx = AFK_Registry::context();
 
 		return sprintf(
-			'realm="%s", domain="%s", qop=auth, algorithm=MD5, nonce="%s", opaque="%s"',
-			$realm, $ctx->application_root_path(), $this->make_nonce($ctx), $this->opaque);
+			'realm="%s", domain="%s", qop=auth, algorithm=MD5, nonce="%s", opaque="%s", stale="%s"',
+			$realm, $ctx->application_root_path(), $this->make_nonce($ctx), $this->opaque,
+			$this->stale ? 'true' : 'false');
 	}
 
 	private function make_nonce(AFK_Environment $env) {
@@ -57,6 +60,8 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 				$this->fields['qop'] . ':' .
 				$a2);
 			return $this->fields['response'] == $valid_response;
+		} else {
+			$this->stale = true;
 		}
 		return false;
 	}
@@ -65,7 +70,7 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 		return
 			$this->fields['opaque'] == $this->opaque &&
 			$this->fields['uri'] == $env->REQUEST_URI &&
-			$this->fields['nonce'] != $this->make_nonce($env);
+			$this->fields['nonce'] == $this->make_nonce($env);
 	}
 
 	private function parse($data) {
@@ -74,9 +79,9 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 			'username' => 1, 'uri' => 1, 'response' => 1);
 
 		$fields = array();
-		preg_match_all('~(\w+)=(?:([\'"])([^\2]+)\2|([^\s,]+))~', $data, $matches, PREG_SET_ORDER);
+		preg_match_all('~(\w+)=(?:[\'"]([^\'"]+)[\'"]|([^\s,]+))~', $data, $matches, PREG_SET_ORDER);
 		foreach ($matches as $m) {
-			$fields[$m[1]] = $m[3] != '' ? $m[3] : $m[4];
+			$fields[$m[1]] = $m[2] != '' ? $m[2] : $m[3];
 			unset($missing[$m[1]]);
 		}
 

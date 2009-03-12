@@ -112,6 +112,5 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 				AFK_Context::UNAUTHORISED,
 				array('WWW-Authenticate' => $this->collect_authenticate_headers()));
 		}
-
 	}
 }
