@@ -7,7 +7,6 @@
 # 
 
 SSH=`which ssh`
-: ${DEPLOY_USER:=root}
 
 dispatch () {
 	local cmd
@@ -48,16 +47,16 @@ dispatch () {
 }
 
 afk_deploy () {
-	local dest
 	local target=$1
-	local site_config
+	local dest ip deploy_user dir version site_config
+	local cdir vdir
 
 	read version <version
 
 	if test -e "deployment/$target.target"; then
 		# Upload data.
-		cat deployment/$target.target | while read ip dir; do
-			dest="$DEPLOY_USER@$ip:$dir/$version"
+		cat deployment/$target.target | while read ip deploy_user dir; do
+			dest="$deploy_user@$ip:$dir/$version"
 			echo -en "Syncing to \033[1m$dest\033[0m: "
 			echo -n "codebase, "
 			rsync -rlptz --delete --exclude-from=deployment/exclude --rsh=$SSH . "$dest"
@@ -76,7 +75,7 @@ afk_deploy () {
 			cdir="$dir/current"
 			vdir="$dir/$version"
 			echo -n "$ip, "
-			ssh "$DEPLOY_USER@$ip" /bin/sh <<EOT
+			ssh "$deploy_user@$ip" /bin/sh <<EOT
 if test ! -e $cdir -o '\$(realpath $cdir)' != '\$(realpath $vdir)'; then
 	test -e $cdir && rm $cdir
 	ln -s $vdir $cdir
@@ -164,6 +163,7 @@ help_purgesvn () {
 
 do_lint () {
 	local method=afk_find_changed_php_files_svn
+	local flag
 
 	while getopts "a" flag; do
 		case $flag in
