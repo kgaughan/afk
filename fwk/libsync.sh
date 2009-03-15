@@ -23,6 +23,7 @@ dispatch () {
 		production | staging | testing)
 		pre_deploy $cmd
 		afk_deploy $cmd
+		exit $?
 		;;
 
 		*)
@@ -59,7 +60,7 @@ afk_deploy () {
 			dest="$deploy_user@$ip:$dir/$version"
 			echo -en "Syncing to \033[1m$dest\033[0m: "
 			echo -n "codebase, "
-			rsync -rlptz --delete --exclude-from=deployment/exclude --rsh=$SSH . "$dest"
+			rsync -rlptzL --delete --exclude-from=deployment/exclude --rsh=$SSH . "$dest"
 			site_config=default
 			if test -f "deployment/configurations/$target/$ip.php"; then
 				site_config="$target/$ip"
@@ -71,20 +72,17 @@ afk_deploy () {
 
 		# Switch deployed version.
 		echo -n "Switching current on: "
-		cat deployment/$target.target | while read ip dir; do
+		cat deployment/$target.target | while read ip deploy_user dir; do
 			cdir="$dir/current"
 			vdir="$dir/$version"
 			echo -n "$ip, "
-			ssh "$deploy_user@$ip" /bin/sh <<EOT
-if test ! -e $cdir -o '\$(realpath $cdir)' != '\$(realpath $vdir)'; then
-	test -e $cdir && rm $cdir
-	ln -s $vdir $cdir
-fi
-EOT
+			echo "cd '$dir'; test -e current && rm current; ln -s $version current" | ssh "$deploy_user@$ip" /bin/sh
 		done
 		echo -e "\033[1mdone\033[0m."
+		return 0
 	else
 		echo "No can do: deployment target '$target' doesn't exist."
+		return 1
 	fi
 }
 
