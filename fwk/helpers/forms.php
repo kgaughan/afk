@@ -8,7 +8,7 @@ define('_AFK_NOTIFICATIONS_KEY', '__notifications');
  */
 function add_notification($type, $message) {
 	if (isset($_SESSION)) {
-		if (array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
+		if (!array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
 			$_SESSION[_AFK_NOTIFICATIONS_KEY] = array();
 		}
 		if (!array_key_exists($type, $_SESSION[_AFK_NOTIFICATIONS_KEY])) {
