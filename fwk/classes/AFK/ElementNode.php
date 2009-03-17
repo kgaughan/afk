@@ -15,6 +15,7 @@
 class AFK_ElementNode {
 
 	const CHARSET = 'utf-8';
+	const XMLNS = "http://www.w3.org/2000/xmlns/";
 
 	private $node;
 	private $ns;
@@ -27,7 +28,6 @@ class AFK_ElementNode {
 		$this->ns = $ns;
 		if (is_object($elem) && get_class($elem) == 'DOMElement') {
 			// Subnode.
-			$dom = $elem->ownerDocument;
 			$this->node = $elem;
 		} else {
 			// Root element.
@@ -61,6 +61,27 @@ class AFK_ElementNode {
 		return htmlspecialchars($text, ENT_QUOTES, self::CHARSET);
 	}
 
+	/**
+	 * Attempt, if possible, to add the given namespace to the root node.
+	 */
+	private function add_namespace($name, $ns) {
+		$prefix = $this->node->ownerDocument->lookupPrefix($ns);
+		$parts = explode(':', $name, 2);
+		if (!empty($prefix)) {
+			// Already added.
+			return $prefix . ':' . $parts[count($parts) - 1];
+		}
+		if (count($parts) == 2) {
+			// Can add it.
+			$this->node->ownerDocument->documentElement->setAttributeNS(
+				self::XMLNS, 'xmlns:' . $parts[0], $ns);
+		}
+		// If neither of the above two have worked, we fall back on producing
+		// neurotic XML. Yes, that's a technical term:
+		// http://lists.xml.org/archives/xml-dev/200204/msg00170.html
+		return $name;
+	}
+
 	// Attributes {{{
 
 	/**
@@ -72,10 +93,7 @@ class AFK_ElementNode {
 		if (is_null($ns)) {
 			$this->node->setAttribute($name, $value);
 		} else {
-			$prefix = $this->node->ownerDocument->lookupPrefix($ns);
-			if ($prefix != '') {
-				$name = "$prefix:$name";
-			}
+			$name = $this->add_namespace($name, $ns);
 			$this->node->setAttributeNS($ns, $name, $value);
 		}
 		return $this;
@@ -99,7 +117,7 @@ class AFK_ElementNode {
 	 * @return Newly-created child node.
 	 */
 	public function child($name, $text=null, $ns=null) {
-		if ($text == '') {
+		if ($text === '') {
 			$text = null;
 		} elseif (!is_null($text)) {
 			$text = $this->e($text);
@@ -111,10 +129,7 @@ class AFK_ElementNode {
 		if (is_null($ns)) {
 			$child = $dom->createElement($name, $text);
 		} else {
-			$prefix = $dom->lookupPrefix($ns);
-			if ($prefix != '') {
-				$name = "$prefix:$name";
-			}
+			$name = $this->add_namespace($name, $ns);
 			$child = $dom->createElementNS($ns, $name, $text);
 		}
 		$this->node->appendChild($child);
