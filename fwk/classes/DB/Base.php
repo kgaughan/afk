@@ -364,13 +364,11 @@ abstract class DB_Base {
 		return addslashes($s);
 	}
 
-	/** Allows query errors to be logged or echoed to the user. */
-	protected function report_error($query='') {
-		throw new DB_Exception($this->get_last_error(), $query);
-	}
-
-	/** Returns the last error known to the underlying database driver. */
-	public abstract function get_last_error();
+	/**
+	 * Allows query errors to be logged or echoed to the user; subclasses
+	 * should override this.
+	 */
+	protected abstract function report_error($query);
 
 	/**
 	 * The poor man's prepared statements. The first argument is an SQL query
@@ -390,7 +388,7 @@ abstract class DB_Base {
 
 	private function get_arg($i, $type, array $args) {
 		if ($i > count($args)) {
-			throw new DB_Exception("Bad placeholder index: $i");
+			throw new DB_PreparationException("Bad placeholder index: $i");
 		}
 		switch ($type) {
 		case '%':
@@ -398,7 +396,7 @@ abstract class DB_Base {
 		case 's': case 'd': case 'u': case 'f':
 			return $this->make_safe($args[$i - 1], $type);
 		}
-		throw new DB_Exception("Bad placeholder type: '$type'");
+		throw new DB_PreparationException("Bad placeholder type: '$type'");
 	}
 
 	private function make_safe($v, $type='s') {
@@ -425,7 +423,7 @@ abstract class DB_Base {
 		case 'f':
 			return floatval($v);
 		}
-		throw new DB_Exception("make_safe: bad type '$type', should not get here");
+		throw new DB_PreparationException("make_safe: bad type '$type', should not get here");
 	}
 
 	protected function log_query($q) {
