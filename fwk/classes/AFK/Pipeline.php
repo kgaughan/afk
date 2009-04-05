@@ -8,9 +8,10 @@
  */
 
 /**
- * A request processing pipeline.
+ * A request processing pipeline. Pipelines can be inserted into other
+ * pipelines as filters.
  */
-class AFK_Pipeline {
+class AFK_Pipeline implements AFK_Filter {
 
 	private $filters = array();
 
@@ -53,5 +54,10 @@ class AFK_Pipeline {
 	 */
 	public function to_end() {
 		end($this->filters);
+	}
+
+	public function execute(AFK_Pipeline $pipe, $ctx) {
+		$this->start($ctx);
+		$pipe->do_next($ctx);
 	}
 }
