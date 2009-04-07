@@ -10,7 +10,7 @@
 /**
  * Basic functionality common to all handlers.
  */
-/* class AFK_XmlRpcHandler implements AFK_Handler {
+class AFK_XmlRpcHandler implements AFK_Handler {
 
 	public function handle(AFK_Context $ctx) {
 		$ctx->header('Allow: POST');
@@ -25,6 +25,4 @@
 			break;
 		}
 	}
-} */
-
-
+}
