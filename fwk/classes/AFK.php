@@ -162,8 +162,8 @@ class AFK {
 		foreach ($extra_filters as $filter) {
 			$p->add($filter);
 		}
-		$p->add(new AFK_DispatchFilter());
-		$p->add(new AFK_RenderFilter());
+		$p->add(array('AFK_CoreFilters', 'dispatch'));
+		$p->add(array('AFK_CoreFilters', 'render'));
 		$p->start(AFK_Registry::context());
 	}
 

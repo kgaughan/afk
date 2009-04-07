@@ -8,14 +8,17 @@
  */
 
 /**
- * Dispatches the request to the appropriate request handler class, if
- * possible.
+ * Core filter callbacks.
  *
  * @author Keith Gaughan
  */
-class AFK_DispatchFilter implements AFK_Filter {
+class AFK_CoreFilters {
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	/**
+	 * Dispatches the request to the appropriate request handler class, if
+	 * possible.
+	 */
+	public static function dispatch(AFK_Pipeline $pipe, $ctx) {
 		if (is_null($ctx->_handler)) {
 			throw new AFK_Exception('No handler specified.');
 		}
@@ -32,5 +35,35 @@ class AFK_DispatchFilter implements AFK_Filter {
 		$handler->handle($ctx);
 		unset($hander_class, $handler);
 		$pipe->do_next($ctx);
+	}
+
+	/**
+	 * Renders the request, if it can.
+	 */
+	public static function render(AFK_Pipeline $pipe, $ctx) {
+		if ($ctx->rendering_is_allowed()) {
+			if (defined('APP_TEMPLATE_ROOT')) {
+				AFK_TemplateEngine::add_paths(
+					APP_TEMPLATE_ROOT,
+					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
+			}
+			try {
+				ob_start();
+				ob_implicit_flush(false);
+
+				$ctx->defaults(array('page_title' => ''));
+
+				$env = array_merge($ctx->as_array(), compact('ctx'));
+				$t = new AFK_TemplateEngine();
+				$t->render($ctx->view('default'), $env);
+				unset($t, $env);
+
+				$pipe->do_next($ctx);
+				ob_end_flush();
+			} catch (Exception $e) {
+				ob_end_clean();
+				throw $e;
+			}
+		}
 	}
 }
