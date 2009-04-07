@@ -16,12 +16,18 @@ class AFK_Pipeline implements AFK_Filter {
 	private $filters = array();
 
 	/**
-	 * Adds a filter to the end of the pipeline.
+	 * Adds a filter to the end of the pipeline, which can be either a
+	 * callback or an instance of AFK_Filter; callbacks must accept the same
+	 * arguments as AFK_Filter->execute().
 	 *
 	 * @return Self.
 	 */
-	public function add(AFK_Filter $filter) {
-		$this->filters[] = $filter;
+	public function add($filter) {
+		if (is_array($filter) || is_string($filter)) {
+			$this->filters[] = $filter;
+		} else {
+			$this->filters[] = array($filter, 'execute');
+		}
 		return $this;
 	}
 
@@ -43,9 +49,9 @@ class AFK_Pipeline implements AFK_Filter {
 	 */
 	public function do_next($ctx) {
 		$filter = current($this->filters);
-		if (is_object($filter)) {
+		if ($filter !== false) {
 			next($this->filters);
-			$filter->execute($this, $ctx);
+			call_user_func($filter, $this, $ctx);
 		}
 	}
 
