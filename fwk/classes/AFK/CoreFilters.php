@@ -66,4 +66,13 @@ class AFK_CoreFilters {
 			}
 		}
 	}
+
+	/**
+	 * Forces the current AFK_Users implementation to authenticate the user.
+	 */
+	public static function require_auth(AFK_Pipeline $pipe, $ctx) {
+		AFK_Users::force_auth();
+		$pipe->do_next($ctx);
+	}
+
 }
