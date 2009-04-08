@@ -8,7 +8,8 @@
  */
 
 /**
- * Thrown when there are problems loading classes, obviously.
+ * A thin wrapper around the expat XML parsing functions with neat support
+ * for namespaces.
  */
 class AFK_XmlParser {
 

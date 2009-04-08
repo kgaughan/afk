@@ -3,8 +3,8 @@ class DB_Exception extends Exception {
 
 	private $q;
 
-	public function __construct($msg, $q=null) {
-		parent::__construct($msg, 0);
+	public function __construct($msg, $code, $q=null) {
+		parent::__construct($msg, $code);
 		$this->q = $q;
 	}
 

@@ -119,8 +119,13 @@ class DB_MySQL extends DB_Base {
 		return mysql_escape_string($s);
 	}
 
-	public function get_last_error() {
-		return mysql_error($this->dbh);
+	protected function report_error($query) {
+		$code = mysql_errno($this->dbh);
+		$msg = mysql_error($this->dbh);
+		if (in_array($code, array(1062, 1291, 1557, 1586))) {
+			throw new DB_DuplicateException($msg, $code, $query);
+		}
+		throw new DB_Exception($msg, $code, $query);
 	}
 
 	public function begin() {
