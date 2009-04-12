@@ -58,16 +58,9 @@ class AFK_Session_DB extends AFK_Session {
 		if ($data == '') {
 			return $this->destroy($id);
 		}
-		$n = $this->dbh->query_value("
-			SELECT	COUNT(*)
-			FROM	{$this->table}
-			WHERE	name = %s AND id = %s", $this->name, $id);
-		if ($n == 0) {
-			$query = "INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %s, %s, %s)";
-		} else {
-			$query = "UPDATE {$this->table} SET data = %s, ts = %s WHERE name = %s AND id = %s";
+		if ($this->dbh->execute("UPDATE {$this->table} SET data = %s, ts = %s WHERE name = %s AND id = %s", $data, time(), $this->name, $id) == 0) {
+			$this->dbh->execute("INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %s, %s, %s)", $data, time(), $this->name, $id);
 		}
-		$this->dbh->execute($query, $data, time(), $this->name, $id);
 		return true;
 	}
 
