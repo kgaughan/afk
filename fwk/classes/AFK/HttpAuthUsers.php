@@ -69,7 +69,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 			$authentication_info = $this->authenticate($username);
 			if ($authentication_info !== false) {
 				list($id, $expected) = $authentication_info;
-				if ($method->verify($ctx, $expected)) {
+				if ($expected === false || $method->verify($ctx, $expected)) {
 					return $id;
 				}
 			}
@@ -112,5 +112,12 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 				AFK_Context::UNAUTHORISED,
 				array('WWW-Authenticate' => $this->collect_authenticate_headers()));
 		}
+	}
+
+	/**
+	 * Helper method for generating a passphrase hash for storage.
+	 */
+	public static function make_passphrase_hash($username, $passphrase) {
+		return md5($username . ':' . self::$realm . ':' . $passphrase);
 	}
 }
