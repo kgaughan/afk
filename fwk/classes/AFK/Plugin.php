@@ -69,7 +69,7 @@ abstract class AFK_Plugin {
 	 * @param  $location  Path to plugin directories.
 	 * @param  $active    List of plugins to load.
 	 */
-	public static function load($location, $active=array()) {
+	public static function load($location, array $active) {
 		foreach ($active as $name) {
 			$d = "$location/$name";
 			if (is_dir($d) && is_file("$d/plugin.php") && is_file("$d/about.ini")) {
