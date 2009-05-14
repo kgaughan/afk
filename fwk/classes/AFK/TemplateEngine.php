@@ -61,6 +61,25 @@ class AFK_TemplateEngine {
 		}
 	}
 
+	public function render_to_string($name, $values=array()) {
+		$old_envelopes = $this->envelopes;
+		$this->envelopes = array();
+
+		ob_start();
+		try {
+			$this->render($name, $values);
+			$result = ob_get_contents();
+			ob_end_clean();
+			$this->envelopes = $old_envelopes;
+		} catch (Exception $ex) {
+			ob_end_clean();
+			$this->envelopes = $old_envelopes;
+			throw $ex;
+		}
+
+		return $result;
+	}
+
 	/* Creates a dedicated scope for rendering a PHP template. */
 	private function internal_render($__path, &$__values) {
 		array_unshift($this->context, $__values);
