@@ -36,36 +36,28 @@ class AFK_RouteFilter implements AFK_Filter {
 
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		$ctx->merge($this->server);
-		if ($this->ensure_canonicalised_uri($ctx)) {
-			$result = $this->map->search($ctx->PATH_INFO);
-			if (is_array($result)) {
-				// The result is the attributes.
-				$ctx->merge($result, $this->request);
-				unset($result);
-				$pipe->do_next($ctx);
-			} else {
-				// Result is a normalised URL. The original request URL was
-				// most likely missing a trailing slash or had one it
-				// shouldn't have had. Also, ensure there's no duplicate
-				// slashes.
-				$path = $ctx->application_root() . substr($result, 1);
-				if ($ctx->QUERY_STRING != '') {
-					$path .= '?' . $ctx->QUERY_STRING;
-				}
-				$ctx->permanent_redirect($path);
-			}
+		// Ensures the request URI doesn't contain double-slashes.
+		$canon = preg_replace('~/{2,}~', '/', $ctx->REQUEST_URI);
+		if ($canon !== $ctx->REQUEST_URI) {
+			$ctx->permanent_redirect($canon);
 		}
+		$result = $this->map->search($ctx->PATH_INFO);
+		if (!is_array($result)) {
+			// Result is a normalised URL. The original request URL was
+			// most likely missing a trailing slash or had one it
+			// shouldn't have had. Also, ensure there's no duplicate
+			// slashes.
+			$path = $ctx->application_root() . substr($result, 1);
+			if ($ctx->QUERY_STRING != '') {
+				$path .= '?' . $ctx->QUERY_STRING;
+			}
+			$ctx->permanent_redirect($path);
+		}
+		// The result is the attributes.
+		$ctx->merge($result, $this->request);
+		unset($result);
+		$pipe->do_next($ctx);
 	}
 
 	// }}}
-
-	/** Ensures the request URI doesn't contain double-slashes. */
-	private function ensure_canonicalised_uri(AFK_Context $ctx) {
-		$canon = preg_replace('~(/)/+~', '$1', $ctx->REQUEST_URI);
-		if ($canon !== $ctx->REQUEST_URI) {
-			$ctx->permanent_redirect($canon);
-			return false;
-		}
-		return true;
-	}
 }

@@ -31,6 +31,13 @@ class AFK_Context extends AFK_Environment {
 	const CONFLICT = 409;
 	// }}}
 
+	// Caches {{{
+	private $host_prefix = null;
+	private $application_root = null;
+	private $current_request_uri = null;
+	private $current_method = null;
+	// }}}
+
 	/**
 	 * Creates a query string from the given array. If an array element has
 	 * a textual key, that's used as the query string key and the value is
@@ -111,25 +118,23 @@ class AFK_Context extends AFK_Environment {
 	}
 
 	private function get_host_prefix() {
-		static $prefix = null;
-		if (is_null($prefix)) {
-			$prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
+		if (is_null($this->host_prefix)) {
+			$this->host_prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
 			// This array simplifies the logic for deciding if the port should be
 			// included in the URL. The value is the default HTTP/HTTPS port, and
 			// the key is whether it's secure (HTTPS) or not (HTTP). This reduces
 			// the logic down to an array lookup and a comparison.
 			$default_ports = array(true => 443, false => 80);
 			if ($default_ports[$this->is_secure()] != $this->SERVER_PORT) {
-				$prefix .= ':' . $this->SERVER_PORT;
+				$this->host_prefix .= ':' . $this->SERVER_PORT;
 			}
 		}
-		return $prefix;
+		return $this->host_prefix;
 	}
 
 	/** @return The root path of the application. */
 	public function application_root_path() {
-		static $root = null;
-		if (is_null($root)) {
+		if (is_null($this->application_root)) {
 			$path = $this->REQUEST_URI;
 			$len = strlen($path) - strlen($this->PATH_INFO);
 			if ($this->QUERY_STRING == '') {
@@ -137,9 +142,9 @@ class AFK_Context extends AFK_Environment {
 			} else {
 				$len -= strlen($this->QUERY_STRING);
 			}
-			$root = substr($path, 0, $len);
+			$this->application_root = substr($path, 0, $len);
 		}
-		return $root;
+		return $this->application_root;
 	}
 
 	/** @return The root URL of the application. */
@@ -154,14 +159,10 @@ class AFK_Context extends AFK_Environment {
 
 	/** @return The current request URI (without the query string.) */
 	public function request_uri() {
-		static $path = null;
-		if (is_null($path)) {
-			$path = $this->REQUEST_URI;
-			if ($this->QUERY_STRING != '') {
-				$path = substr($path, 0, strpos($path, '?'));
-			}
+		if (is_null($this->current_request_uri)) {
+			list($this->current_request_uri) = explode('?', $this->REQUEST_URI, 2);
 		}
-		return $path;
+		return $this->current_request_uri;
 	}
 
 	// }}}
@@ -170,14 +171,13 @@ class AFK_Context extends AFK_Environment {
 
 	/** @return The HTTP method used for this request. */
 	public function method() {
-		static $method = null;
-		if (is_null($method)) {
-			$method = strtolower($this->REQUEST_METHOD);
-			if ($method == 'post' && isset($this->_method)) {
-				$method = strtolower($this->_method);
+		if (is_null($this->current_method)) {
+			$this->current_method = strtolower($this->REQUEST_METHOD);
+			if ($this->current_method == 'post' && isset($this->_method)) {
+				$this->current_method = strtolower($this->_method);
 			}
 		}
-		return $method;
+		return $this->current_method;
 	}
 
 	/** @return True if this request is running over SSL/TLS. */

@@ -55,26 +55,15 @@ class AFK_Cache_DB implements AFK_Cache {
 			WHERE	id = %s AND ts > %s
 			", md5($id), time() - $max_age);
 
-		if (!is_null($data)) {
-			return unserialize($data);
-		}
-		return null;
+		return is_null($data) ? null : unserialize($data);
 	}
 
 	public function save($id, $item) {
 		$hash = md5($id);
-
-		$item_exists = $this->dbh->query_value("
-			SELECT	COUNT(*)
-			FROM	{$this->table}
-			WHERE	id = %s
-			", $hash) != 0;
-
-		if ($item_exists) {
-			$query = "UPDATE {$this->table} SET data = %s, ts = %s WHERE id = %s";
-		} else {
-			$query = "INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %s, %s)";
+		$data = serialize($item);
+		$now = time();
+		if ($this->dbh->execute("UPDATE {$this->table} SET data = %s, ts = %s WHERE id = %s", $data, $now, $hash) == 0) {
+			$this->dbh->execute("INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %s, %s, %s)", $data, $now, $hash);
 		}
-		$this->dbh->execute($query, serialize($item), time(), $hash);
 	}
 }

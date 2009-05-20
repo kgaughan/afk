@@ -65,9 +65,7 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_clear_errors();
 
 		$result = false;
-		$doc = @DOMDocument::loadXML(
-			$xml,
-			LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOCDATA);
+		$doc = @DOMDocument::loadXML($xml, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOCDATA);
 		if ($doc !== false && ($this->schema === false || $this->validate($doc, $this->schema))) {
 			$result = simplexml_import_dom($doc);
 		}

@@ -12,6 +12,8 @@
  */
 class AFK_HandlerBase implements AFK_Handler {
 
+	private $allowed = array();
+
 	public function handle(AFK_Context $ctx) {
 		$methods = $this->get_available_methods($ctx->view());
 		$ctx->header('Allow: ' . implode(', ', $methods));
@@ -45,25 +47,23 @@ class AFK_HandlerBase implements AFK_Handler {
 	 * view.
 	 */
 	private function get_available_methods($view) {
-		static $allowed = array();
-		if (count($allowed) == 0) {
+		if (count($this->allowed) == 0) {
 			$methods = get_class_methods(get_class($this));
-			$allowed = array();
 			foreach ($methods as $m) {
 				$parts = explode('_', $m, 3);
 				if ($parts[0] == 'on' && count($parts) > 1) {
 					$m_view = array_key_exists(2, $parts) ? $parts[2] : '';
 					if ($m_view == '' || $m_view == $view) {
-						$allowed[] = strtoupper($parts[1]);
+						$this->allowed[] = strtoupper($parts[1]);
 					}
 				}
 			}
-			if (in_array('GET', $allowed)) {
-				$allowed[] = 'HEAD';
+			if (in_array('GET', $this->allowed)) {
+				$this->allowed[] = 'HEAD';
 			}
-			$allowed = array_unique($allowed);
+			$this->allowed = array_unique($this->allowed);
 		}
-		return $allowed;
+		return $this->allowed;
 	}
 
 	protected function on_options(AFK_Context $ctx) {

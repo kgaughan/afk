@@ -65,11 +65,10 @@ class AFK {
 		foreach ($helpers as $name) {
 			if (!array_key_exists($name, self::$loaded_helpers) && self::load(self::$helper_paths, $name) === false) {
 				throw new AFK_Exception("Unknown helper: $name");
-			} else {
-				// There's no significance to the stored value: we're just using
-				// the array keys as a set.
-				self::$loaded_helpers[$name] = true;
 			}
+			// There's no significance to the stored value: we're just using
+			// the array keys as a set.
+			self::$loaded_helpers[$name] = true;
 		}
 	}
 
@@ -129,6 +128,7 @@ class AFK {
 
 	/** Basic bootstrapping logic. Feel free to write your own. */
 	public static function bootstrap() {
+		self::fix_superglobals();
 		self::register_autoloader();
 
 		self::add_helper_path(AFK_ROOT . '/helpers');
@@ -154,8 +154,6 @@ class AFK {
 
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
 	public static function process_request(AFK_RouteMap $map, $extra_filters=array()) {
-		self::fix_superglobals();
-
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
 		$p->add(new AFK_RouteFilter($map, $_SERVER, $_REQUEST));

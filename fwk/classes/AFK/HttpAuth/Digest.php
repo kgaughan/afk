@@ -60,9 +60,8 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 				$this->fields['qop'] . ':' .
 				$a2);
 			return $this->fields['response'] == $valid_response;
-		} else {
-			$this->stale = true;
 		}
+		$this->stale = true;
 		return false;
 	}
 

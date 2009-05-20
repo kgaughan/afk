@@ -16,6 +16,7 @@ class AFK_User {
 
 	private $id;
 	private $username;
+	private $caps = array();
 
 	public function __construct($id, $username) {
 		$this->id = $id;
@@ -44,7 +45,6 @@ class AFK_User {
 
 	// Capabilities {{{
 
-	private $caps = array();
 	public function add_capabilities(array $to_add) {
 		$this->caps = array_unique(array_merge($this->caps, $to_add));
 	}

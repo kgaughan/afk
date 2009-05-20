@@ -74,5 +74,4 @@ class AFK_CoreFilters {
 		AFK_Users::force_auth();
 		$pipe->do_next($ctx);
 	}
-
 }
