@@ -35,7 +35,7 @@ class AFK_RouteMap {
 		// Tweak it to remove or append a trailing slash.
 		$path = substr($path, -1) == '/' ? substr($path, 0, -1) : "$path/";
 		foreach ($this->map as $regex => $_) {
-			if ($this->match($regex, $path)) {
+			if ($this->match($regex, $path) !== false) {
 				return $path;
 			}
 		}

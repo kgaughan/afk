@@ -42,7 +42,7 @@ class AFK_RouteFilter implements AFK_Filter {
 			$ctx->permanent_redirect($canon);
 		}
 		$result = $this->map->search($ctx->PATH_INFO);
-		if (!is_array($result)) {
+		if (is_string($result)) {
 			// Result is a normalised URL. The original request URL was
 			// most likely missing a trailing slash or had one it
 			// shouldn't have had. Also, ensure there's no duplicate
@@ -52,10 +52,12 @@ class AFK_RouteFilter implements AFK_Filter {
 				$path .= '?' . $ctx->QUERY_STRING;
 			}
 			$ctx->permanent_redirect($path);
+			$ctx->to_end();
+		} else {
+			// The result is the attributes.
+			$ctx->merge($result, $this->request);
+			unset($result);
 		}
-		// The result is the attributes.
-		$ctx->merge($result, $this->request);
-		unset($result);
 		$pipe->do_next($ctx);
 	}
 
