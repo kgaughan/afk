@@ -1,7 +1,7 @@
 <?php
 function load_helper() {
 	$args = func_get_args();
-	call_user_func_array(array('AFK', 'load_helper'), $args);
+	call_user_func_array(array(AFK::$loader, 'load_helper'), $args);
 }
 
 function le($path) {

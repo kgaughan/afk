@@ -15,7 +15,17 @@ class AFK_TemplateEngine {
 	/* Envelope stack for the current rendering contexts. */
 	private $envelopes = array();
 
+	private $paths;
+
 	private $current_template = '';
+
+	public function __construct(AFK_PathList $paths) {
+		$this->paths = $paths;
+	}
+
+	public function add_path($path) {
+		$this->paths->prepend($path);
+	}
 
 	// Rendering {{{
 
@@ -126,46 +136,13 @@ class AFK_TemplateEngine {
 
 	// Template Searching {{{
 
-	/* Paths to use when searching for templates. */
-	private static $paths = array();
-	/* Cached template locations. */
-	private static $locations = array();
-
-	/**
-	 * Adds a number of template search directory paths in the order they'll
-	 * be searched.
-	 */
-	public static function add_paths() {
-		$paths = func_get_args();
-		foreach ($paths as $path) {
-			array_unshift(self::$paths, $path);
-		}
-	}
-
 	/* Searches the template directories for a named template. */
 	protected function find($name) {
-		$location = $this->internal_find($name);
+		$location = $this->paths->find($name);
 		if ($location === false) {
 			throw new AFK_TemplateException(sprintf("Unknown template: %s", $name));
 		}
 		return $location;
-	}
-
-	private function internal_find($name) {
-		if (array_key_exists($name, self::$locations)) {
-			return self::$locations[$name];
-		}
-		if (count(self::$paths) == 0) {
-			throw new AFK_TemplateException('No template search paths specified!');
-		}
-		foreach (self::$paths as $d) {
-			$path = "$d/$name.php";
-			if (file_exists($path)) {
-				self::$locations[$name] = $path;
-				return $path;
-			}
-		}
-		return false;
 	}
 
 	// }}}
@@ -175,7 +152,7 @@ class AFK_TemplateEngine {
 	/**
 	 * @return The rendering depth of the current template, i.e., 0 when not
 	 *         in a template, 1 when rendering the root template, &c.
-	 * @note   Envelopes will be at the name depth as the templates that
+	 * @note   Envelopes will be at the same depth as the templates that
 	 *         they envelope, as will any envelope enveloping an envelope.
 	 *         This is because they're considered to be part of the same
 	 *         rendering context.
@@ -203,7 +180,7 @@ class AFK_TemplateEngine {
 		}
 
 		if (is_null($this->envelopes[$end])) {
-			if ($this->internal_find($name . '.envelope') === false) {
+			if ($this->path->find($name . '.envelope') === false) {
 				$name = 'default';
 			}
 			$this->envelopes[$end] = $name;

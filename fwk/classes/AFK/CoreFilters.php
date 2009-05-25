@@ -38,36 +38,6 @@ class AFK_CoreFilters {
 	}
 
 	/**
-	 * Renders the request, if it can.
-	 */
-	public static function render(AFK_Pipeline $pipe, $ctx) {
-		if ($ctx->rendering_is_allowed()) {
-			if (defined('APP_TEMPLATE_ROOT')) {
-				AFK_TemplateEngine::add_paths(
-					APP_TEMPLATE_ROOT,
-					APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
-			}
-			try {
-				ob_start();
-				ob_implicit_flush(false);
-
-				$ctx->defaults(array('page_title' => ''));
-
-				$env = array_merge($ctx->as_array(), compact('ctx'));
-				$t = new AFK_TemplateEngine();
-				$t->render($ctx->view('default'), $env);
-				unset($t, $env);
-
-				$pipe->do_next($ctx);
-				ob_end_flush();
-			} catch (Exception $e) {
-				ob_end_clean();
-				throw $e;
-			}
-		}
-	}
-
-	/**
 	 * Forces the current AFK_Users implementation to authenticate the user.
 	 */
 	public static function require_auth(AFK_Pipeline $pipe, $ctx) {
