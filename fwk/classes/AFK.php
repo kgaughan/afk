@@ -33,6 +33,10 @@ class AFK {
 		call_user_func_array(array(self::$loader, 'load_helper'), $args);
 	}
 
+	public static function add_helper_path($path) {
+		self::$loader->add_helper_path($path);
+	}
+
 	/** Does a clean HTML dump of the given variable. */
 	public static function dump() {
 		$vs = func_get_args();

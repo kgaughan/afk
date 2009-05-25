@@ -180,7 +180,7 @@ class AFK_TemplateEngine {
 		}
 
 		if (is_null($this->envelopes[$end])) {
-			if ($this->path->find($name . '.envelope') === false) {
+			if ($this->paths->find($name . '.envelope') === false) {
 				$name = 'default';
 			}
 			$this->envelopes[$end] = $name;
