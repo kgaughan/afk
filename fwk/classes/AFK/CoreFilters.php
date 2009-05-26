@@ -37,6 +37,26 @@ class AFK_CoreFilters {
 		$pipe->do_next($ctx);
 	}
 
+	/** Does the final stage of request processing: rendering. */
+	public static function render(AFK_Pipeline $pipe, $ctx) {
+		if ($ctx->rendering_is_allowed()) {
+			$engine = AFK_Registry::_('template_engine');
+			$engine->add_path(APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
+			$ctx->defaults(array('page_title' => ''));
+			$env = array_merge($ctx->as_array(), compact('ctx'));
+			try {
+				ob_start();
+				ob_implicit_flush(false);
+				$engine->render($ctx->view('default'), $env);
+				$pipe->do_next($ctx);
+				ob_end_flush();
+			} catch (Exception $e) {
+				ob_end_clean();
+				throw $e;
+			}
+		}
+	}
+
 	/**
 	 * Forces the current AFK_Users implementation to authenticate the user.
 	 */

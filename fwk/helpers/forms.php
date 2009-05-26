@@ -44,7 +44,7 @@ function display_notifications($template='notifications') {
 	}
 
 	ksort($notifications);
-	$t = new AFK_TemplateEngine();
+	$t = AFK_Registry::_('template_engine');
 	foreach ($notifications as $type => $messages) {
 		$t->render($template, compact('type', 'messages'));
 	}

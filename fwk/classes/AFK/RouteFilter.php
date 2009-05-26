@@ -52,7 +52,7 @@ class AFK_RouteFilter implements AFK_Filter {
 				$path .= '?' . $ctx->QUERY_STRING;
 			}
 			$ctx->permanent_redirect($path);
-			$ctx->to_end();
+			$pipe->to_end();
 		} else {
 			// The result is the attributes.
 			$ctx->merge($result, $this->request);

@@ -94,14 +94,17 @@ class AFK {
 		}
 
 		$registry->routes = routes()->get_map();
+
+		$paths = new AFK_PathList();
+		$paths->prepend(AFK_ROOT . '/templates');
+		$paths->prepend(APP_TEMPLATE_ROOT);
+		$registry->template_engine = new AFK_TemplateEngine($paths);
+
 		return init();
 	}
 
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
 	public static function process_request(AFK_RouteMap $map, $extra_filters=array()) {
-		$paths = new AFK_PathList();
-		$paths->prepend(AFK_ROOT . '/templates');
-
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
 		$p->add(new AFK_RouteFilter($map, $_SERVER, $_REQUEST));
@@ -109,7 +112,7 @@ class AFK {
 			$p->add($filter);
 		}
 		$p->add(array('AFK_CoreFilters', 'dispatch'));
-		$p->add(new AFK_RenderFilter(new AFK_TemplateEngine($paths)));
+		$p->add(array('AFK_CoreFilters', 'render'));
 		$p->start(AFK_Registry::context());
 	}
 

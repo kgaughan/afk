@@ -19,8 +19,8 @@ class AFK_TemplateEngine {
 
 	private $current_template = '';
 
-	public function __construct(AFK_PathList $paths) {
-		$this->paths = $paths;
+	public function __construct($paths=null) {
+		$this->paths = is_null($paths) ? new AFK_PathList() : $paths;
 	}
 
 	public function add_path($path) {
