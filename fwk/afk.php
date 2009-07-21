@@ -12,7 +12,7 @@
 define('CRLF', "\r\n");
 
 define('AFK_ROOT', dirname(__FILE__));
-define('AFK_VERSION', '1.2.3');
+define('AFK_VERSION', '1.2.4');
 
 // }}}
 

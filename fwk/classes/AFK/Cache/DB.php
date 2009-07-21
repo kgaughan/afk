@@ -62,8 +62,8 @@ class AFK_Cache_DB implements AFK_Cache {
 		$hash = md5($id);
 		$data = serialize($item);
 		$now = time();
-		if ($this->dbh->execute("UPDATE {$this->table} SET data = %s, ts = %s WHERE id = %s", $data, $now, $hash) == 0) {
-			$this->dbh->execute("INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %s, %s, %s)", $data, $now, $hash);
+		if ($this->dbh->execute("UPDATE {$this->table} SET data = %s, ts = %d WHERE id = %s", $data, $now, $hash) == 0) {
+			$this->dbh->execute("INSERT INTO {$this->table} (data, ts, id) VALUES (%s, %d, %s)", $data, $now, $hash);
 		}
 	}
 }

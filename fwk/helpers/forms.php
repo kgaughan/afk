@@ -63,7 +63,7 @@ function radio_field($name, array $elements, $default=null) {
 			if ($k == $selected) {
 				echo 'checked="checked" ';
 			}
-			echo 'value="', e($k), '">', ee($v), '</label>';
+			echo 'value="', e($k), '">', e($v), '</label>';
 			if (++$i < count($elements)) {
 				echo "<br>\n";
 			}
@@ -129,7 +129,7 @@ function carry_hidden_values() {
  */
 function hidden_fields(array $data, $prefix='') {
 	foreach ($data as $name => $value) {
-		$field = $prefix == '' ? $name : $prefix . '[' . $name . ']';
+		$field = $prefix == '' ? $name : ($prefix . '[' . $name . ']');
 		if (is_array($value)) {
 			hidden_fields($value, $field);
 		} else {

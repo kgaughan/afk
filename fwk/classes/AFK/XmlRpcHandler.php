@@ -14,15 +14,10 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 
 	public function handle(AFK_Context $ctx) {
 		$ctx->header('Allow: POST');
-
-		switch ($ctx->method()) {
-		case 'post':
+		if ($ctx->method() == 'post') {
 			$this->process_request();
-			break;
-
-		default:
+		} else {
 			$ctx->no_such_method(array('post'));
-			break;
 		}
 	}
 }

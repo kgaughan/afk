@@ -59,8 +59,8 @@ class AFK_Session_DB extends AFK_Session {
 			return $this->destroy($id);
 		}
 		$now = time();
-		if ($this->dbh->execute("UPDATE {$this->table} SET data = %s, ts = %s WHERE name = %s AND id = %s", $data, $now, $this->name, $id) == 0) {
-			$this->dbh->execute("INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %s, %s, %s)", $data, $now, $this->name, $id);
+		if ($this->dbh->execute("UPDATE {$this->table} SET data = %s, ts = %d WHERE name = %s AND id = %s", $data, $now, $this->name, $id) == 0) {
+			$this->dbh->execute("INSERT INTO {$this->table} (data, ts, name, id) VALUES (%s, %d, %s, %s)", $data, $now, $this->name, $id);
 		}
 		return true;
 	}
