@@ -156,6 +156,15 @@ abstract class AFK_Users {
 		}
 	}
 
+	public static function member_of() {
+		self::ensure_implementation();
+		$reqs = func_get_args();
+		$user = self::current();
+		if (is_null($user) || !call_user_func_array(array($user, 'member_of'), $reqs)) {
+			self::$impl->require_auth();
+		}
+	}
+
 	public static function force_auth() {
 		if (is_null(self::current())) {
 			self::$impl->require_auth();

@@ -17,6 +17,7 @@ class AFK_User {
 	private $id;
 	private $username;
 	private $caps = array();
+	private $groups = array();
 
 	public function __construct($id, $username) {
 		$this->id = $id;
@@ -57,6 +58,24 @@ class AFK_User {
 		$reqs = func_get_args();
 		$reqs = array_unique($reqs);
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
+	}
+
+	// }}}
+
+	// Groups {{{
+
+	public function add_groups(array $to_add) {
+		$this->groups = array_unique(array_merge($this->groups, $to_add));
+	}
+
+	public function remove_groups(array $to_remove) {
+		$this->groups = array_diff($this->groups, $to_remove);
+	}
+
+	public function member_of() {
+		$reqs = func_get_args();
+		$reqs = array_unique($reqs);
+		return count(array_intersect($this->groups, $reqs)) > 0;
 	}
 
 	// }}}
