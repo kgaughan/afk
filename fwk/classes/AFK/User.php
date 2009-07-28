@@ -55,7 +55,8 @@ class AFK_User {
 	}
 
 	public function can() {
-		return count($reqs) == count(array_intersect($this->caps, array_unique(func_get_args())));
+		$reqs = array_unique(func_get_args());
+		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
 
 	// }}}
