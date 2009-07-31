@@ -40,7 +40,7 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 		// Method taken straight from Paul James' HTTP Digest code at
 		// http://www.peej.co.uk/files/httpdigest.phps
 		$time = ceil(time() / $this->nonce_lifetime) * $this->nonce_lifetime;
-		return md5(date('Y-m-d H:i', $time) . ':' . $env->REMOTE_ADDR . ':' . $this->private_key);
+		return $this->h(date('Y-m-d H:i', $time), $env->REMOTE_ADDR, $this->private_key);
 	}
 
 	public function initialise($realm, $data) {
@@ -49,15 +49,19 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 		return $this->fields['username'];
 	}
 
+	private function h() {
+		return md5(implode(':', func_get_args()));
+	}
+
 	public function verify(AFK_Environment $env, $expected) {
 		if ($this->are_fields_good($env)) {
-			$a2 = md5($env->REQUEST_METHOD . ':' . $this->fields['uri']);
-			$valid_response = md5(
-				$expected . ':' .
-				$this->fields['nonce'] . ':' .
-				$this->fields['nc'] . ':' .
-				$this->fields['cnonce'] . ':' .
-				$this->fields['qop'] . ':' .
+			$a2 = $this->h($env->REQUEST_METHOD, $this->fields['uri']);
+			$valid_response = $this->h(
+				$expected,
+				$this->fields['nonce'],
+				$this->fields['nc'],
+				$this->fields['cnonce'],
+				$this->fields['qop'],
 				$a2);
 			return $this->fields['response'] == $valid_response;
 		}

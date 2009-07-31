@@ -1,5 +1,5 @@
 <?php $this->with_envelope() ?>
-<?php AFK::load_helper('core') ?>
+<?php AFK::load_helper('core', 'events') ?>
 
 <h2>Lost?</h2>
 

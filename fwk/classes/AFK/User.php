@@ -41,7 +41,7 @@ class AFK_User {
 	}
 
 	public function is_logged_in() {
-		return $this->id !== 0;
+		return $this->id !== AFK_Users::ANONYMOUS;
 	}
 
 	// Capabilities {{{
