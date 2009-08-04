@@ -316,8 +316,8 @@ abstract class DB_Base {
 		}
 		$flags = $delayed ? '/*! DELAYED */ ' : '';
 		$keys = implode(', ', array_keys($data));
-		$values = implode("', '", array_map(array($this, 'e'), array_values($data)));
-		return $this->execute("INSERT $flags INTO $table ($keys) VALUES ('$values')");
+		$values = implode(', ', array_map(array($this, 'make_safe'), array_values($data)));
+		return $this->execute("INSERT $flags INTO $table ($keys) VALUES ($values)");
 	}
 
 	/**
