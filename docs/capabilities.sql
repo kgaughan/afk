@@ -43,5 +43,20 @@ CREATE TABLE users_capabilities (
     user_id       INTEGER UNSIGNED  NOT NULL,
     capability_id SMALLINT UNSIGNED NOT NULL,
 
-    PRIMARY KEY (user_id, capability_id)
+    PRIMARY KEY (user_id, capability_id),
+	INDEX ix_capability (capability_id)
+
 );
+
+-- The permissions view makes fetching the capabilities and groups a given user
+-- Much easier than having to explicitly query the details.
+CREATE VIEW permissions AS
+SELECT  users_groups.user_id, capabilities.slug AS capability, groups.slug AS `group`
+FROM    users_groups
+JOIN    groups_capabilities ON groups_capabilities.group_id      = users_groups.group_id
+JOIN    capabilities        ON groups_capabilities.capability_id = capabilities.id
+JOIN    groups              ON groups_capabilities.group_id      = groups.id
+UNION
+SELECT  users_capabilities.user_id, capabilities.slug, NULL
+FROM    users_capabilities
+JOIN    capabilities        ON users_capabilities.capability_id = capabilities.id;
