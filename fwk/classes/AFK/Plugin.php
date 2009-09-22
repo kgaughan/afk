@@ -19,9 +19,9 @@
  * register themselves to listen for the events or event stages they're
  * interested in.
  *
- * about.ini consists of lines of key-value pairs, with the key separated
- * from the value with a equals sign. At a minimum, the following should be
- * specified:
+ * about.ini consists of sets of lines of key-value pairs, with the key
+ * separated from the value with a equals sign. At a minimum, the section
+ * '[plugin]' should be present, and it should contain the following:
  *
  *     Key      Explaination
  *     -------  ------------------------------------------------------------
@@ -38,10 +38,20 @@ abstract class AFK_Plugin {
 	/** This plugin's path. */
 	protected $root;
 
+	/** Contents of about.ini. */
+	protected $about;
+
 	public function __construct() {
 		// So that plugins know where they are.
 		$robj = new ReflectionObject($this);
 		$this->root = dirname($robj->getFileName());
+
+		// Load the config file.
+		$this->about = new AFK_ConfigFile();
+		if ($this->about->read_file($this->root . '/about.ini') === false) {
+			throw new AFK_ConfigurationException(
+				get_class($this) . ': could not read about.ini');
+		}
 
 		// Register event listeners.
 		$evts = $this->get_events();
@@ -51,6 +61,27 @@ abstract class AFK_Plugin {
 			}
 			register_listener($evt, array($this, $fn));
 		}
+	}
+
+	public function get_internal_name() {
+		return basename($this->root);
+	}
+
+	public function get_plugin_description() {
+		// Backwards compatibility with old-style about.ini files.
+		if (!$this->has_section('plugin')) {
+			return $this->about->get_section('DEFAULT');
+		}
+		return $this->about->get_section('plugin');
+	}
+
+	protected function get_setting($name, $default=null) {
+		$section = defined('STATUS') ? STATUS : 'LIVE';
+		return $this->about->get($section, $name, $default);
+	}
+
+	protected function get_setting_descriptions() {
+		return $this->about->get_section('settings');
 	}
 
 	/**
