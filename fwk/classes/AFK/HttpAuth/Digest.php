@@ -50,7 +50,8 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 	}
 
 	private function h() {
-		return md5(implode(':', func_get_args()));
+		$args = func_get_args();
+		return md5(implode(':', $args));
 	}
 
 	public function verify(AFK_Environment $env, $expected) {
