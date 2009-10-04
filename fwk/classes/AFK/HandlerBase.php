@@ -19,7 +19,13 @@ class AFK_HandlerBase implements AFK_Handler {
 		$ctx->header('Allow: ' . implode(', ', $methods));
 		$handler_method = $this->get_handler_method($ctx->method(), $ctx->view());
 		if ($handler_method != '') {
+			if (method_exists($this, 'pre_' . $ctx->method())) {
+				call_user_func(array($this, 'pre_' . $ctx->method()), $ctx);
+			}
 			call_user_func(array($this, $handler_method), $ctx);
+			if (method_exists($this, 'post_' . $ctx->method())) {
+				call_user_func(array($this, 'post_' . $ctx->method()), $ctx);
+			}
 		} elseif (count($methods) == 1) {
 			// Why one? Because the OPTIONS method is always available.
 			$ctx->not_found();
