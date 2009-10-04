@@ -32,7 +32,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		self::$methods[$method->get_name()] = $method;
 	}
 
-	private function collect_authenticate_headers() {
+	private static function collect_authenticate_headers() {
 		$headers = array();
 		foreach (self::$methods as $method) {
 			$headers[] = $method->get_name() . ' ' . $method->get_authenticate_header(self::$realm);
@@ -40,7 +40,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		return $headers;
 	}
 
-	private function get_header(AFK_Environment $ctx) {
+	private static function get_header(AFK_Environment $ctx) {
 		$header = false;
 		if (isset($ctx->HTTP_AUTHORIZATION)) {
 			$header = $ctx->HTTP_AUTHORIZATION;
@@ -60,7 +60,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 
 	private function check() {
 		$ctx = AFK_Registry::context();
-		$header = $this->get_header($ctx);
+		$header = self::get_header($ctx);
 		if ($header !== false) {
 			list($method_name, $data) = $header;
 			$method = self::$methods[$method_name];
@@ -95,7 +95,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		if ($this->id === false && ($id = $this->check()) !== false) {
 			$this->id = $id;
 		}
-		return $this->id !== false ? $this->id : AFK_Users::ANONYMOUS;
+		return $this->id !== false ? $this->id : self::ANONYMOUS;
 	}
 
 	/**
@@ -110,7 +110,7 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 			throw new AFK_HttpException(
 				'You are not authorised for access.',
 				AFK_Context::UNAUTHORISED,
-				array('WWW-Authenticate' => $this->collect_authenticate_headers()));
+				array('WWW-Authenticate' => self::collect_authenticate_headers()));
 		}
 	}
 
