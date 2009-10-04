@@ -15,6 +15,40 @@
 class AFK_CoreFilters {
 
 	/**
+	 * Populates the request context with AFK_UploadedFile instances from the
+	 * $_FILES superglobal.
+	 */
+	public static function populate_uploaded_files(AFK_Pipeline $pipe, $ctx) {
+		foreach ($_FILES as $field_name => $info) {
+			$contents = self::convert_uploaded_files(
+				$info['name'], $info['type'], $info['size'], $info['tmp_name'], $info['error']);
+			if ($contents !== false) {
+				$ctx->$field_name = $contents;
+			}
+		}
+		$pipe->do_next($ctx);
+	}
+
+	private static function convert_uploaded_files($name, $type, $size, $tmp_name, $error) {
+		if (is_array($name)) {
+			$files = array();
+			for ($i = 0; $i < count($name); $i++) {
+				$contents = self::convert_uploaded_files(
+					$name[$i], $type[$i], $size[$i], $tmp_name[$i], $error[$i]);
+				if ($contents !== false) {
+					$files[] = $contents;
+				}
+			}
+			if (count($files) > 0) {
+				return $files;
+			}
+		} elseif ($size > 0) {
+			return new AFK_UploadedFile($name, $type, $size, $tmp_name, $error);
+		}
+		return false;
+	}
+
+	/**
 	 * Dispatches the request to the appropriate request handler class, if
 	 * possible.
 	 */

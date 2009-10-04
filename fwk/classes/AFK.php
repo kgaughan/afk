@@ -108,6 +108,7 @@ class AFK {
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
 		$p->add(new AFK_RouteFilter($map, $_SERVER, $_REQUEST));
+		$p->add(array('AFK_CoreFilters', 'populate_uploaded_files'));
 		foreach ($extra_filters as $filter) {
 			$p->add($filter);
 		}
