@@ -55,7 +55,8 @@ class AFK_User {
 	}
 
 	public function can() {
-		$reqs = array_unique(func_get_args());
+		$reqs = func_get_args();
+		$reqs = array_unique($reqs);
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
 
@@ -72,7 +73,8 @@ class AFK_User {
 	}
 
 	public function member_of() {
-		return count(array_intersect($this->groups, array_unique(func_get_args()))) > 0;
+		$groups = func_get_args();
+		return count(array_intersect($this->groups, array_unique($groups))) > 0;
 	}
 
 	// }}}

@@ -76,12 +76,12 @@ abstract class AFK_Plugin {
 	}
 
 	protected function get_setting($name, $default=null) {
-		$section = defined('STATUS') ? STATUS : 'LIVE';
+		$section = defined('STATUS') ? ('settings:' . STATUS) : 'settings';
 		return $this->about->get($section, $name, $default);
 	}
 
 	protected function get_setting_descriptions() {
-		return $this->about->get_section('settings');
+		return $this->about->get_section('setting-descriptions');
 	}
 
 	/**

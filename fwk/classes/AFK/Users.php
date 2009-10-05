@@ -121,7 +121,7 @@ abstract class AFK_Users {
 	 * Here's an example implementation:
 	 *
 	 * <code>
-	 * if (is_null($this->actual_id)) {
+	 * if ($this->actual_id === false) {
 	 *     $this->actual_id = $this->id;
 	 * }
 	 * $this->id = $id;
@@ -137,8 +137,9 @@ abstract class AFK_Users {
 	 * implementation:
 	 *
 	 * <code>
-	 * if (!is_null($this->actual_id)) {
+	 * if ($this->actual_id !== false) {
 	 *     $this->id = $this->actual_id;
+	 *     $this->actual_id = false;
 	 * }
 	 * </code>
 	 */
