@@ -44,6 +44,10 @@ class AFK_User {
 		return $this->id !== AFK_Users::ANONYMOUS;
 	}
 
+	public function __toString() {
+		return $this->get_display_name();
+	}
+
 	// Capabilities {{{
 
 	public function add_capabilities(array $to_add) {
