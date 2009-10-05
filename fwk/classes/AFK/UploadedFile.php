@@ -41,17 +41,24 @@ class AFK_UploadedFile {
 
 	public function move_to($dir, $filename=false) {
 		if (!is_dir($dir)) {
-			throw Exception(sprintf("'%s' is not a directory.", $dir));
+			throw AFK_PathException(sprintf("'%s' is not a directory.", $dir));
 		}
 		$filename = $filename === false ? $this->original_filename : basename($filename);
-		if (!$this->exists()) {
-			throw Exception(sprintf("'%s' no longer exists.", $filename));
+		if (!$this->upload_exists()) {
+			throw AFK_NoSuchFileException(sprintf("The uploaded temporary file for '%s' no longer exists.", $filename));
 		}
 		if (move_uploaded_file($this->temporary_name, "$dir/$filename")) {
 			$this->temporary_filename = false;
 			return true;
 		}
 		return false;
+	}
+
+	public function copy_exists($dir, $filename=false) {
+		if (!is_dir($dir)) {
+			throw AFK_PathException(sprintf("'%s' is not a directory.", $dir));
+		}
+		return file_exists("$dir/" . ($filename === false ? $this->original_filename : basename($filename)));
 	}
 
 	public function is_good() {
@@ -62,7 +69,7 @@ class AFK_UploadedFile {
 		return in_array($this->mime_type, $valid_types, true);
 	}
 
-	public function exists() {
+	public function upload_exists() {
 		return
 			$this->temporary_filename !== false &&
 			is_uploaded_file($this->temporary_name) &&
@@ -70,14 +77,14 @@ class AFK_UploadedFile {
 	}
 
 	public function delete() {
-		if ($this->exists()) {
+		if ($this->upload_exists()) {
 			unlink($this->temporary_name);
 			$this->temporary_name = false;
 		}
 	}
 
 	public function open() {
-		if ($this->exists()) {
+		if ($this->upload_exists()) {
 			return fopen($this->temporary_name, 'r', false);
 		}
 		return false;
