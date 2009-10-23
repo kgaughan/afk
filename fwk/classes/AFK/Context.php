@@ -185,6 +185,14 @@ class AFK_Context extends AFK_Environment {
 		return $this->__isset('HTTPS');
 	}
 
+	public function is_referrer_this_host() {
+		if (isset($ctx->HTTP_REFERER)) {
+			$parts = parse_url($ctx->HTTP_REFERER);
+			return isset($parts['host']) && $parts['host'] == $ctx->HTTP_HOST;
+		}
+		return false;
+	}
+
 	// }}}
 
 	// Views {{{

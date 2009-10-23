@@ -11,11 +11,11 @@ the bad part of town...</p>
 	looking for. Double-check it, and correct any mistakes.</p>
 	<p>If you&rsquo;ve tried to open this page from a bookmark, it might be
 	incorrect or obsolete.</p>
-<?php } elseif (g(parse_url($ctx->HTTP_REFERER), 'host') == $ctx->HTTP_HOST) { ?>
+<?php } elseif ($ctx->is_referrer_this_host()) { ?>
 	<p>Oops! It looks like we&rsquo;ve messed up. You selected a broken link
 	on this site.</p>
 	<?php
-	list($unhandled) = trigger_event('afk_404',
+	list($unhandled) = trigger_event('afk:404',
 		$ctx->as_array('HTTP_REFERER', 'REQUEST_URI'));
 	?>
 	<?php if (!$unhandled) { ?>
