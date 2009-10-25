@@ -16,6 +16,18 @@ class AFK {
 
 	public static $loader;
 
+	/**
+	 * Ensures the given list of contants are set up by setting them if
+	 * they are not already defined.
+	 */
+	public static function ensure_constants(array $cs) {
+		foreach ($cs as $name => $value) {
+			if (!defined($name)) {
+				define($name, $value);
+			}
+		}
+	}
+
 	public static function register_autoloader() {
 		if (function_exists('spl_autoload_register')) {
 			// Attempt to register an autoloader cleanly...
