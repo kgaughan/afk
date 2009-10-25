@@ -44,6 +44,8 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			$ctx->allow_rendering();
 			$this->render_error500($ctx, $e);
 			$this->report_error(500, $pipe, $ctx);
+
+			AFK::load_helper('events');
 			trigger_event('afk:internal_error', array('ctx' => $ctx, 'exception' => $e));
 		}
 	}
