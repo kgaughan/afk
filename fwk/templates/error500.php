@@ -68,6 +68,12 @@ $quips = array(
 	"Nine out of ten cats don't have a clue what it's for.",
 	'Badger! Badger! Badger! Badger! Badger! Badger! Badger! Badger! Badger! Mushroom! Mushroom!!',
 	'A product of Irish design since 1979.', // With apologies to DHH.
+	'The cake is a LIE!',
+	'But there\'s no sense crying over every mistake / You just keep on trying till you run out of cake',
+	'Now these points of data make a beautiful line / And we\'re out of beta; we\'re releasing on time.',
+	'Anyway, this cake is great: / It\'s so delicious and moist.',
+	'Look at me still talking when there\'s science to do.',
+	'I\'ve experiments to run, there is research to be done \ On the people who are still alive',
 	'Yet another framework framework.');
 ee($quips[mt_rand(0, count($quips) - 1)]);
 ?>
