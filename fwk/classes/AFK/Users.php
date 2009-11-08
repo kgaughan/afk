@@ -129,7 +129,7 @@ abstract class AFK_Users {
 	 */
 	public function act_as_effective_user_impl($id) {
 		// Subclass should implement this.
-		throw new Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
+		throw new AFK_Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
 	}
 
 	/**
@@ -145,7 +145,7 @@ abstract class AFK_Users {
 	 */
 	public function revert_to_actual_user_impl() {
 		// Subclass should implement this.
-		throw new Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
+		throw new AFK_Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
 	}
 
 	public static function prerequisites() {

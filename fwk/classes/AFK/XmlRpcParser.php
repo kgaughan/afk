@@ -54,7 +54,7 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 
 			$this->current_tag = $new_tag;
 		} elseif ($this->expected_tags !== true) {
-			throw new Exception("Boom! [$new_tag]");
+			throw new AFK_XmlParserException("Whoa, Nelly! Unknown tag, '$new_tag'.");
 		}
 	}
 
@@ -144,12 +144,6 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 				'string', 'base64');
 		}
 
-		if (array_key_exists($tag, $branches)) {
-			return $branches[$tag];
-		}
-		if (in_array($tag, $leaves)) {
-			return true;
-		}
-		return false;
+		return array_key_exists($tag, $branches) ? $branches[$tag] : in_array($tag, $leaves);
 	}
 }
