@@ -64,6 +64,10 @@ class AFK_User {
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
 
+	public function get_capabilities() {
+		return $this->caps;
+	}
+
 	// }}}
 
 	// Groups {{{
@@ -79,6 +83,10 @@ class AFK_User {
 	public function member_of() {
 		$groups = func_get_args();
 		return count(array_intersect($this->groups, array_unique($groups))) > 0;
+	}
+
+	public function get_groups() {
+		return $this->groups;
 	}
 
 	// }}}

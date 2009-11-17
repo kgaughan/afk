@@ -100,6 +100,20 @@ abstract class AFK_Users {
 
 	// }}}
 
+	// Saving {{{
+
+	public static function save(AFK_User $user) {
+		self::ensure_implementation();
+		return self::$impl->save_impl($user);
+	}
+
+	public function save_impl(AFK_User $user) {
+		// Subclass should implement this.
+		throw new AFK_Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
+	}
+
+	// }}}
+
 	// Access Control {{{
 
 	public static function act_as_effective_user($id) {

@@ -4,7 +4,7 @@ function load_helper() {
 	call_user_func_array(array(AFK::$loader, 'load_helper'), $args);
 }
 
-function le($path) {
+function le($path='') {
 	$root = AFK_Registry::context()->application_root();
 	ee($root, $path);
 }
