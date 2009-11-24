@@ -107,10 +107,15 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		static $called = false;
 		if (!$called) {
 			$called = true;
+			if ($this->get_current_user_id() == self::ANONYMOUS) {
+				throw new AFK_HttpException(
+					'You are not authorised for access.',
+					AFK_Context::UNAUTHORISED,
+					array('WWW-Authenticate' => self::collect_authenticate_headers()));
+			}
 			throw new AFK_HttpException(
-				'You are not authorised for access.',
-				AFK_Context::UNAUTHORISED,
-				array('WWW-Authenticate' => self::collect_authenticate_headers()));
+				'You lack the required credentials.',
+				AFK_Context::FORBIDDEN);
 		}
 	}
 
