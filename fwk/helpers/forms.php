@@ -51,7 +51,7 @@ function display_notifications($template='notifications') {
 }
 
 function get_field($name, $default=null) {
-	return coalesce(AFK_Registry::context()->__get($name), $default);
+	return AFK::coalesce(AFK_Registry::context()->__get($name), $default);
 }
 
 function radio_field($name, array $elements, $default=null) {

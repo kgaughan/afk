@@ -297,7 +297,7 @@ class AFK_Context extends AFK_Environment {
 	public function try_not_modified($etag) {
 		$status = self::OK;
 		$etag = '"' . $etag . '"';
-		if (in_array($etag, explode(', ', coalesce($this->HTTP_IF_NONE_MATCH, '')))) {
+		if (in_array($etag, explode(', ', AFK::coalesce($this->HTTP_IF_NONE_MATCH, '')))) {
 			$status = self::NOT_MODIFIED;
 			$this->allow_rendering(false);
 		}

@@ -16,6 +16,18 @@ class AFK {
 
 	public static $loader;
 
+	/** @return The first non-empty argument in the arguments passed in. */
+	public static function coalesce() {
+		$args = func_get_args();
+		$default = $args[0];
+		foreach ($args as $arg) {
+			if (!empty($arg)) {
+				return $arg;
+			}
+		}
+		return $default;
+	}
+
 	/**
 	 * Ensures the given list of contants are set up by setting them if
 	 * they are not already defined.
