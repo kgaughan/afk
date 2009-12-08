@@ -17,13 +17,16 @@ function add_notification($type, $message) {
 		$_SESSION[_AFK_NOTIFICATIONS_KEY][$type][] = $message;
 	} else {
 		$ctx = AFK_Registry::context();
-		if (!isset($ctx->__notifications)) {
-			$ctx->__notifications = array();
+		if (isset($ctx->__notifications)) {
+			$notifications = $ctx->__notifications;
+		} else {
+			$notifications = array();
 		}
-		if (!array_key_exists($type, $ctx->__notifications)) {
-			$ctx->__notifications[$type] = array();
+		if (!array_key_exists($type, $notifications)) {
+			$notifications[$type] = array();
 		}
-		$ctx->__notifications[$type][] = $message;
+		$notifications[$type][] = $message;
+		$ctx->__notifications = $notifications;
 	}
 }
 
