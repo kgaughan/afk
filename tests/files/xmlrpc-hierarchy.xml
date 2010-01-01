@@ -6,6 +6,8 @@
       <value>
         <i4>41</i4>
       </value>
+    </param>
+    <param>
       <value>
         <array>
           <data>
@@ -16,8 +18,14 @@
           </data>
         </array>
       </value>
+    </param>
+    <param>
       <value>zoop</value>
+    </param>
+    <param>
       <value></value>
+    </param>
+    <param>
       <value>
         <struct>
           <member>

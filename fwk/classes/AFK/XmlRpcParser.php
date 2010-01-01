@@ -92,6 +92,38 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 				break;
 
 			case 'i4':
+			case 'int':
+				$this->set_current(intval($text));
+				break;
+
+			case 'double':
+				$this->set_current(doubleval($text));
+				break;
+
+			case 'boolean':
+				$this->set_current($text == 'true' || $text == '1');
+				break;
+
+			case 'dateTime.iso8601':
+				// We (the server) assume UTC because we've no way of knowing
+				// otherwise. DW should have included timezone offset
+				// support, but he's a jerk.
+				$p = strptime($text, "%FT%T");
+				if ($p !== false) {
+					$d = new DateTime();
+					$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
+					$d->setTime($p['tm_hour'], $p['tm_min'], $p['tm_sec']);
+					$d->setTimezone(new DateTimeZone('UTC'));
+					$this->set_current($d);
+				} else {
+					// TODO: Can't parse!
+				}
+				break;
+
+			case 'base64':
+				$this->set_current(base64_decode($text));
+				break;
+
 			case 'string':
 				$this->set_current($text);
 				break;
