@@ -103,25 +103,33 @@ class AFK {
 
 		self::$loader = new AFK_Loader();
 		self::$loader->add_helper_path(AFK_ROOT . '/helpers');
-		self::$loader->add_helper_path(APP_ROOT . '/lib/helpers');
+		if (defined('APP_ROOT')) {
+			self::$loader->add_helper_path(APP_ROOT . '/lib/helpers');
+		}
 		self::$loader->add_class_path(AFK_ROOT . '/classes');
-		self::$loader->add_class_path(APP_ROOT . '/lib/classes');
-		self::$loader->add_class_path(APP_ROOT . '/classes');
-		self::$loader->add_class_path(APP_ROOT . '/handlers');
+		if (defined('APP_ROOT')) {
+			self::$loader->add_class_path(APP_ROOT . '/lib/classes');
+			self::$loader->add_class_path(APP_ROOT . '/classes');
+			self::$loader->add_class_path(APP_ROOT . '/handlers');
+		}
 		self::register_autoloader();
 
 		AFK_Registry::set_instance($registry = new AFK_Registry());
 
-		include APP_ROOT . '/config.php';
-		if (file_exists(APP_ROOT . '/lib/lib.php')) {
-			include APP_ROOT . '/lib/lib.php';
+		if (defined('APP_ROOT')) {
+			include APP_ROOT . '/config.php';
+			if (file_exists(APP_ROOT . '/lib/lib.php')) {
+				include APP_ROOT . '/lib/lib.php';
+			}
 		}
 
 		$registry->routes = routes()->get_map();
 
 		$paths = new AFK_PathList();
 		$paths->prepend(AFK_ROOT . '/templates');
-		$paths->prepend(APP_TEMPLATE_ROOT);
+		if (defined('APP_TEMPLATE_ROOT')) {
+			$paths->prepend(APP_TEMPLATE_ROOT);
+		}
 		$registry->template_engine = new AFK_TemplateEngine($paths);
 
 		return init();
