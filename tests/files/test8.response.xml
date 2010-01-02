@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<methodResponse>
+  <params>
+    <param>
+      <value>
+        <struct>
+          <member>
+            <name>times10</name>
+            <value>
+              <int>550</int>
+            </value>
+          </member>
+          <member>
+            <name>times100</name>
+            <value>
+              <int>5500</int>
+            </value>
+          </member>
+          <member>
+            <name>times1000</name>
+            <value>
+              <int>55000</int>
+            </value>
+          </member>
+        </struct>
+      </value>
+    </param>
+  </params>
+</methodResponse>

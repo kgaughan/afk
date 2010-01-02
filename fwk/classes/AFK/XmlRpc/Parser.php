@@ -112,7 +112,7 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 				// We (the server) assume UTC because we've no way of knowing
 				// otherwise. DW should have included timezone offset
 				// support, but he's a jerk.
-				$p = strptime($text, "%FT%T");
+				$p = strptime($text, "%Y%m%dT%T");
 				if ($p !== false) {
 					$d = new DateTime();
 					$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
@@ -125,7 +125,7 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 				break;
 
 			case 'base64':
-				$this->set_current(base64_decode($text));
+				$this->set_current(new AFK_Blob(base64_decode($text)));
 				break;
 
 			case 'string':
@@ -246,7 +246,7 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		} elseif (is_object($value)) {
 			switch (get_class($value)) {
 			case 'DateTime':
-				$parent->child('dateTime.iso8601', $value->format('Y-m-d\TH:i:s'));
+				$parent->child('dateTime.iso8601', $value->format('Ymd\TH:i:s'));
 				break;
 			case 'AFK_Blob':
 				$parent->base64(base64_encode($value->blob));

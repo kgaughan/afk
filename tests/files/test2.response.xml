@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<methodResponse>
+  <params>
+    <param>
+      <value>
+        <struct>
+          <member>
+            <name>ctAmpersands</name>
+            <value>
+              <int>5</int>
+            </value>
+          </member>
+          <member>
+            <name>ctApostrophes</name>
+            <value>
+              <int>1</int>
+            </value>
+          </member>
+          <member>
+            <name>ctLeftAngleBrackets</name>
+            <value>
+              <int>8</int>
+            </value>
+          </member>
+          <member>
+            <name>ctQuotes</name>
+            <value>
+              <int>4</int>
+            </value>
+          </member>
+          <member>
+            <name>ctRightAngleBrackets</name>
+            <value>
+              <int>8</int>
+            </value>
+          </member>
+        </struct>
+      </value>
+    </param>
+  </params>
+</methodResponse>
