@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <methodCall>
   <methodName>examples.testTypes</methodName>
   <params>
@@ -14,17 +14,7 @@
     </param>
     <param>
       <value>
-        <boolean>true</boolean>
-      </value>
-    </param>
-    <param>
-      <value>
         <boolean>0</boolean>
-      </value>
-    </param>
-    <param>
-      <value>
-        <boolean>false</boolean>
       </value>
     </param>
     <param>
@@ -34,7 +24,6 @@
     </param>
     <param>
       <value>
-        <!-- 'Hello, World!' base64 encoded -->
         <base64>SGVsbG8sIFdvcmxkIQ==</base64>
       </value>
     </param>

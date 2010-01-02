@@ -7,7 +7,7 @@
  * that was distributed with this source code.
  */
 
-class AFK_XmlRpcParser extends AFK_XmlParser {
+class AFK_XmlRpc_Parser extends AFK_XmlParser {
 
 	private $method_name;
 
@@ -17,6 +17,8 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 
 	private $data_stack;
 	private $current_value;
+
+	private $is_fault = false;
 
 	public function __construct() {
 		parent::__construct();
@@ -50,6 +52,8 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 				} else {
 					$this->current_value = null;
 				}
+			} elseif ($new_tag == 'fault') {
+				$this->is_fault = true;
 			}
 
 			$this->current_tag = $new_tag;
@@ -101,7 +105,7 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 				break;
 
 			case 'boolean':
-				$this->set_current($text == 'true' || $text == '1');
+				$this->set_current($text == '1');
 				break;
 
 			case 'dateTime.iso8601':
@@ -146,6 +150,20 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 	}
 
 	public function get_result() {
+		if ($this->is_fault) {
+			if (isset($this->current_value[0])) {
+				$fault = $this->current_value[0];
+				if (!isset($fault['faultString'])) {
+					$fault['faultString'] = '';
+				}
+				if (!isset($fault['faultCode'])) {
+					$fault['faultCode'] = 0;
+				}
+			} else {
+				$fault = array('faultCode' => 0, 'faultString' => '');
+			}
+			return new AFK_XmlRpc_Fault($fault['faultCode'], $fault['faultString']);
+		}
 		return array($this->method_name, $this->current_value);
 	}
 
@@ -157,8 +175,10 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 			// Tags that can contain other tags, and which ones are expected
 			// within them.
 			$branches = array(
-				null => array('methodCall'),
+				null => array('methodCall', 'methodResponse'),
 				'methodCall' => array('methodName', 'params'),
+				'methodResponse' => array('params', 'fault'),
+				'fault' => array('value'),
 				'params' => array('param'),
 				'param' => array('value'),
 				'value' => array(
@@ -177,5 +197,75 @@ class AFK_XmlRpcParser extends AFK_XmlParser {
 		}
 
 		return array_key_exists($tag, $branches) ? $branches[$tag] : in_array($tag, $leaves);
+	}
+
+	public static function serialise_request($method, array $args) {
+		$root = new AFK_ElementNode('methodCall');
+		$root->methodName($method);
+		if (count($args) > 0) {
+			$container = $root->params();
+			foreach ($args as $arg) {
+				self::serialise_value($container->param()->value(), $arg);
+			}
+		}
+		return $root->as_xml();
+	}
+
+	public static function serialise_response($value) {
+		$root = new AFK_ElementNode('methodResponse');
+		if (get_class($value) == 'AFK_XmlRpc_Fault') {
+			$container = $root->fault()->value();
+		} else {
+			$container = $root->params()->param()->value();
+		}
+		self::serialise_value($container, $value);
+		return $root->as_xml();
+	}
+
+	public static function serialise_value(AFK_ElementNode $parent, $value) {
+		if (is_array($value)) {
+			$is_numeric = true;
+			foreach ($value as $k => $_v) {
+				if (!is_int($k)) {
+					$is_numeric = false;
+					break;
+				}
+			}
+			if ($is_numeric) {
+				$container = $parent->array()->data();
+				foreach ($value as $v) {
+					self::serialise_value($container->value(), $v);
+				}
+			} else {
+				$container = $parent->struct();
+				foreach ($value as $k => $v) {
+					$member = $container->member()->with('name', $k);
+					self::serialise_value($member->value(), $v);
+				}
+			}
+		} elseif (is_object($value)) {
+			switch (get_class($value)) {
+			case 'DateTime':
+				$parent->child('dateTime.iso8601', $value->format('Y-m-d\TH:i:s'));
+				break;
+			case 'AFK_Blob':
+				$parent->base64(base64_encode($value->blob));
+				break;
+			default:
+				$container = $parent->struct();
+				foreach ($value as $k => $v) {
+					$member = $container->member()->with('name', $k);
+					self::serialise_value($member->value(), $v);
+				}
+			}
+		} elseif (is_int($value)) {
+			$parent->int($value);
+		} elseif (is_double($value)) {
+			$parent->double($value);
+		} elseif (is_bool($value)) {
+			$parent->boolean($value === true ? '1' : '0');
+		} else {
+			$parent->string((string) $value);
+		}
 	}
 }

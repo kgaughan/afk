@@ -3,13 +3,26 @@ require_once dirname(__FILE__) . '/../internal.php';
 
 class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 
-	public function load($file) {
+	private function load($file) {
 		return file_get_contents(dirname(__FILE__) . "/files/$file");
 	}
 
+	private function parse($file) {
+		$p = new AFK_XmlRpc_Parser();
+		$p->parse($this->load($file));
+		return $p->get_result();
+	}
+
+	private function format($xml) {
+		$file = tempnam(sys_get_temp_dir(), 'afk-test');
+		file_put_contents($file, $xml);
+		$result = shell_exec('xmlstarlet fo ' . escapeshellarg($file));
+		unlink($file);
+		return $result;
+	}
+
 	public function test_hierarchy() {
-		$p = new AFK_XmlRpcParser();
-		$p->parse($this->load('xmlrpc-hierarchy.xml'));
+		$r = $this->parse('xmlrpc-hierarchy.xml');
 		$expected = array(
 			'examples.getStateName',
 			array(
@@ -20,20 +33,46 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 				array(
 					'wilma' => array('quux' => 'baz', 'fred' => 'barney'),
 					'foo' => 'bar')));
-		$this->assertEquals($expected, $p->get_result());
+		$this->assertEquals($expected, $r);
+	}
+
+	public function test_fault() {
+		$r = $this->parse('xmlrpc-fault.xml');
+		$this->assertEquals('AFK_XmlRpc_Fault', get_class($r));
+		$this->assertEquals(new AFK_XmlRpc_Fault(4, 'Too many parameters.'), $r);
+	}
+
+	public function test_fault_build() {
+		$expected = $this->load('xmlrpc-fault.xml');
+		$result = AFK_XmlRpc_Parser::serialise_response(
+			new AFK_XmlRpc_Fault(4, 'Too many parameters.'));
+		$expected = $this->format($expected);
+		$result = $this->format($result);
+		$this->assertEquals($expected, $result);
 	}
 
 	public function test_types() {
-		$p = new AFK_XmlRpcParser();
-		$p->parse($this->load('xmlrpc-types.xml'));
-		list($method, $args) = $p->get_result();
-		list($dt, $t1, $t2, $f1, $f2, $d, $b64) = $args;
+		list($method, $args) = $this->parse('xmlrpc-types.xml');
+		list($dt, $t, $f, $d, $b64) = $args;
 		$this->assertEquals('2002-05-12T07:09:42+00:00', $dt->format('c'));
-		$this->assertTrue($t1 === true, '1 == true');
-		$this->assertTrue($t2 === true, 'true == true');
-		$this->assertTrue($f1 === false, '0 == false');
-		$this->assertTrue($f2 === false, 'false == false');
+		$this->assertTrue($t === true, '1 == true');
+		$this->assertTrue($f === false, '0 == false');
 		$this->assertTrue($d === 1.5, '1.5 is 1.5');
 		$this->assertEquals($b64, 'Hello, World!');
+	}
+
+	public function test_types_build() {
+		$expected = $this->load('xmlrpc-types.xml');
+		$result = AFK_XmlRpc_Parser::serialise_request(
+			'examples.testTypes',
+			array(
+				new DateTime('2002-05-12T07:09:42+00:00'),
+				true,
+				false,
+				1.5,
+				new AFK_Blob('Hello, World!')));
+		$expected = $this->format($expected);
+		$result = $this->format($result);
+		$this->assertEquals($expected, $result);
 	}
 }
