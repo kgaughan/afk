@@ -16,7 +16,7 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	private function format($xml) {
 		$file = tempnam(sys_get_temp_dir(), 'afk-test');
 		file_put_contents($file, $xml);
-		$result = shell_exec('xmlstarlet fo ' . escapeshellarg($file));
+		$result = shell_exec('xmlstarlet fo -C -N -e "utf-8" ' . escapeshellarg($file));
 		unlink($file);
 		return $result;
 	}
