@@ -123,7 +123,9 @@ class AFK {
 			}
 		}
 
-		$registry->routes = routes()->get_map();
+		if (function_exists('routes')) {
+			$registry->routes = routes()->get_map();
+		}
 
 		$paths = new AFK_PathList();
 		$paths->prepend(AFK_ROOT . '/templates');
@@ -132,7 +134,10 @@ class AFK {
 		}
 		$registry->template_engine = new AFK_TemplateEngine($paths);
 
-		return init();
+		if (function_exists('init')) {
+			return init();
+		}
+		return array();
 	}
 
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
