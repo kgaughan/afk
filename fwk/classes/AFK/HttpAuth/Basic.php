@@ -16,7 +16,7 @@ class AFK_HttpAuth_Basic implements AFK_HttpAuth {
 	}
 
 	public function get_authenticate_header($realm) {
-		return 'Basic realm="' . $realm . '"';
+		return 'realm="' . $realm . '"';
 	}
 
 	public function initialise($realm, $data) {
