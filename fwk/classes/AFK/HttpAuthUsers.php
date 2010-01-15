@@ -47,9 +47,9 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		} elseif (isset($ctx->Authorization)) {
 			$header = $ctx->Authorization;
 		} elseif (function_exists('apache_request_headers')) {
-			$headers = apache_request_headers();
-			if (array_key_exists('Authorization', $headers)) {
-				$header = $headers['Authorization'];
+			$headers = array_change_key_case(apache_request_headers(), CASE_LOWER);
+			if (array_key_exists('authorization', $headers)) {
+				$header = $headers['authorization'];
 			}
 		}
 		if ($header !== false) {
