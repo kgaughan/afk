@@ -3,6 +3,10 @@ function has_slot($slot) {
 	return AFK_Registry::_('slots')->has($slot);
 }
 
+function set_slot($slot, $content) {
+	return AFK_Registry::_('slots')->set($slot, $content);
+}
+
 function get_slot($slot, $default='') {
 	return AFK_Registry::_('slots')->get($slot, $default);
 }
