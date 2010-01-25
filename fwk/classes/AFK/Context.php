@@ -135,7 +135,7 @@ class AFK_Context extends AFK_Environment {
 	/** @return The root path of the application. */
 	public function application_root_path() {
 		if (is_null($this->application_root)) {
-			$path = $this->REQUEST_URI;
+			$path = rtrim($this->REQUEST_URI, '?');
 			$len = strlen($path) - strlen($this->PATH_INFO);
 			if ($this->QUERY_STRING == '') {
 				$len++;
