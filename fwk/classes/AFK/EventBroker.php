@@ -51,6 +51,15 @@ class AFK_EventBroker {
 		}
 	}
 
+	public function has_callbacks($event) {
+		foreach (array("pre:$event", $event, "post:$event") as $stage) {
+			if (isset($this->callbacks[$stage])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Trigger's an event.
 	 *

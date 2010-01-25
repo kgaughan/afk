@@ -20,18 +20,26 @@ class AFK_Slots {
 	private $slots = array();
 
 	/** Checks if the named slot has content. */
-	public function has($slot) {
+	private function has_int($slot) {
 		return array_key_exists($slot, $this->slots);
+	}
+
+	/** Checks if the named slot has content, or corresponding event handlers. */
+	public function has($slot) {
+		return $this->has_int($slot) || AFK_Registry::_('broker')->has_callbacks("slot:$slot");
 	}
 
 	/** Writes out the content in the given slot. */
 	public function get($slot, $default='') {
-		if ($this->has($slot)) {
-			echo $this->slots[$slot];
-			return true;
+		if (!$this->has($slot)) {
+			echo $default;
+			return false;
 		}
-		echo $default;
-		return false;
+		if ($this->has_int($slot)) {
+			echo $this->slots[$slot];
+		}
+		trigger_event("slot:$slot", null);
+		return true;
 	}
 
 	/** Sets the contents of the given slot. */
@@ -41,7 +49,7 @@ class AFK_Slots {
 
 	/** Appends content to the given slot. */
 	public function append($slot, $contents) {
-		if ($this->has($slot)) {
+		if ($this->has_int($slot)) {
 			$this->slots[$slot] .= $contents;
 		} else {
 			$this->slots[$slot] = $contents;
