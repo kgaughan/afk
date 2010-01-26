@@ -10,7 +10,7 @@
 /**
  * Basic functionality common to all handlers.
  */
-class AFK_XmlRpc_Handler implements AFK_Handler {
+class AFK_XmlRpcHandler implements AFK_Handler {
 
 	// Map from method names to pairs of callbacks, the first of which is the 
 	// method handler callback, and the second being the introspection 
@@ -46,20 +46,25 @@ class AFK_XmlRpc_Handler implements AFK_Handler {
 	}
 
 	public function handle(AFK_Context $ctx) {
-		$ctx->header('Allow: POST');
+		$ctx->header('Allow: POST, HEAD, OPTIONS');
 		$this->add_default_registrations();
 		$this->add_registrations();
 		trigger_event('xmlrpc:register', $this);
 		switch ($ctx->method()) {
 		case 'post':
-			$this->allow_rendering(false);
+			$ctx->allow_rendering(false);
+			if (is_null($ctx->_raw)) {
+				throw new Exception("Argh!");
+			}
 			$p = new AFK_XmlRpc_Parser();
 			$p->parse($ctx->_raw);
 			list($method, $args) = $p->get_result();
-			echo AFK_XmlRpc_Parser::serialise($this->process_request($method, $args));
+			echo AFK_XmlRpc_Parser::serialise_response($this->process_request($method, $args));
+			break;
+		case 'head':
 			break;
 		default:
-			$ctx->no_such_method(array('post'));
+			$ctx->no_such_method(array('POST', 'HEAD', 'OPTIONS'));
 		}
 	}
 
@@ -158,6 +163,6 @@ class AFK_XmlRpc_Handler implements AFK_Handler {
 	}
 
 	private function process_request($method, array $params) {
-		return call_user_func_array($this->method_table[$method], $params);
+		return call_user_func_array($this->method_table[$method][0], $params);
 	}
 }
