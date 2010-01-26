@@ -25,7 +25,7 @@ class AFK_XmlRpc_Handler implements AFK_Handler {
 	// There are two ways in which classes can be registered with the handler. 
 	// Either by (a) subclassing this class and implementing the 
 	// add_registrations() method, or (b) by listening for the 
-	// 'afk:xmlrpc.register' event.
+	// 'xmlrpc:register' event.
 	//
 	// In the latter case, the event is triggered when then handle() method
 	// is called, and the argument supplied is a reference to the current
@@ -49,7 +49,7 @@ class AFK_XmlRpc_Handler implements AFK_Handler {
 		$ctx->header('Allow: POST');
 		$this->add_default_registrations();
 		$this->add_registrations();
-		trigger_event('afk:xmlrpc.register', $this);
+		trigger_event('xmlrpc:register', $this);
 		switch ($ctx->method()) {
 		case 'post':
 			$this->allow_rendering(false);
@@ -134,16 +134,30 @@ class AFK_XmlRpc_Handler implements AFK_Handler {
 	private function on_introspection($method) {
 		switch ($method) {
 		case 'system.getCapabilities':
-			break;
+			return array(
+				'signatures' => array('struct'),
+				'help' => 'Returns a struct giving the capabilities exposed by this server.');
 		case 'system.listMethods':
-			break;
+			return array(
+				'signatures' => array('array'),
+				'help' => 'Returns an array of the methods exposed by this server.');
 		case 'system.methodSignature':
-			break;
+			return array(
+				'signatures' => array('array, string'),
+				'help' => 'Returns the signatures of the given method.');
 		case 'system.methodHelp':
-			break;
+			return array(
+				'signatures' => array('string, string'),
+				'help' => 'Returns a description of what the given method does. This description *may* be HTML.');
 		case 'system.multicall':
-			break;
+			return array(
+				'signatures' => array('array, array'),
+				'help' => 'Executes the given list of boxcarred method calls on this server.');
 		}
 		return null;
+	}
+
+	private function process_request($method, array $params) {
+		return call_user_func_array($this->method_table[$method], $params);
 	}
 }
