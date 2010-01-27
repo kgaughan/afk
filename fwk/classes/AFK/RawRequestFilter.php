@@ -24,7 +24,7 @@ class AFK_RawRequestFilter implements AFK_Filter {
 
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		if (!$this->is_parsed_type($ctx->CONTENT_TYPE)) {
-			$ctx->_raw = $this->read('php://input', $this->limit);
+			$ctx->_raw = self::read('php://input', $this->limit);
 		}
 		$pipe->do_next($ctx);
 	}
@@ -33,19 +33,23 @@ class AFK_RawRequestFilter implements AFK_Filter {
 		return $content_type == 'application/x-www-form-urlencoded' || $content_type == 'multipart/form-data';
 	}
 
-	private function read($source, $amount) {
+	public static function read($source, $limit=false) {
 		$data = false;
 		$fp = fopen($source, 'rb');
 		if (!$fp) {
-			throw new AFK_HttpException('Could not read request body', 500);
+			throw new AFK_HttpException(
+				'Could not read request body',
+				self::INTERNAL_ERROR);
 		}
-		if ($amount === false) {
+		if ($limit === false) {
 			$data = stream_get_contents($fp);
 		} else {
-			$data = fread($fp, $amount);
+			$data = fread($fp, $limit);
 			if (!feof($fp)) {
 				fclose($fp);
-				throw new AFK_HttpException(sprintf("Request was too big, limit is %d", $this->limit), 413);
+				throw new AFK_HttpException(
+					sprintf("Request was too big, limit is %d", $limit),
+					AFK_Context::ENTITY_TOO_LARGE);
 			}
 		}
 		fclose($fp);
