@@ -58,7 +58,7 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 
 			$this->current_tag = $new_tag;
 		} elseif ($this->expected_tags !== true) {
-			throw new AFK_XmlParserException("Whoa, Nelly! Unknown tag, '$new_tag'.");
+			throw new AFK_XmlParserException("Unexpected tag: '$new_tag'");
 		}
 	}
 
@@ -113,15 +113,14 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 				// otherwise. DW should have included timezone offset
 				// support, but he's a jerk.
 				$p = strptime($text, "%Y%m%dT%T");
-				if ($p !== false) {
-					$d = new DateTime();
-					$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
-					$d->setTime($p['tm_hour'], $p['tm_min'], $p['tm_sec']);
-					$d->setTimezone(new DateTimeZone('UTC'));
-					$this->set_current($d);
-				} else {
-					// TODO: Can't parse!
+				if ($p === false) {
+					throw new AFK_XmlParserException("Unparseable dateTime: '$text'");
 				}
+				$d = new DateTime();
+				$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
+				$d->setTime($p['tm_hour'], $p['tm_min'], $p['tm_sec']);
+				$d->setTimezone(new DateTimeZone('UTC'));
+				$this->set_current($d);
 				break;
 
 			case 'base64':
