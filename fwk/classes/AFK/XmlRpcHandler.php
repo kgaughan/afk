@@ -16,6 +16,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	// method handler callback, and the second being the introspection 
 	// callback.
 	private $method_table = array();
+	private $introspection_table = array();
 
 	// Design:
 	//
@@ -25,7 +26,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	// There are two ways in which classes can be registered with the handler. 
 	// Either by (a) subclassing this class and implementing the 
 	// add_registrations() method, or (b) by listening for the 
-	// 'xmlrpc:register' event.
+	// 'afk:xmlrpc_register' event.
 	//
 	// In the latter case, the event is triggered when then handle() method
 	// is called, and the argument supplied is a reference to the current
@@ -46,32 +47,40 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	}
 
 	public function handle(AFK_Context $ctx) {
-		$ctx->header('Allow: POST, HEAD, OPTIONS');
+		$ctx->header('Allow: POST, OPTIONS');
 		$this->add_default_registrations();
 		$this->add_registrations();
-		trigger_event('xmlrpc:register', $this);
+		trigger_event('afk:xmlrpc_register', $this);
 		switch ($ctx->method()) {
 		case 'post':
 			$ctx->allow_rendering(false);
-			if (is_null($ctx->_raw)) {
-				throw new Exception("Argh!");
+			$content = $ctx->_raw;
+			if (is_null($content)) {
+				$content = AFK_RawRequestFilter::read('php://input');
 			}
-			$p = new AFK_XmlRpc_Parser();
-			$p->parse($ctx->_raw);
-			list($method, $args) = $p->get_result();
-			echo AFK_XmlRpc_Parser::serialise_response($this->process_request($method, $args));
+			try {
+				$p = new AFK_XmlRpc_Parser();
+				$p->parse($content);
+				list($method, $args) = $p->get_result();
+				$result = $this->process_request($method, $args);
+			} catch (AFK_XmlParserException $xpex) {
+				$result = new AFK_XmlRpc_Fault(
+					AFK_XmlRpc_Fault::NOT_WELL_FORMED,
+					"Cannot parse request: " . $xpex);
+			}
+			echo AFK_XmlRpc_Parser::serialise_response($result);
 			break;
-		case 'head':
+		case 'options':
 			break;
 		default:
-			$ctx->no_such_method(array('POST', 'HEAD', 'OPTIONS'));
+			$ctx->no_such_method(array('POST', 'OPTIONS'));
 		}
 	}
 
 	public function register($name, $method_callback, $introspection_callback) {
-		if (!isset($this->method_table[$name])) {
-			// TODO: Check both are callable.
-			$this->method_table[$name] = array($method_callback, $introspection_callback);
+		if (!isset($this->method_table[$name]) && is_callable($method_callback) && is_callable($introspection_callback)) {
+			$this->method_table[$name] = $method_callback;
+			$this->introspection_table[$name] = $introspection_callback;
 		}
 	}
 
@@ -91,8 +100,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 
 	private function get_introspection($method) {
 		if (isset($this->method_table[$method])) {
-			list(, $introspection_db) = $this->method_table[$method];
-			return call_user_func($introspection_cb, $method);
+			return call_user_func($this->introspection_table[$method], $method);
 		}
 		return null;
 	}
@@ -163,6 +171,18 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	}
 
 	private function process_request($method, array $params) {
-		return call_user_func_array($this->method_table[$method][0], $params);
+		if (!isset($this->method_table[$method])) {
+			return new AFK_XmlRpc_Fault(
+				AFK_XmlRpc_Fault::UNKNOWN_METHOD,
+				"Unknown method: '$method'");
+		}
+		try {
+			return call_user_func_array($this->method_table[$method], $params);
+		} catch (Exception $ex) {
+			trigger_event('afk:xmlrpc_fault', compact('method', 'params', 'ex'));
+			return new AFK_XmlRpc_Fault(
+				AFK_XmlRpc_Fault::INTERNAL_ERROR,
+				"Uncaught internal exception.");
+		}
 	}
 }
