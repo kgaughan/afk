@@ -15,20 +15,27 @@
 class AFK_Context extends AFK_Environment {
 
 	// Important HTTP response status codes {{{
+
 	const OK = 200;
 	const CREATED = 201;
 	const ACCEPTED = 202;
+
 	const PERMANENT = 301;
 	const FOUND = 302;
 	const SEE_OTHER = 303;
 	const NOT_MODIFIED = 304;
 	const TEMPORARY = 307;
+
 	const BAD_REQUEST = 400;
 	const UNAUTHORISED = 401;
 	const FORBIDDEN = 403;
 	const NOT_FOUND = 404;
 	const BAD_METHOD = 405;
 	const CONFLICT = 409;
+	const ENTITY_TOO_LARGE = 413;
+
+	const INTERNAL_ERROR = 500;
+
 	// }}}
 
 	// Caches {{{
