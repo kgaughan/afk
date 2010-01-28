@@ -32,7 +32,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	private $introspection_table = array();
 
 	private function add_default_registrations() {
-		$introspection_cb = array($this, 'on_introspection');
+		$introspection_cb = array($this, 'on_internal_introspection');
 		$this->register('system.getCapabilities', array($this, 'on_get_capabilities'), $introspection_cb);
 		$this->register('system.listMethods', array($this, 'on_list_methods'), $introspection_cb);
 		$this->register('system.methodSignature', array($this, 'on_method_signature'), $introspection_cb);
@@ -144,7 +144,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		return $results;
 	}
 
-	private function on_introspection($method) {
+	private function on_internal_introspection($method) {
 		switch ($method) {
 		case 'system.getCapabilities':
 			return array(
