@@ -24,7 +24,7 @@ abstract class AFK_Users {
 
 	// Implementation Assignment {{{
 
-	private static $impl = null;
+	protected static $impl = null;
 
 	public static function set_implementation(AFK_Users $impl) {
 		self::$impl = $impl;

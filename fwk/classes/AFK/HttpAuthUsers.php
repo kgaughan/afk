@@ -125,4 +125,15 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 	public static function make_passphrase_hash($username, $passphrase) {
 		return md5($username . ':' . self::$realm . ':' . $passphrase);
 	}
+
+	public static function check_credentials($username, $passphrase) {
+		$info = self::$impl->authenticate($username);
+		if (is_array($info)) {
+			list($id, $a1) = $info;
+			if ($a1 == self::make_passphrase_hash($username, $passphrase)) {
+				return $id;
+			}
+		}
+		return false;
+	}
 }
