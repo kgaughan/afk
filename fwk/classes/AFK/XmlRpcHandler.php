@@ -9,6 +9,19 @@
 
 /**
  * Basic functionality common to all handlers.
+ *
+ * This handler acts as a dispatcher for various registered classes and
+ * methods, performing serialisation and error handling.
+ *
+ * There are two ways in which classes can be registered with the handler.
+ * Either by (a) subclassing this class and implementing the 
+ * add_registrations() method, or (b) by listening for the
+ * 'afk:xmlrpc_register' event.
+ *
+ * In the latter case, the event is triggered when then handle() method
+ * is called, and the argument supplied is a reference to the current
+ * handler instance. This should give any listening plugins, &c. an opportunity
+ * to register themselves to handle various calls.
  */
 class AFK_XmlRpcHandler implements AFK_Handler {
 
@@ -17,22 +30,6 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	// callback.
 	private $method_table = array();
 	private $introspection_table = array();
-
-	// Design:
-	//
-	// This handler acts as a dispatcher for various registered classes and
-	// methods, performing serialisation and error handling.
-	//
-	// There are two ways in which classes can be registered with the handler. 
-	// Either by (a) subclassing this class and implementing the 
-	// add_registrations() method, or (b) by listening for the 
-	// 'afk:xmlrpc_register' event.
-	//
-	// In the latter case, the event is triggered when then handle() method
-	// is called, and the argument supplied is a reference to the current
-	// handler instance. This should give any listening plugins, &c. an 
-	// opportunity to register themselves to handle various calls.
-	//
 
 	private function add_default_registrations() {
 		$introspection_cb = array($this, 'on_introspection');
@@ -53,7 +50,6 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		trigger_event('afk:xmlrpc_register', $this);
 		switch ($ctx->method()) {
 		case 'post':
-			$ctx->allow_rendering(false);
 			$content = $ctx->_raw;
 			if (is_null($content)) {
 				$content = AFK_RawRequestFilter::read('php://input');
@@ -68,12 +64,16 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 					AFK_XmlRpc_Fault::NOT_WELL_FORMED,
 					"Cannot parse request: " . $xpex);
 			}
+			$ctx->header("Content-Type: application/xml; charset=utf-8");
 			echo AFK_XmlRpc_Parser::serialise_response($result);
-			break;
+			/* PASSTHROUGH */
 		case 'options':
+			$ctx->allow_rendering(false);
 			break;
+		case 'get':
+		case 'head':
 		default:
-			$ctx->no_such_method(array('POST', 'OPTIONS'));
+			$ctx->no_such_method();
 		}
 	}
 
@@ -124,8 +124,8 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	private function on_multicall(array $calls) {
 		$results = array();
 		foreach ($calls as $call) {
-			if (!is_array($call)) {
-				return new AFK_XmlRpc_Fault(
+			if (!is_array($call) || !isset($call['methodName'])) {
+				$results[] = new AFK_XmlRpc_Fault(
 					AFK_XmlRpc_Fault::NOT_WELL_FORMED,
 					'system.multicall expected struct');
 			} elseif ($call['methodName'] == 'system.multicall') {
