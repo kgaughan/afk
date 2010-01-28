@@ -78,9 +78,11 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	}
 
 	public function register($name, $method_callback, $introspection_callback) {
-		if (!isset($this->method_table[$name]) && is_callable($method_callback) && is_callable($introspection_callback)) {
+		if (!isset($this->method_table[$name]) && is_callable($method_callback)) {
 			$this->method_table[$name] = $method_callback;
-			$this->introspection_table[$name] = $introspection_callback;
+			if (is_callable($introspection_callback)) {
+				$this->introspection_table[$name] = $introspection_callback;
+			}
 		}
 	}
 
@@ -99,7 +101,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	}
 
 	private function get_introspection($method) {
-		if (isset($this->method_table[$method])) {
+		if (isset($this->introspection_table[$method])) {
 			return call_user_func($this->introspection_table[$method], $method);
 		}
 		return null;
