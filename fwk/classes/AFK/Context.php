@@ -117,7 +117,10 @@ class AFK_Context extends AFK_Environment {
 		if ($path[0] != '/') {
 			$prefix = $this->REQUEST_URI;
 			if (substr($prefix, -1) != '/') {
-				$prefix = dirname($prefix) . '/';
+				$prefix = dirname($prefix);
+				if ($prefix != '/') {
+					$prefix .= '/';
+				}
 			}
 			$path = $prefix . $path;
 		}

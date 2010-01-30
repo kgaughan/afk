@@ -35,7 +35,10 @@ class AFK_Urls {
 			$pb['path'] = $pu['path'];
 		} else {
 			if (substr($pb['path'], -1) != '/') {
-				$pb['path'] = dirname($pb['path']) . '/';
+				$pb['path'] = dirname($pb['path']);
+				if ($pb['path'] != '/') {
+					$pb['path'] .= '/';
+				}
 			}
 			$pb['path'] = self::scrub_path($pb['path'] . $pu['path']);
 		}
