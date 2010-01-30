@@ -267,4 +267,14 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 			$parent->string((string) $value);
 		}
 	}
+
+	/** A helper for the lack of date_set_timestamp() */
+	public static function from_timestamp($ts) {
+		$p = strptime($ts, "%s");
+		$d = new DateTime();
+		$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
+		$d->setTime($p['tm_hour'], $p['tm_min'], $p['tm_sec']);
+		$d->setTimezone(new DateTimeZone('UTC'));
+		return $d;
+	}
 }
