@@ -127,7 +127,7 @@ class AFK_Context extends AFK_Environment {
 		return AFK_Urls::scrub_path($path);
 	}
 
-	private function get_host_prefix() {
+	public function get_host_prefix() {
 		if (is_null($this->host_prefix)) {
 			$this->host_prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
 			// This array simplifies the logic for deciding if the port should be
