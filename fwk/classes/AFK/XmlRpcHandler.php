@@ -31,21 +31,9 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 	private $method_table = array();
 	private $introspection_table = array();
 
-	private function add_default_registrations() {
-		$introspection_cb = array($this, 'on_internal_introspection');
-		$this->register('system.getCapabilities', array($this, 'on_get_capabilities'), $introspection_cb);
-		$this->register('system.listMethods', array($this, 'on_list_methods'), $introspection_cb);
-		$this->register('system.methodSignature', array($this, 'on_method_signature'), $introspection_cb);
-		$this->register('system.methodHelp', array($this, 'on_method_help'), $introspection_cb);
-		$this->register('system.multicall', array($this, 'on_multicall'), $introspection_cb);
-	}
-
-	protected function add_registrations() {
-	}
+	// Internal request processing mechanics {{{
 
 	public function handle(AFK_Context $ctx) {
-		$ctx->header('Allow: POST, OPTIONS');
-		$this->add_default_registrations();
 		$this->add_registrations();
 		trigger_event('afk:xmlrpc_register', $this);
 		switch ($ctx->method()) {
@@ -69,11 +57,28 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 			/* PASSTHROUGH */
 		case 'options':
 			$ctx->allow_rendering(false);
+			$ctx->header('Allow: POST, OPTIONS');
 			break;
 		case 'get':
 		case 'head':
 		default:
-			$ctx->no_such_method();
+			$ctx->no_such_method(array('POST', 'OPTIONS'));
+		}
+	}
+
+	private function process_request($method, array $params) {
+		if (!isset($this->method_table[$method])) {
+			return new AFK_XmlRpc_Fault(
+				AFK_XmlRpc_Fault::UNKNOWN_METHOD,
+				"Unknown method: '$method'");
+		}
+		try {
+			return call_user_func_array($this->method_table[$method], $params);
+		} catch (Exception $ex) {
+			trigger_event('afk:xmlrpc_fault', compact('method', 'params', 'ex'));
+			return new AFK_XmlRpc_Fault(
+				AFK_XmlRpc_Fault::INTERNAL_ERROR,
+				"Uncaught internal exception.");
 		}
 	}
 
@@ -86,7 +91,63 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		}
 	}
 
-	private function on_get_capabilities() {
+	protected function register_each(array $methods) {
+		$introspection_cb = array($this, 'on_introspection');
+		foreach ($methods as $method) {
+			$info = $this->on_introspection($method);
+			$this->register($method, array($this, $info['callback']), $introspection_cb);
+		}
+	}
+
+	// }}}
+
+	// Registration and metadata {{{
+
+	protected function add_registrations() {
+		$this->register_each(array(
+			'system.getCapabilities',
+			'system.listMethods',
+			'system.methodSignature',
+			'system.methodHelp',
+			'system.multicall'));
+	}
+
+	protected function on_introspection($method) {
+		switch ($method) {
+		case 'system.getCapabilities':
+			return array(
+				'signatures' => array('struct'),
+				'callback' => 'call_get_capabilities',
+				'help' => 'Returns a struct giving the capabilities exposed by this server.');
+		case 'system.listMethods':
+			return array(
+				'signatures' => array('array'),
+				'callback' => 'call_list_methods',
+				'help' => 'Returns an array of the methods exposed by this server.');
+		case 'system.methodSignature':
+			return array(
+				'signatures' => array('array, string'),
+				'callback' => 'call_method_signature',
+				'help' => 'Returns the signatures of the given method.');
+		case 'system.methodHelp':
+			return array(
+				'signatures' => array('string, string'),
+				'callback' => 'call_method_help',
+				'help' => 'Returns a description of what the given method does. This description *may* be HTML.');
+		case 'system.multicall':
+			return array(
+				'signatures' => array('array, array'),
+				'callback' => 'call_multicall',
+				'help' => 'Executes the given list of boxcarred method calls on this server.');
+		}
+		return null;
+	}
+
+	// }}}
+
+	// Default methods {{{
+
+	protected function call_get_capabilities() {
 		return array(
 			'faults_interop' => array(
 				'specUrl' => 'http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php',
@@ -96,18 +157,18 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 				'specVersion' => 1)); 
 	}
 
-	private function on_list_methods() {
+	protected function call_list_methods() {
 		return array_keys($this->method_table);
 	}
 
-	private function get_introspection($method) {
+	protected function get_introspection($method) {
 		if (isset($this->introspection_table[$method])) {
 			return call_user_func($this->introspection_table[$method], $method);
 		}
 		return null;
 	}
 
-	private function on_method_signature($method) {
+	protected function call_method_signature($method) {
 		$introspection = $this->get_introspection($method);
 		if (!is_array($introspection) || !isset($introspection['signatures'])) {
 			return array();
@@ -115,7 +176,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		return $introspection['signatures'];
 	}
 
-	private function on_method_help($method) {
+	protected function call_method_help($method) {
 		$introspection = $this->get_introspection($method);
 		if (!is_array($introspection) || !isset($introspection['help'])) {
 			return '';
@@ -123,7 +184,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		return $introspection['help'];
 	}
 
-	private function on_multicall(array $calls) {
+	protected function call_multicall(array $calls) {
 		$results = array();
 		foreach ($calls as $call) {
 			if (!is_array($call) || !isset($call['methodName'])) {
@@ -146,45 +207,5 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		return $results;
 	}
 
-	private function on_internal_introspection($method) {
-		switch ($method) {
-		case 'system.getCapabilities':
-			return array(
-				'signatures' => array('struct'),
-				'help' => 'Returns a struct giving the capabilities exposed by this server.');
-		case 'system.listMethods':
-			return array(
-				'signatures' => array('array'),
-				'help' => 'Returns an array of the methods exposed by this server.');
-		case 'system.methodSignature':
-			return array(
-				'signatures' => array('array, string'),
-				'help' => 'Returns the signatures of the given method.');
-		case 'system.methodHelp':
-			return array(
-				'signatures' => array('string, string'),
-				'help' => 'Returns a description of what the given method does. This description *may* be HTML.');
-		case 'system.multicall':
-			return array(
-				'signatures' => array('array, array'),
-				'help' => 'Executes the given list of boxcarred method calls on this server.');
-		}
-		return null;
-	}
-
-	private function process_request($method, array $params) {
-		if (!isset($this->method_table[$method])) {
-			return new AFK_XmlRpc_Fault(
-				AFK_XmlRpc_Fault::UNKNOWN_METHOD,
-				"Unknown method: '$method'");
-		}
-		try {
-			return call_user_func_array($this->method_table[$method], $params);
-		} catch (Exception $ex) {
-			trigger_event('afk:xmlrpc_fault', compact('method', 'params', 'ex'));
-			return new AFK_XmlRpc_Fault(
-				AFK_XmlRpc_Fault::INTERNAL_ERROR,
-				"Uncaught internal exception.");
-		}
-	}
+	// }}}
 }
