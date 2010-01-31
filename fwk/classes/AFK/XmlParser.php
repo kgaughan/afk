@@ -13,6 +13,9 @@
  */
 class AFK_XmlParser {
 
+	// Maximum chunk size we use for parsing (64kB)
+	const MAX_CHUNK = 65536;
+
 	private $namespaces;
 	private $parser;
 
@@ -51,9 +54,14 @@ class AFK_XmlParser {
 	}
 
 	public function parse($data, $is_final=true) {
-		if (!xml_parse($this->parser, $data, $is_final)) {
-			$code = xml_get_error_code($this->parser);
-			throw new AFK_XmlParserException(xml_error_string($code), $code);
+		$len = strlen($data);
+		for ($offset = 0; $offset < $len; $offset += self::MAX_CHUNK) {
+			$chunk = substr($data, $offset, self::MAX_CHUNK);
+			$is_really_final = $is_final && $offset + self::MAX_CHUNK >= $len;
+			if (!xml_parse($this->parser, $chunk, $is_really_final)) {
+				$code = xml_get_error_code($this->parser);
+				throw new AFK_XmlParserException(xml_error_string($code), $code);
+			}
 		}
 	}
 
