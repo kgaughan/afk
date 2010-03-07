@@ -104,3 +104,5 @@ class AFK_Slots {
 
 	// }}}
 }
+
+AFK::load_helper('events');
