@@ -154,6 +154,37 @@ class AFK {
 		$p->start(AFK_Registry::context());
 	}
 
+	/** Helper method for writing a cron job runner. */
+	public static function run_callables(array $callables) {
+		set_time_limit(0);
+		if (count($callables) > 0) {
+			for ($i = 1; $i < count($callables); $i++) {
+				$callable = explode('::', $callables[$i], 2);
+				// Callable is a function rather than a static method?
+				if (count($callable) == 1) {
+					$callable = $callable[0];
+				}
+				if (is_callable($callable)) {
+					try {
+						call_user_func($callable);
+					} catch (Exception $ex) {
+						list($unhandled) =
+							trigger_event(
+								'afk:internal_error',
+								array('ctx' => null, 'exception' => $ex));
+						// The nuclear option - you should have something to
+						// handle errors.
+						if ($unhandled) {
+							AFK::dump($ex);
+						}
+					}
+				} else {
+					printf("No such callable: %s()\n", $callables[$i]);
+				}
+			}
+		}
+	}
+
 	// }}}
 }
 
