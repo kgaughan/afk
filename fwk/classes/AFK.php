@@ -166,18 +166,22 @@ class AFK {
 					$callable = $callable[0];
 				}
 				if (is_callable($callable)) {
-					$locked = true;
 					$lock = false;
+					$lock_file_path = sprintf('%s/job.%s.lock', $lock_directory, sha1($callables[$i]));
 					if ($use_locking && $callable != 'cronjob') {
-						$lock_hash = sha1($callables[$i]);
-						$lock = fopen("$lock_directory/job.$lock_hash.lock", "a");
-						if (flock($lock, LOCK_EX | LOCK_NB)) {
-							ftruncate($lock, 0);
-							fwrite($lock, $callables[$i]);
-						} else {
+						$locked = false;
+						$lock = fopen($lock_file_path, "a+");
+						if ($lock === false) {
 							fclose($lock);
 							$locked = false;
+						} elseif (flock($lock, LOCK_EX | LOCK_NB)) {
+							fwrite($lock, $callables[$i]);
+							$locked = true;
+						} else {
+							fclose($lock);
 						}
+					} else {
+						$locked = true;
 					}
 					try {
 						if ($locked) {
@@ -197,9 +201,9 @@ class AFK {
 						}
 					}
 					if ($use_locking && $locked && $callable != 'cronjob') {
-						ftruncate($lock, 0);
 						flock($lock, LOCK_UN);
 						fclose($lock);
+						unlink($lock_file_path);
 					}
 				} else {
 					printf("No such callable: %s()\n", $callables[$i]);
