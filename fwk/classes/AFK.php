@@ -155,18 +155,36 @@ class AFK {
 	}
 
 	/** Helper method for writing a cron job runner. */
-	public static function run_callables(array $callables) {
+	public static function run_callables(array $callables, $lock_directory=false) {
 		set_time_limit(0);
 		if (count($callables) > 0) {
-			for ($i = 1; $i < count($callables); $i++) {
+			$use_locking = $lock_directory !== false && is_dir($lock_directory);
+			for ($i = 0; $i < count($callables); $i++) {
 				$callable = explode('::', $callables[$i], 2);
 				// Callable is a function rather than a static method?
 				if (count($callable) == 1) {
 					$callable = $callable[0];
 				}
 				if (is_callable($callable)) {
+					$locked = true;
+					$lock = false;
+					if ($use_locking && $callable != 'cronjob') {
+						$lock_hash = sha1($callables[$i]);
+						$lock = fopen("$lock_directory/job.$lock_hash.lock", "a");
+						if (flock($lock, LOCK_EX | LOCK_NB)) {
+							ftruncate($lock, 0);
+							fwrite($lock, $callables[$i]);
+						} else {
+							fclose($lock);
+							$locked = false;
+						}
+					}
 					try {
-						call_user_func($callable);
+						if ($locked) {
+							call_user_func($callable);
+						} else {
+							printf("Cannot lock for callable job %s()\n", $callables[$i]);
+						}
 					} catch (Exception $ex) {
 						list($unhandled) =
 							trigger_event(
@@ -177,6 +195,11 @@ class AFK {
 						if ($unhandled) {
 							AFK::dump($ex);
 						}
+					}
+					if ($use_locking && $locked && $callable != 'cronjob') {
+						ftruncate($lock, 0);
+						flock($lock, LOCK_UN);
+						fclose($lock);
 					}
 				} else {
 					printf("No such callable: %s()\n", $callables[$i]);
