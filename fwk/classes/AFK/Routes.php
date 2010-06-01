@@ -31,8 +31,8 @@ class AFK_Routes {
 
 	/** Adds a route and an associated resource handler. */
 	public function route($route, $defaults=array(), $patterns=array()) {
-		$all_patterns = array_merge($patterns, $this->patterns);
-		$all_defaults = array_merge($defaults, $this->defaults);
+		$all_patterns = $this->patterns + $patterns;
+		$all_defaults = $this->defaults + $defaults;
 		list($regex, $keys) = $this->compile_route($route, $all_patterns);
 		$this->map->add($regex, $keys, $all_defaults);
 		return $this;

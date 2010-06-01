@@ -51,7 +51,7 @@ class AFK_RouteMap {
 
 			$values = $this->match($regex, $path);
 			if ($values !== false) {
-				return array_merge($defaults, $this->combine($keys, $values));
+				return $this->combine($keys, $values) + $defaults;
 			}
 		}
 		return false;

@@ -77,7 +77,7 @@ class AFK_CoreFilters {
 			$engine = AFK_Registry::_('template_engine');
 			$engine->add_path(APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
 			$ctx->defaults(array('page_title' => ''));
-			$env = array_merge($ctx->as_array(), compact('ctx'));
+			$env = compact('ctx') + $ctx->as_array();
 			try {
 				ob_start();
 				ob_implicit_flush(false);

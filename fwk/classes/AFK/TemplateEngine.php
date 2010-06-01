@@ -59,7 +59,7 @@ class AFK_TemplateEngine {
 			$row_count = count($rows);
 			$current_row = 0;
 			foreach ($rows as $r) {
-				$r = array_merge($r, compact('row_count', 'current_row'));
+				$r = compact('row_count', 'current_row') + $r;
 				$this->internal_render($paths[$current_row % count($paths)], $r);
 				$current_row++;
 			}

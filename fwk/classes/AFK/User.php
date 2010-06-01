@@ -51,7 +51,7 @@ class AFK_User {
 	// Capabilities {{{
 
 	public function add_capabilities(array $to_add) {
-		$this->caps = array_unique(array_merge($this->caps, $to_add));
+		$this->caps = array_unique($to_add + $this->caps);
 	}
 
 	public function remove_capabilities(array $to_remove) {
@@ -73,7 +73,7 @@ class AFK_User {
 	// Groups {{{
 
 	public function add_groups(array $to_add) {
-		$this->groups = array_unique(array_merge($this->groups, $to_add));
+		$this->groups = array_unique($to_add + $this->groups);
 	}
 
 	public function remove_groups(array $to_remove) {

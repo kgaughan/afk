@@ -68,7 +68,7 @@ class AFK_Environment {
 		$args = func_get_args();
 		foreach ($args as $a) {
 			// Values already in the context are preserved.
-			$this->env = array_merge($a, $this->env);
+			$this->env += $a;
 		}
 	} // }}}
 
