@@ -7,41 +7,13 @@
  * that was distributed with this source code.
  */
 
-class AFK_PDO_RowIterator implements Iterator {
+class AFK_PDO_RowIterator extends AFK_PDO_IteratorBase {
 
-	private $stmt;
-	private $n;
-	private $current;
-
-	public function __construct(PDOStatement $stmt) {
-		$this->stmt = $stmt;
-		$this->n = -1;
-		$this->current = false;
-	}
-
-	public function rewind() {
-		// Erm...
-		$this->next();
+	protected function _fetch(PDOStatement $stmt) {
+		return $stmt->fetch(PDO::FETCH_ASSOC);
 	}
 
 	public function current() {
-		return $this->current;
-	}
-
-	public function key() {
-		return $this->n;
-	}
-
-	public function next() {
-		if ($this->current = $this->stmt->fetch(PDO::FETCH_ASSOC)) {
-			$this->n++;
-		} else {
-			$this->stmt->closeCursor();
-		}
-		return $this->current;
-	}
-
-	public function valid() {
-		return $this->current !== false;
+		return $this->_current();
 	}
 }
