@@ -51,9 +51,9 @@ class AFK_Session_PDO extends AFK_Session {
 		$result = AFK_PDOHelper::query_value($this->dbh, "
 			SELECT	data
 			FROM	{$this->table}
-			WHERE	name = ? AND id = ?
-			", array($this->name, $id));
-		return coalesce($result, '');
+			WHERE	name = :name AND id = :id
+			", array('name' => $this->name, 'id' => $id));
+		return $result === false ? '' : $result;
 	}
 
 	public function write($id, $data) {
@@ -68,12 +68,12 @@ class AFK_Session_PDO extends AFK_Session {
 	}
 
 	public function destroy($id) {
-		$this->e("DELETE FROM {$this->table} WHERE name = ? AND id = ?", array($this->name, $id));
+		$this->e("DELETE FROM {$this->table} WHERE name = :name AND id = :id", array('name' => $this->name, 'id' => $id));
 		return true;
 	}
 
 	public function gc($max_age) {
-		$this->e("DELETE FROM {$this->table} WHERE ts < ?", array(time() - $max_age));
+		$this->e("DELETE FROM {$this->table} WHERE ts < :ts", array('ts' => time() - $max_age));
 		return true;
 	}
 
