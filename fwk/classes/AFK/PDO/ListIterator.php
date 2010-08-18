@@ -14,7 +14,7 @@ class AFK_PDO_ListIterator extends AFK_PDO_IteratorBase {
 	}
 
 	public function current() {
-		$current = $this->current_int();
+		$current = $this->_current();
 		return $current === false ? false : $current[0];
 	}
 }
