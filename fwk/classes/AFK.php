@@ -141,7 +141,7 @@ class AFK {
 	}
 
 	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
-	public static function process_request(AFK_RouteMap $map, $extra_filters=array()) {
+	public static function process_request(AFK_RouteMap $map, array $extra_filters=array()) {
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
 		$p->add(new AFK_RouteFilter($map, $_SERVER, $_REQUEST));
@@ -156,180 +156,52 @@ class AFK {
 
 	/** Helper method for writing a cron job runner. */
 	public static function run_callables(array $callables, $lock_directory=false) {
+		if (count($callables) == 0) {
+			return;
+		}
+
+		if ($lock_directory === false || count($callables) == 1 && $callables[0] == 'cronjob') {
+			$locker = new AFK_NullLockingStrategy();
+		} elseif (is_dir($lock_directory)) {
+			$locker = new AFK_FileLockingStrategy($lock_directory . '/job.%s.lock');
+		} else {
+			throw new AFK_Exception(sprintf("Bad lock directory: '%s'", $lock_directory));
+		}
+
 		set_time_limit(0);
-		if (count($callables) > 0) {
-			$use_locking = $lock_directory !== false && is_dir($lock_directory);
-			for ($i = 0; $i < count($callables); $i++) {
-				$callable = explode('::', $callables[$i], 2);
-				// Callable is a function rather than a static method?
-				if (count($callable) == 1) {
-					$callable = $callable[0];
-				}
-				if (is_callable($callable)) {
-					$lock = false;
-					$lock_file_path = sprintf('%s/job.%s.lock', $lock_directory, sha1($callables[$i]));
-					if ($use_locking && $callable != 'cronjob') {
-						$locked = false;
-						$lock = fopen($lock_file_path, "a+");
-						if ($lock === false) {
-							fclose($lock);
-							$locked = false;
-						} elseif (flock($lock, LOCK_EX | LOCK_NB)) {
-							fwrite($lock, $callables[$i]);
-							$locked = true;
-						} else {
-							fclose($lock);
-						}
-					} else {
-						$locked = true;
-					}
-					try {
-						if ($locked) {
-							call_user_func($callable);
-						} else {
-							printf("Cannot lock for callable job %s()\n", $callables[$i]);
-						}
-					} catch (Exception $ex) {
-						list($unhandled) =
-							trigger_event(
-								'afk:internal_error',
-								array('ctx' => null, 'exception' => $ex));
-						// The nuclear option - you should have something to
-						// handle errors.
-						if ($unhandled) {
-							AFK::dump($ex);
-						}
-					}
-					if ($use_locking && $locked && $callable != 'cronjob') {
-						flock($lock, LOCK_UN);
-						fclose($lock);
-						unlink($lock_file_path);
-					}
-				} else {
-					printf("No such callable: %s()\n", $callables[$i]);
+		foreach ($callables as $callable) {
+			self::run_callable($callable, $locker);
+		}
+	}
+
+	private static function run_callable($callable_name, AFK_LockingStrategy $locker) {
+		$callable = explode('::', $callable_name, 2);
+		// Callable is a function rather than a static method?
+		if (count($callable) == 1) {
+			$callable = $callable[0];
+		}
+		if (!is_callable($callable)) {
+			printf("No such callable: %s()\n", $callable_name);
+		} elseif (!$locker->lock($callable_name)) {
+			printf("Cannot lock for callable job %s()\n", $callable_name);
+		} else {
+			try {
+				call_user_func($callable);
+				$locker->unlock();
+			} catch (Exception $ex) {
+				$locker->unlock();
+				list($unhandled) =
+					trigger_event(
+						'afk:internal_error',
+						array('ctx' => null, 'exception' => $ex));
+				// The nuclear option - you should have something to
+				// handle errors.
+				if ($unhandled) {
+					AFK::dump($ex);
 				}
 			}
 		}
 	}
 
 	// }}}
-}
-
-/**
- * Represents a list of paths to load files from.
- *
- * @author Keith Gaughan
- */
-class AFK_PathList {
-
-	private $paths = array();
-	private $path_pattern;
-
-	public function __construct($path_pattern="%s/%s.php") {
-		$this->path_pattern = $path_pattern;
-	}
-
-	public function prepend($path) {
-		array_unshift($this->paths, $path);
-	}
-
-	public function append($path) {
-		$this->paths[] = $path;
-	}
-
-	public function find($name) {
-		foreach ($this->paths as $d) {
-			$path = sprintf($this->path_pattern, $d, $name);
-			if (file_exists($path)) {
-				return $path;
-			}
-		}
-		return false;
-	}
-
-	public function load($name) {
-		$path = $this->find($name);
-		if ($path !== false) {
-			include $path;
-			return $path;
-		}
-		return false;
-	}
-}
-
-/**
- * The class and helper loader.
- *
- * @author Keith Gaughan
- */
-class AFK_Loader {
-
-	private $class_paths;
-	private $helper_paths;
-	private $loaded_helpers;
-
-	public function __construct() {
-		$this->class_paths = new AFK_PathList();
-		$this->helper_paths = new AFK_PathList();
-		$this->loaded_helpers = array();
-	}
-
-	/** Adds a new directory to use when searching for classes. */
-	public function add_class_path($path) {
-		$this->class_paths->append($path);
-	}
-
-	/** Loads the named class from one of the registered class paths. */
-	public function load_class($name) {
-		$path = $this->class_paths->load(str_replace('_', '/', $name));
-		if ($path === false) {
-			throw new AFK_ClassLoadException("Could not load '$name': No class file matching that name.");
-		}
-		if (!$this->class_or_interface_is_loaded($name)) {
-			throw new AFK_ClassLoadException("Could not load '$name': '$path' did not contain it.");
-		}
-		return true;
-	}
-
-	private function class_or_interface_is_loaded($name) {
-		// Workaround for changes introduced in PHP 5.0.2.
-		return class_exists($name, false) || function_exists('interface_exists') && interface_exists($name, false);
-	}
-
-	/** Adds a new directory to use when searching for helpers. */
-	public function add_helper_path($path) {
-		$this->helper_paths->append($path);
-	}
-
-	/** Loads the named helpers. */
-	public function load_helper() {
-		foreach (func_get_args() as $name) {
-			if (!array_key_exists($name, $this->loaded_helpers)) {
-				if ($this->helper_paths->load($name) === false) {
-					throw new AFK_Exception("Unknown helper: $name");
-				}
-				// There's no significance to the stored value: we're
-				// just using the array keys as a set.
-				$this->loaded_helpers[$name] = true;
-			}
-		}
-	}
-}
-
-/**
- * Common logic for AFK-specific exceptions.
- *
- * @author Keith Gaughan
- */
-class AFK_Exception extends Exception {
-
-	public function __construct($msg, $code=0) {
-		parent::__construct($msg, $code);
-	}
-
-	public function __toString() {
-		return sprintf(
-			"%s in %s at line %d:\nCode %d: %s\n\n",
-			get_class($this), $this->file, $this->line, $this->code, $this->message);
-	}
 }

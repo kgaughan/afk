@@ -9,7 +9,7 @@ function afk_get_assets_location($where=null) {
 	return $where;
 }
 
-function stylesheets($styles=array(), $where=null) {
+function stylesheets(array $styles=array(), $where=null) {
 	$root_enc = e(afk_get_assets_location($where));
 	if (count($styles) == 0 || !is_array($styles)) {
 		$styles = array();

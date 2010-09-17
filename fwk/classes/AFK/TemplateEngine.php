@@ -32,7 +32,7 @@ class AFK_TemplateEngine {
 	private $context = array();
 
 	/** Renders the named template. */
-	public function render($name, $values=array()) {
+	public function render($name, array $values=array()) {
 		$this->start_rendering_context($name);
 		$this->internal_render($this->find($name), $values);
 		$this->end_rendering_context($values);
@@ -71,7 +71,7 @@ class AFK_TemplateEngine {
 		}
 	}
 
-	public function render_to_string($name, $values=array()) {
+	public function render_to_string($name, array $values=array()) {
 		$old_envelopes = $this->envelopes;
 		$this->envelopes = array();
 

@@ -23,7 +23,7 @@ class AFK_HttpException extends AFK_Exception {
 	 * @param  $headers  Associative array of HTTP headers to attach to this
 	 *                   exception.
 	 */
-	public function __construct($msg, $code, $headers=array()) {
+	public function __construct($msg, $code, array $headers=array()) {
 		parent::__construct($msg, $code);
 		$this->add_headers($headers);
 	}

@@ -16,7 +16,7 @@ class AFK_Routes {
 	private $defaults = array();
 	private $patterns;
 
-	public function __construct($patterns=array()) {
+	public function __construct(array $patterns=array()) {
 		$this->map = new AFK_RouteMap();
 		$this->patterns = $patterns;
 	}
@@ -30,7 +30,7 @@ class AFK_Routes {
 	}
 
 	/** Adds a route and an associated resource handler. */
-	public function route($route, $defaults=array(), $patterns=array()) {
+	public function route($route, array $defaults=array(), array $patterns=array()) {
 		$all_patterns = $this->patterns + $patterns;
 		$all_defaults = $this->defaults + $defaults;
 		list($regex, $keys) = $this->compile_route($route, $all_patterns);

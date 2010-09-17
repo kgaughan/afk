@@ -323,7 +323,7 @@ abstract class DB_Base {
 	/**
 	 *
 	 */
-	public function update($table, array $data, $qualifiers=array()) {
+	public function update($table, array $data, array $qualifiers=array()) {
 		if (count($data) == 0) {
 			return false;
 		}

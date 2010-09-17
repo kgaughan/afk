@@ -40,4 +40,8 @@ function ee() {
 
 // }}}
 
+// The order and position of these lines is important.
 require AFK_ROOT . '/classes/AFK.php';
+require AFK_ROOT . '/classes/AFK/PathList.php';
+require AFK_ROOT . '/classes/AFK/Loader.php';
+require AFK_ROOT . '/classes/AFK/Exception.php';

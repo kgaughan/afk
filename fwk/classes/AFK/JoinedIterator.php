@@ -8,11 +8,10 @@
  */
 
 /**
- * Chains together a number of iterable objects (instances of Iterator,
- * IteratorAggregate, and arrays) to allow their contents to be iterated
- * over in succession.
+ * Allows iteration over a number of different iterable objects in
+ * succession.
  */
-class AFK_ChainingIterator implements Iterator {
+class AFK_JoinedIterator implements Iterator {
 
 	private $iterators = array();
 
