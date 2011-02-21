@@ -37,34 +37,50 @@ abstract class AFK_Plugin {
 
 	/** This plugin's path. */
 	protected $root;
+	/** The plugin's internal name. */
+	protected $name;
 
 	/** Contents of about.ini. */
 	protected $about;
 
-	public function __construct() {
-		// So that plugins know where they are.
+	private static $registry = array();
+
+	public function __construct($name=null) {
+		$this->root = $this->get_plugin_root();
+		$this->name = coalesce($name, basename($this->root));
+		self::$registry[$this->name] = $this;
+		$this->about = $this->load_configuration();
+		$this->register_listeners();
+	}
+
+	private function get_plugin_root() {
 		$robj = new ReflectionObject($this);
-		$this->root = dirname($robj->getFileName());
-
-		// Load the config file.
-		$this->about = new AFK_ConfigFile();
-		if ($this->about->read_file($this->root . '/about.ini') === false) {
-			throw new AFK_ConfigurationException(
-				get_class($this) . ': could not read about.ini');
-		}
-
-		// Register event listeners.
-		$evts = $this->get_events();
-		foreach ($evts as $evt => $fn) {
-			if (is_numeric($evt)) {
-				$evt = $fn;
-			}
-			register_listener($evt, array($this, $fn));
-		}
+		return dirname($robj->getFileName());
 	}
 
 	public function get_internal_name() {
-		return basename($this->root);
+		return $this->name;
+	}
+
+	public static function by_name($name) {
+		if (isset(self::$registry[$name])) {
+			return self::$registry[$name];
+		}
+		return false;
+	}
+
+	// Settings {{{
+
+	protected function load_configuration() {
+		$config = new AFK_ConfigFile();
+		if ($config->read_file($this->root . '/about.ini') === false) {
+			throw new AFK_ConfigurationException(
+				sprintf(
+					'%s (%s): could not read configuration',
+					$this->get_internal_name(),
+					get_class($this)));
+		}
+		return $config;
 	}
 
 	public function get_plugin_description() {
@@ -80,8 +96,28 @@ abstract class AFK_Plugin {
 		return $this->about->get($section, $name, $default);
 	}
 
+	protected function get_bool_setting($name, $default=false) {
+		return in_array(
+			strtolower($this->get_setting($name, $default ? 'yes' : 'no')),
+			array('yes', 'on', 'true', '1'));
+	}
+
 	protected function get_setting_descriptions() {
 		return $this->about->get_section('setting-descriptions');
+	}
+	
+	// }}}
+	
+	// Events {{{
+
+	private function register_listeners() {
+		$evts = $this->get_events();
+		foreach ($evts as $evt => $fn) {
+			if (is_numeric($evt)) {
+				$evt = $fn;
+			}
+			register_listener($evt, array($this, $fn));
+		}
 	}
 
 	/**
@@ -93,6 +129,8 @@ abstract class AFK_Plugin {
 	 *       of the event stage.
 	 */
 	protected abstract function get_events();
+
+	// }}}
 
 	/**
 	 * Loads the given plugins from the given location.
