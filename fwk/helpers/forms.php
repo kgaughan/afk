@@ -57,7 +57,7 @@ function get_field($name, $default=null) {
 	return AFK::coalesce(AFK_Registry::context()->__get($name), $default);
 }
 
-function radio_field($name, array $elements, $default=null) {
+function radio_field($name, array $elements, $default=null, array $field_ids=array()) {
 	$selected = get_field($name, $default);
 	if (count($elements) > 1) {
 		$i = 0;
@@ -66,6 +66,7 @@ function radio_field($name, array $elements, $default=null) {
 			if ($k == $selected) {
 				echo 'checked="checked" ';
 			}
+			echo 'id="', e(isset($field_ids[$k]) ? $field_ids[$k] : "{$name}__{$k}"), '" ';
 			echo 'value="', e($k), '">', e($v), '</label>';
 			if (++$i < count($elements)) {
 				echo "<br>\n";
@@ -100,13 +101,7 @@ function select_box($name, array $elements, $default=null) {
 	$selected = get_field($name, $default);
 	if (count($elements) > 1) {
 		echo '<select name="', e($name), '" id="', e($name), '">';
-		foreach ($elements as $k => $v) {
-			echo '<option';
-			if ($k == $selected) {
-				echo ' selected="selected"';
-			}
-			echo ' value="', e($k), '">', e($v), '</option>';
-		}
+		select_box__options($elements, $selected, $default);
 		echo '</select>';
 	} elseif (count($elements) == 1) {
 		// This is in a loop so we can be sure what the array key is.
@@ -118,6 +113,35 @@ function select_box($name, array $elements, $default=null) {
 		echo '&mdash;';
 	}
 }
+
+function select_box__options(array $elements, $selected, $default) {
+	foreach ($elements as $k => $v) {
+		if (is_array($v)) {
+			echo '<optgroup label="', e($k), '">';
+			select_box__options($v, $selected, $default);
+			echo '</optgroup>';
+		} else {
+			echo '<option';
+			if ($k == $selected) {
+				echo ' selected="selected"';
+			}
+			echo ' value="', e($k), '">', e($v), '</option>';
+		}
+	}
+}
+
+function select_box_to_title(array $elements, $value, $default=false) {
+	foreach ($elements as $k => $v) {
+		if (is_array($v)) {
+			return select_box_to_title($v, $value);
+		}
+		if ($k == $value) {
+			return $v;
+		}
+	}
+	return $default;
+}
+
 
 /**
  * Renders the named entries in the current context as hidden form fields.
