@@ -8,6 +8,21 @@
  */
 
 /**
+ * Wraps a PHP error that's been converted to an exception.
+ */
+class AFK_TrappedErrorException extends AFK_Exception {
+
+	protected $ctx;
+
+	public function __construct($msg, $code, $file, $line, $ctx) {
+		parent::__construct($msg, $code);
+		$this->file = $file;
+		$this->line = $line;
+		$this->ctx  = $ctx;
+	}
+}
+
+/**
  * Traps exceptions thrown within the application, converting them to
  * user-friendly screens. This class also traps and converts PHP errors to
  * exceptions.
@@ -25,15 +40,21 @@
 class AFK_ExceptionTrapFilter implements AFK_Filter {
 
 	public function convert_error($errno, $errstr, $errfile, $errline, $ctx) {
-		throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
+		// Only trigger the exception if the error hasn't been suppressed with '@'.
+		if (error_reporting() > 0) {
+			restore_error_handler();
+			throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
+		}
+		return false;
 	}
 
 	public function execute(AFK_Pipeline $pipe, $ctx) {
-		set_error_handler(array($this, 'convert_error'), E_ALL);
-
 		try {
+			set_error_handler(array($this, 'convert_error'), E_ALL);
 			$pipe->do_next($ctx);
+			restore_error_handler();
 		} catch (AFK_HttpException $he) {
+			restore_error_handler();
 			$ctx->allow_rendering();
 			foreach ($he->get_headers() as $h) {
 				$ctx->header($h);
@@ -41,6 +62,12 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 			$ctx->message = $he->getMessage();
 			$this->report_error($he->getCode(), $pipe, $ctx);
 		} catch (Exception $e) {
+			// The previous exception handler is restored previously to
+			// this being thrown, so there's no need.
+			if (get_class($e) != 'AFK_TrappedErrorException') {
+				restore_error_handler();
+			}
+
 			$ctx->allow_rendering();
 			$this->render_error500($ctx, $e);
 			$this->report_error(500, $pipe, $ctx);
@@ -174,19 +201,4 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	}
 
 	// }}}
-}
-
-/**
- * Wraps a PHP error that's been converted to an exception.
- */
-class AFK_TrappedErrorException extends AFK_Exception {
-
-	protected $ctx;
-
-	public function __construct($msg, $code, $file, $line, $ctx) {
-		parent::__construct($msg, $code);
-		$this->file = $file;
-		$this->line = $line;
-		$this->ctx  = $ctx;
-	}
 }
