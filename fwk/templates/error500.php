@@ -78,7 +78,7 @@ $quips = array(
 ee($quips[mt_rand(0, count($quips) - 1)]);
 ?>
 <br>
-Copyright &copy; Keith Gaughan, <?php echo date('Y') ?>.
+Copyright &copy; Keith Gaughan, <?php echo gmdate('Y') ?>.
 </address>
 
 </body></html>

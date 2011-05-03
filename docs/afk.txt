@@ -214,7 +214,7 @@ context:
 				$ctx->name = "Anon E. Mouse";
 			}
 			// Current date formatted according to RFC 2822.
-			$ctx->now = date('r');
+			$ctx->now = gmdate('r');
 		}
 	}
 	?>

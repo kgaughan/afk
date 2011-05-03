@@ -40,7 +40,7 @@ class AFK_HttpAuth_Digest implements AFK_HttpAuth {
 		// Method taken straight from Paul James' HTTP Digest code at
 		// http://www.peej.co.uk/files/httpdigest.phps
 		$time = ceil(time() / $this->nonce_lifetime) * $this->nonce_lifetime;
-		return $this->h(date('Y-m-d H:i', $time), $env->REMOTE_ADDR, $this->private_key);
+		return $this->h(gmdate('Y-m-d H:i', $time), $env->REMOTE_ADDR, $this->private_key);
 	}
 
 	public function initialise($realm, $data) {
