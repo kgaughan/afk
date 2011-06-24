@@ -83,12 +83,15 @@ function radio_field($name, array $elements, $default=null, array $field_ids=arr
 	}
 }
 
-function checkbox_field($name, $value) {
-	echo '<input type="checkbox" name="', e($name), '" value="', e($value);
-	if (get_field($name) == $value) {
-		echo '" checked="checked';
+function checkbox_field($name, $value, $id=null) {
+	echo '<input type="checkbox" name="', e($name), '" value="', e($value), '"';
+	if (!is_null($id)) {
+		echo ' id="', e($id), '"';
 	}
-	echo '">';
+	if (get_field($name) == $value) {
+		echo ' checked="checked"';
+	}
+	echo '>';
 }
 
 /**
