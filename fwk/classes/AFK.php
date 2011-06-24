@@ -182,7 +182,7 @@ class AFK {
 		}
 		if (!is_callable($callable)) {
 			printf("No such callable: %s()\n", $callable_name);
-		} elseif (!$locker->lock($callable_name)) {
+		} elseif (!$locker->lock(APP_ROOT . ':' . $callable_name)) {
 			printf("Cannot lock for callable job %s()\n", $callable_name);
 		} else {
 			try {
