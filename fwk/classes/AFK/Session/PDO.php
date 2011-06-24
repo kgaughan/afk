@@ -62,7 +62,11 @@ class AFK_Session_PDO extends AFK_Session {
 		}
 		$args = array('name' => $this->name, 'now' => time(), 'data' => $data, 'id' => $id);
 		if ($this->e("UPDATE {$this->table} SET data = :data, ts = :now WHERE name = :name AND id = :id", $args) == 0) {
-			$this->e("INSERT INTO {$this->table} (data, ts, name, id) VALUES (:data, :now, :name, :id)", $args);
+			try {
+				$this->e("INSERT INTO {$this->table} (data, ts, name, id) VALUES (:data, :now, :name, :id)", $args);
+			} catch (PDOException $ex) {
+				return false;
+			}
 		}
 		return true;
 	}
