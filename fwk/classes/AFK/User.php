@@ -80,6 +80,10 @@ class AFK_User {
 		$this->groups = array_diff($this->groups, $to_remove);
 	}
 
+	public function set_groups(array $slugs) {
+		$this->groups = array_unique($slugs);
+	}
+
 	public function member_of() {
 		$groups = func_get_args();
 		return count(array_intersect($this->groups, array_unique($groups))) > 0;
