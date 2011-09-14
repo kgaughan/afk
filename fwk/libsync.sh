@@ -54,36 +54,40 @@ afk_deploy () {
 
 	read version <version
 
-	if test -e "deployment/$target.target"; then
-		# Upload data.
-		cat deployment/$target.target | while read ip deploy_user dir; do
-			dest="$deploy_user@$ip:$dir/$version"
-			echo -en "Syncing to \033[1m$dest\033[0m: "
-			echo -n "codebase, "
-			rsync -rlptzL --delete --exclude-from=deployment/exclude --rsh=$SSH . "$dest"
-			site_config=default
-			if test -f "deployment/configurations/$target/$ip.php"; then
-				site_config="$target/$ip"
-			fi
-			echo -n "site configuration, "
-			rsync -tLz --rsh=$SSH "deployment/configurations/$site_config.php" "$dest/site-config.php"
-			echo -e "\033[1mdone\033[0m."
-		done
-
-		# Switch deployed version.
-		echo -n "Switching current on: "
-		cat deployment/$target.target | while read ip deploy_user dir; do
-			cdir="$dir/current"
-			vdir="$dir/$version"
-			echo -n "$ip, "
-			echo "cd '$dir'; test -e current && rm current; ln -s $version current" | ssh "$deploy_user@$ip" /bin/sh
-		done
-		echo -e "\033[1mdone\033[0m."
-		return 0
-	else
+	if ! test -e "deployment/$target.target"; then
 		echo "No can do: deployment target '$target' doesn't exist."
 		return 1
 	fi
+
+	# Upload data.
+	cat deployment/$target.target | while read ip deploy_user dir; do
+		dest="$deploy_user@$ip:$dir/$version"
+		echo -en "Syncing to \033[1m$dest\033[0m: "
+		echo -n "codebase, "
+		rsync -rlptzL --delete --exclude-from=deployment/exclude --rsh=$SSH . "$dest"
+		site_config=default
+		if test -f "deployment/configurations/$target/$ip.php"; then
+			site_config="$target/$ip"
+		fi
+		echo -n "site configuration, "
+		rsync -tLz --rsh=$SSH "deployment/configurations/$site_config.php" "$dest/site-config.php"
+		echo -e "\033[1mdone\033[0m."
+	done
+
+	if ! pre_switch $target; then
+		return 1
+	fi
+
+	# Switch deployed version.
+	echo -n "Switching current on: "
+	cat deployment/$target.target | while read ip deploy_user dir; do
+		cdir="$dir/current"
+		vdir="$dir/$version"
+		echo -n "$ip, "
+		echo "cd '$dir'; test -e current && rm current; ln -s $version current" | ssh "$deploy_user@$ip" /bin/sh
+	done
+	echo -e "\033[1mdone\033[0m."
+	return 0
 }
 
 afk_php_lint () {
@@ -238,6 +242,10 @@ pre_deploy () {
 }
 
 pre_dispatch () {
+	# This function is a dummy hook - replace it with your own.
+	:
+}
+pre_switch () {
 	# This function is a dummy hook - replace it with your own.
 	:
 }
