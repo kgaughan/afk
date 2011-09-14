@@ -7,6 +7,8 @@
  * that was distributed with this source code.
  */
 
+class AFK_BadSlugException extends AFK_Exception {}
+
 /**
  * Represents the collection of all groups.
  *
@@ -56,7 +58,7 @@ abstract class AFK_Groups {
 		if (!$this->has($slug)) {
 			$this->load_all();
 			if (!$this->has($slug)) {
-				throw new AFK_Exception(sprintf("Bad group slug: %s", $slug));
+				throw new AFK_BadSlugException(sprintf("Bad group slug: %s", $slug));
 			}
 		}
 		return $this->instances[$slug];
