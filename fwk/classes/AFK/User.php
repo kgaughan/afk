@@ -14,8 +14,8 @@
  */
 class AFK_User {
 
-	private $id;
-	private $username;
+	protected $id;
+	protected $username;
 	private $caps = array();
 	private $groups = array();
 
