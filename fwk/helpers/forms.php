@@ -104,7 +104,7 @@ function select_box($name, array $elements, $default=null) {
 	$selected = get_field($name, $default);
 	if (count($elements) > 1) {
 		echo '<select name="', e($name), '" id="', e($name), '">';
-		select_box__options($elements, $selected, $default);
+		select_box__options($elements, $selected);
 		echo '</select>';
 	} elseif (count($elements) == 1) {
 		// This is in a loop so we can be sure what the array key is.
@@ -117,11 +117,11 @@ function select_box($name, array $elements, $default=null) {
 	}
 }
 
-function select_box__options(array $elements, $selected, $default) {
+function select_box__options(array $elements, $selected) {
 	foreach ($elements as $k => $v) {
 		if (is_array($v)) {
 			echo '<optgroup label="', e($k), '">';
-			select_box__options($v, $selected, $default);
+			select_box__options($v, $selected);
 			echo '</optgroup>';
 		} else {
 			echo '<option';
@@ -136,7 +136,7 @@ function select_box__options(array $elements, $selected, $default) {
 function select_box_to_title(array $elements, $value, $default=false) {
 	foreach ($elements as $k => $v) {
 		if (is_array($v)) {
-			return select_box_to_title($v, $value);
+			return select_box_to_title($v, $value, $default);
 		}
 		if ($k == $value) {
 			return $v;
