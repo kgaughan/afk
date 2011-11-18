@@ -75,7 +75,7 @@ abstract class AFK_Groups {
 		self::ensure_implementation();
 		$result = array();
 		foreach ($slugs as $slug) {
-			$result[$slugs] = self::$impl->internal_get($slug);
+			$result[$slug] = self::$impl->internal_get($slug);
 		}
 		return $result;
 	}
