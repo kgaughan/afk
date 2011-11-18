@@ -63,6 +63,9 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		$header = self::get_header($ctx);
 		if ($header !== false) {
 			list($method_name, $data) = $header;
+			if (!isset(self::$methods[$method_name])) {
+				return false;
+			}
 			$method = self::$methods[$method_name];
 
 			$username = $method->initialise(self::$realm, $data);
