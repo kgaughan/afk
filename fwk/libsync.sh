@@ -245,6 +245,7 @@ pre_dispatch () {
 	# This function is a dummy hook - replace it with your own.
 	:
 }
+
 pre_switch () {
 	# This function is a dummy hook - replace it with your own.
 	:
