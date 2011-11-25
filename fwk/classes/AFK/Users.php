@@ -95,6 +95,17 @@ abstract class AFK_Users {
 
 	public static function get($id) {
 		self::ensure_implementation();
+
+		// An array of IDs to fetch.
+		if (is_array($id)) {
+			self::preload($id);
+			$users = array();
+			foreach ($id as $actual_id) {
+				$users[$actual_id] = self::$impl->internal_get($actual_id);
+			}
+			return $users;
+		}
+
 		return self::$impl->internal_get($id);
 	}
 
