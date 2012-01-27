@@ -104,7 +104,7 @@ afk_php_lint () {
 }
 
 afk_find_changed_php_files_svn () {
-	svn status | grep '^M .*\.php' | cut -c 8-
+	svn status --xml | xmlstarlet sel -t -m '//entry' -i "wc-status[@item='modified' or @item='added']" -v '@path' -n | grep '.php$'
 }
 
 afk_find_all_php_files () {
