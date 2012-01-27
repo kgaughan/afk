@@ -58,9 +58,13 @@ class AFK_TemplateEngine {
 
 			$row_count = count($rows);
 			$current_row = 0;
-			foreach ($rows as $r) {
-				$r = compact('row_count', 'current_row') + $r;
-				$this->internal_render($paths[$current_row % count($paths)], $r);
+			foreach ($rows as $row) {
+				if (is_object($row)) {
+					$row = compact('row_count', 'current_row', 'row');
+				} else {
+					$row = compact('row_count', 'current_row') + $row;
+				}
+				$this->internal_render($paths[$current_row % count($paths)], $row);
 				$current_row++;
 			}
 
