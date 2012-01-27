@@ -107,6 +107,9 @@ class AFK_Context extends AFK_Environment {
 	 * @param  $path  An absolute or relative path to canonicalise into a URI.
 	 */
 	public function to_absolute_uri($path) {
+		if (substr($path, 0, 2) == '~/') {
+			$path = $this->application_root() . substr($path, 1);
+		}
 		if (strpos($path, '://') !== false) {
 			return AFK_Urls::scrub_path($path);
 		}
