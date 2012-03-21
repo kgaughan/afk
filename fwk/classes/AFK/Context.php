@@ -283,12 +283,12 @@ class AFK_Context extends AFK_Environment {
 	/**
 	 * Performs a HTTP redirect.
 	 *
-	 * @param  The redirect type. Defaults to 'See Other' (303).
+	 * @param  The redirect type.
 	 * @param  Where to redirect to. Defaults to the current URI.
 	 *
 	 * @note   For RFC2161 compliance, this does _not_ turn off rendering.
 	 */
-	public function redirect($code=303, $to=null) {
+	public function redirect($code, $to=null) {
 		if ($code < 300 || $code > 307 || $code == 306 || $code == self::NOT_MODIFIED) {
 			throw new AFK_Exception(sprintf("Bad redirect code: %s", $code));
 		}
@@ -300,6 +300,10 @@ class AFK_Context extends AFK_Environment {
 			$to = $this->REQUEST_URI;
 		}
 		$this->header('Location: ' . $this->to_absolute_uri($to), true, $code);
+	}
+
+	public function see_other($to=null) {
+		$this->redirect(self::SEE_OTHER, $to);
 	}
 
 	/** Performs a permanent redirect. See ::redirect(). */
