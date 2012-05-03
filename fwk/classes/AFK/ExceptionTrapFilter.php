@@ -41,7 +41,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 
 	public function convert_error($errno, $errstr, $errfile, $errline, $ctx) {
 		// Only trigger the exception if the error hasn't been suppressed with '@'.
-		if (error_reporting() > 0) {
+		if (error_reporting() != 0) {
 			restore_error_handler();
 			throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
 		}
@@ -49,8 +49,12 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	}
 
 	public function execute(AFK_Pipeline $pipe, $ctx) {
+		$errors = E_ALL;
+		if (defined('E_DEPRECATED')) {
+			$errors |= ~E_DEPRECATED;
+		}
 		try {
-			set_error_handler(array($this, 'convert_error'), E_ALL);
+			set_error_handler(array($this, 'convert_error'), $errors);
 			$pipe->do_next($ctx);
 			restore_error_handler();
 		} catch (AFK_HttpException $he) {
