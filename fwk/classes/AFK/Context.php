@@ -81,6 +81,10 @@ class AFK_Context extends AFK_Environment {
 		}
 	} // }}}
 
+	public function is_upload($key) { // {{{
+		return $this->__isset($key) && $this->__get($key) instanceof AFK_UploadedFile;
+	} // }}}
+
 	// URLs {{{
 
 	/**

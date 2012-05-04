@@ -48,7 +48,7 @@ class AFK_UploadedFile {
 			throw AFK_NoSuchFileException(sprintf("The uploaded temporary file for '%s' no longer exists.", $filename));
 		}
 		if (move_uploaded_file($this->temporary_name, "$dir/$filename")) {
-			$this->temporary_filename = false;
+			$this->temporary_name = false;
 			return true;
 		}
 		return false;
@@ -71,7 +71,7 @@ class AFK_UploadedFile {
 
 	public function upload_exists() {
 		return
-			$this->temporary_filename !== false &&
+			$this->temporary_name !== false &&
 			is_uploaded_file($this->temporary_name) &&
 			file_exists($this->temporary_name);
 	}
@@ -86,6 +86,20 @@ class AFK_UploadedFile {
 	public function open() {
 		if ($this->upload_exists()) {
 			return fopen($this->temporary_name, 'r', false);
+		}
+		return false;
+	}
+
+	public function get_contents() {
+		if ($this->upload_exists()) {
+			return file_get_contents($this->temporary_name);
+		}
+		return false;
+	}
+
+	public function get_temporary_name() {
+		if ($this->upload_exists()) {
+			return $this->temporary_name;
 		}
 		return false;
 	}
