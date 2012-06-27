@@ -32,11 +32,7 @@ class AFK_ElementNode {
 		} else {
 			// Root element.
 			$dom = new DOMDocument('1.0', self::CHARSET);
-			if (is_null($ns)) {
-				$this->node = $dom->createElement($elem);
-			} else {
-				$this->node = $dom->createElementNS($ns, $elem);
-			}
+			$this->node = $this->create_element($dom, $elem, null, $ns);
 			$dom->appendChild($this->node);
 		}
 	}
@@ -45,9 +41,7 @@ class AFK_ElementNode {
 	 * @return The tree serialised as an XML document.
 	 */
 	public function as_xml() {
-		$dom = $this->node->ownerDocument;
-		$dom->normalizeDocument();
-		return $dom->saveXML();
+		return $this->node->ownerDocument->saveXML();
 	}
 
 	/**
@@ -81,6 +75,20 @@ class AFK_ElementNode {
 		// http://lists.xml.org/archives/xml-dev/200204/msg00170.html
 		return $name;
 	}
+
+	private function create_element($dom, $name, $text=null, $ns=null) {
+		if (is_null($ns)) {
+			if (is_null($text) || $text === '') {
+				return $dom->createElement($name);
+			}
+			return $dom->createElement($name, $text);
+		}
+		if (is_null($text) || $text === '') {
+			return $dom->createElementNS($ns, $name);
+		}
+		return $dom->createElementNS($ns, $name, $text);
+	}
+
 
 	// Attributes {{{
 
@@ -126,12 +134,7 @@ class AFK_ElementNode {
 			$ns = $this->ns;
 		}
 		$dom = $this->node->ownerDocument;
-		if (is_null($ns)) {
-			$child = $dom->createElement($name, $text);
-		} else {
-			$name = $this->add_namespace($name, $ns);
-			$child = $dom->createElementNS($ns, $name, $text);
-		}
+		$child = $this->create_element($dom, $name, $text, $ns);
 		$this->node->appendChild($child);
 		return new AFK_ElementNode($child, $this->ns);
 	}
