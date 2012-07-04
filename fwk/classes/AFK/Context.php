@@ -121,7 +121,7 @@ class AFK_Context extends AFK_Environment {
 	}
 
 	private function canonicalise_path($path) {
-		if ($path[0] != '/') {
+		if ($path == '' || $path[0] != '/') {
 			$prefix = $this->REQUEST_URI;
 			if (substr($prefix, -1) != '/') {
 				$prefix = dirname($prefix);
