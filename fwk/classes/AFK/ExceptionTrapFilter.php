@@ -51,7 +51,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	public function execute(AFK_Pipeline $pipe, $ctx) {
 		$errors = E_ALL;
 		if (defined('E_DEPRECATED')) {
-			$errors |= ~E_DEPRECATED;
+			$errors &= ~E_DEPRECATED;
 		}
 		try {
 			set_error_handler(array($this, 'convert_error'), $errors);

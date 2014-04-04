@@ -27,9 +27,13 @@
 <div id="request-info">
 	<h2>Request Context</h2>
 	<?php
-	$ctx->__unset('traceback');
-	$ctx->__unset('page_title');
-	AFK::dump($ctx);
+	$env = $ctx->as_array();
+	unset(
+		$env['traceback'],
+		$env['page_title'],
+		$env['PHP_AUTH_USER'],
+		$env['PHP_AUTH_PW']);
+	AFK::dump($env);
 	?>
 </div>
 

@@ -89,7 +89,6 @@ class AFK_ElementNode {
 		return $dom->createElementNS($ns, $name, $text);
 	}
 
-
 	// Attributes {{{
 
 	/**
