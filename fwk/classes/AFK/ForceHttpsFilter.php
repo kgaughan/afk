@@ -8,7 +8,7 @@
  */
 
 /**
- * Requires that all requests are done over HTTPS. Useful if you've no other 
+ * Requires that all requests are done over HTTPS. Useful if you've no other
  * ways of forcing this such as in an Apache .htaccess file.
  */
 class AFK_ForceHttpsFilter implements AFK_Filter {

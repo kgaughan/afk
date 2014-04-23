@@ -253,10 +253,10 @@ class AFK_Context extends AFK_Environment {
 	 */
 	public function header($header, $replace=true, $status=null) {
 		if (!headers_sent()) {
-		if (is_null($status)) {
-			header($header, $replace);
-		} else {
-			header($header, $replace, $status);
+			if (is_null($status)) {
+				header($header, $replace);
+			} else {
+				header($header, $replace, $status);
 			}
 		}
 	}

@@ -54,5 +54,5 @@ class AFK_Cache_File implements AFK_Cache {
 
 	public function save($id, $item) {
 		file_put_contents($this->cache_path . md5($id), serialize($item), LOCK_EX);
-    }
+	}
 }

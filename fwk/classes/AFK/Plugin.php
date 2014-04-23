@@ -105,9 +105,9 @@ abstract class AFK_Plugin {
 	protected function get_setting_descriptions() {
 		return $this->about->get_section('setting-descriptions');
 	}
-	
+
 	// }}}
-	
+
 	// Events {{{
 
 	private function register_listeners() {

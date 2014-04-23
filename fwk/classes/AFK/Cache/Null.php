@@ -37,5 +37,5 @@ class AFK_Cache_Null implements AFK_Cache {
 
 	public function save($id, $item) {
 		// Do nothing.
-    }
+	}
 }

@@ -34,4 +34,3 @@ class AFK_FileLockingStrategy extends AFK_LockingStrategy {
 		unlink($this->make_lock_file_path($key));
 	}
 }
-

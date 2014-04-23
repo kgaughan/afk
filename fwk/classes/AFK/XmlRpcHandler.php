@@ -14,7 +14,7 @@
  * methods, performing serialisation and error handling.
  *
  * There are two ways in which classes can be registered with the handler.
- * Either by (a) subclassing this class and implementing the 
+ * Either by (a) subclassing this class and implementing the
  * add_registrations() method, or (b) by listening for the
  * 'afk:xmlrpc_register' event.
  *
@@ -25,8 +25,8 @@
  */
 class AFK_XmlRpcHandler implements AFK_Handler {
 
-	// Map from method names to pairs of callbacks, the first of which is the 
-	// method handler callback, and the second being the introspection 
+	// Map from method names to pairs of callbacks, the first of which is the
+	// method handler callback, and the second being the introspection
 	// callback.
 	private $method_table = array();
 	private $introspection_table = array();
@@ -154,7 +154,7 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 				'specVersion' => 20010516),
 			'introspect' => array(
 				'specUrl' => 'http://xmlrpc-c.sourceforge.net/xmlrpc-c/introspection.html',
-				'specVersion' => 1)); 
+				'specVersion' => 1));
 	}
 
 	protected function call_list_methods() {

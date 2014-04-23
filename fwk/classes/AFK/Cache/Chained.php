@@ -58,5 +58,5 @@ class AFK_Cache_Chained implements AFK_Cache {
 		foreach ($this->chain as $c) {
 			$c->save($id, $item);
 		}
-    }
+	}
 }
