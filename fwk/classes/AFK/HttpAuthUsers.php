@@ -53,7 +53,10 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 			}
 		}
 		if ($header !== false) {
-			return explode(' ', $header, 2);
+			$parts = explode(' ', $header, 2);
+			if (count($parts) == 2) {
+				return $parts;
+			}
 		}
 		return false;
 	}
