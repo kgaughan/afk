@@ -137,14 +137,6 @@ class AFK_Context extends AFK_Environment {
 	public function get_host_prefix() {
 		if (is_null($this->host_prefix)) {
 			$this->host_prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
-			// This array simplifies the logic for deciding if the port should be
-			// included in the URL. The value is the default HTTP/HTTPS port, and
-			// the key is whether it's secure (HTTPS) or not (HTTP). This reduces
-			// the logic down to an array lookup and a comparison.
-			$default_ports = array(true => 443, false => 80);
-			if ($default_ports[$this->is_secure()] != $this->SERVER_PORT) {
-				$this->host_prefix .= ':' . $this->SERVER_PORT;
-			}
 		}
 		return $this->host_prefix;
 	}
