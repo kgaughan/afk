@@ -43,10 +43,11 @@ class AFK_RouteFilter implements AFK_Filter {
 		}
 		# Fix PATH_INFO.
 		if (strlen($ctx->QUERY_STRING) > 0) {
-			$ctx->PATH_INFO = substr($ctx->REQUEST_URI, 0, -strlen($ctx->QUERY_STRING) - 1);
+			$path_info = substr($ctx->REQUEST_URI, 0, -strlen($ctx->QUERY_STRING) - 1);
 		} else {
-			$ctx->PATH_INFO = $ctx->REQUEST_URI;
+			$path_info = $ctx->REQUEST_URI;
 		}
+		$ctx->PATH_INFO = urldecode($path_info);
 		$result = $this->map->search($ctx->PATH_INFO);
 		if (is_string($result)) {
 			// Result is a normalised URL. The original request URL was
