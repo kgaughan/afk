@@ -191,8 +191,12 @@ abstract class AFK_Users {
 		}
 	}
 
+	public static function is_anonymous() {
+		return is_null(self::current()) || !self::current()->is_logged_in();
+	}
+
 	public static function force_auth() {
-		if (is_null(self::current())) {
+		if (self::is_anonymous()) {
 			self::$impl->require_auth();
 		}
 	}
