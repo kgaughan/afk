@@ -7,7 +7,7 @@
  * that was distributed with this source code.
  */
 
-class AFK_XmlRpc_Fault {
+class AFK_XmlRpc_Fault extends Exception {
 
 	// See http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
 	// Parser errors
@@ -28,6 +28,7 @@ class AFK_XmlRpc_Fault {
 	public $faultString;
 
 	public function __construct($faultCode, $faultString) {
+		parent::__construct($faultString, $faultCode);
 		$this->faultCode = $faultCode;
 		$this->faultString = $faultString;
 	}
