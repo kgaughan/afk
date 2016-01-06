@@ -40,6 +40,14 @@ class AFK {
 		}
 	}
 
+	public static function include_if_exists($path, $otherwise=null) {
+		if (file_exists($path)) {
+			require($path);
+		} elseif (!is_null($otherwise)) {
+			require($otherwise);
+		}
+	}
+
 	public static function register_autoloader() {
 		if (function_exists('spl_autoload_register')) {
 			// Attempt to register an autoloader cleanly...
