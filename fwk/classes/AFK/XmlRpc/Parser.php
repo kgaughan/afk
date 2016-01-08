@@ -212,7 +212,7 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 
 	public static function serialise_response($value) {
 		$root = new AFK_ElementNode('methodResponse');
-		if (get_class($value) == 'AFK_XmlRpc_Fault') {
+		if (is_object($value) && get_class($value) == 'AFK_XmlRpc_Fault') {
 			$container = $root->fault()->value();
 		} else {
 			$container = $root->params()->param()->value();
