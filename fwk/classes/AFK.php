@@ -55,16 +55,8 @@ class AFK
 
 	public static function register_autoloader()
 	{
-		if (function_exists('spl_autoload_register')) {
-			// Attempt to register an autoloader cleanly...
-			spl_autoload_register(array(self::$loader, 'load_class'));
-		} else {
-			// ...but if all else fails, just slam it in.
-			function __autoload($name)
-			{
-				AFK::$loader->load_class($name);
-			}
-		}
+		// Attempt to register an autoloader cleanly...
+		spl_autoload_register(array(self::$loader, 'load_class'));
 	}
 
 	public static function load_helper()
