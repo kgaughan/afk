@@ -110,16 +110,16 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 
 			case 'dateTime.iso8601':
 				// We (the server) assume UTC because we've no way of knowing
-				// otherwise. DW should have included timezone offset
-				// support, but he's a jerk.
+				// otherwise. DW should have included timezone offset support,
+				// but he's a jerk.
 				$p = strptime($text, "%Y%m%dT%T");
 				if ($p === false) {
 					throw new AFK_XmlParserException("Unparseable dateTime: '$text'");
 				}
 				$d = new DateTime();
+				$d->setTimezone(new DateTimeZone('UTC'));
 				$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
 				$d->setTime($p['tm_hour'], $p['tm_min'], $p['tm_sec']);
-				$d->setTimezone(new DateTimeZone('UTC'));
 				$this->set_current($d);
 				break;
 
@@ -272,9 +272,9 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 	public static function from_timestamp($ts) {
 		$p = strptime($ts, "%s");
 		$d = new DateTime();
+		$d->setTimezone(new DateTimeZone('UTC'));
 		$d->setDate($p['tm_year'] + 1900, $p['tm_mon'] + 1, $p['tm_mday']);
 		$d->setTime($p['tm_hour'], $p['tm_min'], $p['tm_sec']);
-		$d->setTimezone(new DateTimeZone('UTC'));
 		return $d;
 	}
 }
