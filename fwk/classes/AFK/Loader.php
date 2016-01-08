@@ -31,14 +31,7 @@ class AFK_Loader {
 
 	/** Loads the named class from one of the registered class paths. */
 	public function load_class($name) {
-		$path = $this->class_paths->load(str_replace('_', '/', $name));
-		if ($path === false) {
-			throw new AFK_ClassLoadException("Could not load '$name': No class file matching that name.");
-		}
-		if (!$this->class_or_interface_is_loaded($name)) {
-			throw new AFK_ClassLoadException("Could not load '$name': '$path' did not contain it.");
-		}
-		return true;
+		$this->class_paths->load(str_replace('_', '/', $name));
 	}
 
 	private function class_or_interface_is_loaded($name) {
