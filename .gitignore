@@ -1,0 +1,6 @@
+.*.sw?
+/vendor
+
+# Because AFK acts as a library, we don't commit composer.lock. Apps should,
+# however.
+/composer.lock
