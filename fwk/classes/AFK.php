@@ -87,7 +87,10 @@ class AFK {
 
 	/** Fixes the superglobals by removing any magic quotes, if present. */
 	public static function fix_superglobals() {
-		if (get_magic_quotes_gpc()) {
+		// Magic quotes were removed in PHP 5.4.0, and the *_magic_quotes_*
+		// methods removed in PHP 7.0. This should be safe on PHP 7 due to
+		// shortcircuiting.
+		if (version_compare(PHP_VERSION, '5.4.0', '<') && get_magic_quotes_gpc()) {
 			$cb = array('AFK', 'fix_magic_quotes');
 			array_walk_recursive($_GET, $cb);
 			array_walk_recursive($_POST, $cb);
