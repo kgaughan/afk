@@ -83,6 +83,57 @@ class AFK {
 		echo $contents;
 	}
 
+	/**
+	 * A wrapper around getopt() to make it behave more sanely.
+	 */
+	public static function get_opt($opts, $longopts=null, $argv=null) {
+		if (is_null($argv)) {
+			$argv = $GLOBALS['argv'];
+		}
+		if (is_null($longopts)) {
+			$longopts = array();
+		}
+
+		$parsed = getopt($opts, $longopts);
+
+		// We use this filter to eliminate any options from our argument list.
+		$filter = array();
+		foreach ($parsed as $k => $vs) {
+			if (strlen($k) == 1) {
+				$flag = '-' . $k;
+			} else {
+				$flag = '--' . $k;
+				if ($vs !== false) {
+					$flag .= '=';
+				}
+			}
+			if ($vs === false) {
+				$filter[$flag] = false;
+			} elseif (is_array($vs)) {
+				foreach ($vs as $v) {
+					$filter[$flag . $v] = false;
+				}
+			} else {
+				$filter[$flag . $vs] = false;
+			}
+		}
+
+		$args = array();
+
+		$copy_args = false;
+		foreach (array_slice($argv, 1) as $arg) {
+			if ($arg == '--') {
+				// Any arguments from this point on should just be copied.
+				$copy_args = true;
+			} elseif ($copy_args || !isset($filter[$arg])) {
+				// Copy the current argument.
+				$args[] = $arg;
+			}
+		}
+
+		return array($parsed, $args);
+	}
+
 	// Workarounds {{{
 
 	/** Fixes the superglobals by removing any magic quotes, if present. */
