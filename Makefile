@@ -4,4 +4,9 @@ install-deps:
 test:
 	vendor/bin/phpunit tests
 
-.PHONY: test
+lint:
+	vendor/bin/parallel-lint fwk tests
+
+qa: lint test
+
+.PHONY: test lint qa
