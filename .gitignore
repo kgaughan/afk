@@ -1,6 +1,10 @@
 .*.sw?
 /vendor
 
+# Directories in the root starting with an underscore are temporary
+# directories.
+/_*
+
 # Because AFK acts as a library, we don't commit composer.lock. Apps should,
 # however.
 /composer.lock

@@ -1,10 +1,22 @@
 <?php
+/**
+ * Template helper functions for forms.
+ *
+ * @package helpers\forms
+ */
+
+/**
+ * @internal
+ */
 define('_AFK_NOTIFICATIONS_KEY', '__notifications');
 
 /**
  * Records a form notification message. Note that this code requires
  * session support so that is can persist the notifications across
  * requests.
+ *
+ * @param string $type    Notification type. Used for grouping.
+ * @param string $message Notification message.
  */
 function add_notification($type, $message)
 {
@@ -33,6 +45,8 @@ function add_notification($type, $message)
 
 /**
  * Displays and clears any currently recorded form notifications.
+ *
+ * @param string $template Name of template to use for rendering notifications.
  */
 function display_notifications($template='notifications')
 {
@@ -55,11 +69,22 @@ function display_notifications($template='notifications')
 	}
 }
 
+/**
+ * Get a named field from the request context.
+ *
+ * @param string $name Field name.
+ * @param any $default If the field doesn't exist, return this value instead.
+ *
+ * @return any The field value.
+ */
 function get_field($name, $default=null)
 {
 	return AFK::coalesce(AFK_Registry::context()->__get($name), $default);
 }
 
+/**
+ * Render a radio field.
+ */
 function radio_field($name, array $elements, $default=null, array $field_ids=array())
 {
 	$selected = get_field($name, $default);
@@ -87,6 +112,9 @@ function radio_field($name, array $elements, $default=null, array $field_ids=arr
 	}
 }
 
+/**
+ * Render a checkbox field.
+ */
 function checkbox_field($name, $value, $id=null)
 {
 	echo '<input type="checkbox" name="', e($name), '" value="', e($value), '"';
@@ -123,6 +151,9 @@ function select_box($name, array $elements, $default=null)
 	}
 }
 
+/**
+ * @internal
+ */
 function select_box__options(array $elements, $selected)
 {
 	foreach ($elements as $k => $v) {
@@ -140,6 +171,9 @@ function select_box__options(array $elements, $selected)
 	}
 }
 
+/**
+ * DOCUMENT ME.
+ */
 function select_box_to_title(array $elements, $value, $default=false)
 {
 	foreach ($elements as $k => $v) {
