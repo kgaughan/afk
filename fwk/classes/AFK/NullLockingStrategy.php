@@ -7,14 +7,16 @@
  * that was distributed with this source code.
  */
 
-class AFK_NullLockingStrategy extends AFK_LockingStrategy {
-
-	protected function lock_int($key) {
+class AFK_NullLockingStrategy extends AFK_LockingStrategy
+{
+	protected function lock_int($key)
+	{
 		// Always succeeds.
 		return true;
 	}
 
-	public function unlock_int($lock, $key) {
+	public function unlock_int($lock, $key)
+	{
 		// Do nothing.
 	}
 }

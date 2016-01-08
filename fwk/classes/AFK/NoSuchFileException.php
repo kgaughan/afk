@@ -10,4 +10,6 @@
 /**
  * Thrown when an operation is attempted on a nonexistent file.
  */
-class AFK_NoSuchFileException extends AFK_PathException { }
+class AFK_NoSuchFileException extends AFK_PathException
+{
+}

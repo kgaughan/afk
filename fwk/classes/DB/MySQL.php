@@ -2,8 +2,8 @@
 /**
  * An implementation of DB_Base for MySQL.
  */
-class DB_MySQL extends DB_Base {
-
+class DB_MySQL extends DB_Base
+{
 	/**
 	 * Used to prevent the creation of too-many unneeded connections and to
 	 * prevent the client libraries from recycling connections we don't want it
@@ -20,7 +20,8 @@ class DB_MySQL extends DB_Base {
 	/**
 	 *
 	 */
-	public function __construct($host, $user, $pass, $db) {
+	public function __construct($host, $user, $pass, $db)
+	{
 		parent::__construct();
 		$this->key = "$host:$user:$db";
 		if (array_key_exists($this->key, self::$cache)) {
@@ -50,7 +51,8 @@ class DB_MySQL extends DB_Base {
 		}
 	}
 
-	public function close() {
+	public function close()
+	{
 		if ($this->dbh) {
 			while ($this->depth > 0) {
 				$this->rollback();
@@ -67,11 +69,13 @@ class DB_MySQL extends DB_Base {
 		}
 	}
 
-	public function is_connected() {
+	public function is_connected()
+	{
 		return $this->dbh !== false;
 	}
 
-	public function vexecute($q, array $args) {
+	public function vexecute($q, array $args)
+	{
 		if (count($args) > 0) {
 			$q = $this->compose($q, $args);
 		}
@@ -87,7 +91,8 @@ class DB_MySQL extends DB_Base {
 		return mysql_affected_rows($this->dbh);
 	}
 
-	public function vquery($q, array $args) {
+	public function vquery($q, array $args)
+	{
 		if (count($args) > 0) {
 			$q = $this->compose($q, $args);
 		}
@@ -100,7 +105,8 @@ class DB_MySQL extends DB_Base {
 		return true;
 	}
 
-	public function fetch($type=DB_ASSOC, $free_now=false) {
+	public function fetch($type=DB_ASSOC, $free_now=false)
+	{
 		if (!$this->rs) {
 			return false;
 		}
@@ -112,14 +118,16 @@ class DB_MySQL extends DB_Base {
 		return $r;
 	}
 
-	public function e($s) {
+	public function e($s)
+	{
 		if (function_exists('mysql_real_escape_string')) {
 			return mysql_real_escape_string($s, $this->dbh);
 		}
 		return mysql_escape_string($s);
 	}
 
-	protected function report_error($query) {
+	protected function report_error($query)
+	{
 		$code = mysql_errno($this->dbh);
 		$msg = mysql_error($this->dbh);
 		if (in_array($code, array(1062, 1291, 1557, 1586))) {
@@ -128,7 +136,8 @@ class DB_MySQL extends DB_Base {
 		throw new DB_Exception($msg, $code, $query);
 	}
 
-	public function begin() {
+	public function begin()
+	{
 		$this->depth++;
 		if ($this->depth == 1) {
 			$this->execute('SET AUTOCOMMIT=0');
@@ -136,7 +145,8 @@ class DB_MySQL extends DB_Base {
 		}
 	}
 
-	public function commit() {
+	public function commit()
+	{
 		$this->depth--;
 		if ($this->depth == 0) {
 			$this->execute('COMMIT');
@@ -144,7 +154,8 @@ class DB_MySQL extends DB_Base {
 		}
 	}
 
-	public function rollback() {
+	public function rollback()
+	{
 		$this->depth--;
 		if ($this->depth == 0) {
 			$this->execute('ROLLBACK');

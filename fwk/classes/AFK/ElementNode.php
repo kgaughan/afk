@@ -12,8 +12,8 @@
  *
  * @author Keith Gaughan
  */
-class AFK_ElementNode {
-
+class AFK_ElementNode
+{
 	const CHARSET = 'utf-8';
 	const XMLNS = "http://www.w3.org/2000/xmlns/";
 
@@ -24,7 +24,8 @@ class AFK_ElementNode {
 	 * @param  $elem  Root element name.
 	 * @param  $nss   Namespace of the root element.
 	 */
-	public function __construct($elem, $ns=null) {
+	public function __construct($elem, $ns=null)
+	{
 		$this->ns = $ns;
 		if (is_object($elem) && get_class($elem) == 'DOMElement') {
 			// Subnode.
@@ -40,25 +41,29 @@ class AFK_ElementNode {
 	/**
 	 * @return The tree serialised as an XML document.
 	 */
-	public function as_xml() {
+	public function as_xml()
+	{
 		return $this->node->ownerDocument->saveXML();
 	}
 
 	/**
 	 * @return The current node serialised as an XML document fragment.
 	 */
-	public function as_xml_fragment() {
+	public function as_xml_fragment()
+	{
 		return $this->node->ownerDocument->saveXML($this->node);
 	}
 
-	private function e($text) {
+	private function e($text)
+	{
 		return htmlspecialchars($text, ENT_QUOTES, self::CHARSET);
 	}
 
 	/**
 	 * Attempt, if possible, to add the given namespace to the root node.
 	 */
-	private function add_namespace($name, $ns) {
+	private function add_namespace($name, $ns)
+	{
 		$prefix = $this->node->ownerDocument->lookupPrefix($ns);
 		$parts = explode(':', $name, 2);
 		if (!empty($prefix)) {
@@ -68,7 +73,8 @@ class AFK_ElementNode {
 		if (count($parts) == 2) {
 			// Can add it.
 			$this->node->ownerDocument->documentElement->setAttributeNS(
-				self::XMLNS, 'xmlns:' . $parts[0], $ns);
+				self::XMLNS, 'xmlns:' . $parts[0], $ns
+			);
 		}
 		// If neither of the above two have worked, we fall back on producing
 		// neurotic XML. Yes, that's a technical term:
@@ -76,7 +82,8 @@ class AFK_ElementNode {
 		return $name;
 	}
 
-	private function create_element($dom, $name, $text=null, $ns=null) {
+	private function create_element($dom, $name, $text=null, $ns=null)
+	{
 		if (is_null($ns)) {
 			if (is_null($text) || $text === '') {
 				return $dom->createElement($name);
@@ -96,7 +103,8 @@ class AFK_ElementNode {
 	 *
 	 * @return $this
 	 */
-	public function attr($name, $value, $ns=null) {
+	public function attr($name, $value, $ns=null)
+	{
 		if (is_null($ns)) {
 			$this->node->setAttribute($name, $value);
 		} else {
@@ -106,7 +114,8 @@ class AFK_ElementNode {
 		return $this;
 	}
 
-	public function __set($name, $value) {
+	public function __set($name, $value)
+	{
 		$this->attr($name, $value);
 	}
 
@@ -117,13 +126,14 @@ class AFK_ElementNode {
 	/**
 	 * Creates a child element, returning that child node.
 	 *
-	 * @param  $name  Element name.
-	 * @param  $text  Text to insert into the element.
-	 * @param  $ns    Namespace to use, null to inherit from its parent.
+	 * @param $name  Element name.
+	 * @param $text  Text to insert into the element.
+	 * @param $ns    Namespace to use, null to inherit from its parent.
 	 *
 	 * @return Newly-created child node.
 	 */
-	public function child($name, $text=null, $ns=null) {
+	public function child($name, $text=null, $ns=null)
+	{
 		if ($text === '') {
 			$text = null;
 		} elseif (!is_null($text)) {
@@ -138,7 +148,8 @@ class AFK_ElementNode {
 		return new AFK_ElementNode($child, $this->ns);
 	}
 
-	public function __call($name, array $args) {
+	public function __call($name, array $args)
+	{
 		$text = count($args) > 0 ? $args[0] : null;
 		$ns = count($args) > 1 ? $args[1] : null;
 		return $this->child($name, $text, $ns);
@@ -149,18 +160,21 @@ class AFK_ElementNode {
 	 *
 	 * @return $this.
 	 */
-	public function with($name, $text=null, $ns=null) {
+	public function with($name, $text=null, $ns=null)
+	{
 		$this->child($name, $text, $ns);
 		return $this;
 	}
 
-	public function with_raw($raw) {
+	public function with_raw($raw)
+	{
 		$dom = $this->node->ownerDocument;
 		$this->node->appendChild($dom->createTextNode($raw));
 		return $this;
 	}
 
-	public function with_text($text) {
+	public function with_text($text)
+	{
 		return $this->with_raw($this->e($text));
 	}
 

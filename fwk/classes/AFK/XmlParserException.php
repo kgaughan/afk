@@ -11,4 +11,6 @@
  * Thrown when an XML document could not be parsed; not to be confused with
  * an AFK_ParseException.
  */
-class AFK_XmlParserException extends AFK_Exception { }
+class AFK_XmlParserException extends AFK_Exception
+{
+}

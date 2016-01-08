@@ -7,15 +7,16 @@
  * that was distributed with this source code.
  */
 
-abstract class AFK_PDO_IteratorBase implements Iterator {
-
+abstract class AFK_PDO_IteratorBase implements Iterator
+{
 	private $stmt;
 	protected $n;
 	protected $current;
 	private $open;
 	private $peeked;
 
-	public function __construct(PDOStatement $stmt) {
+	public function __construct(PDOStatement $stmt)
+	{
 		$this->stmt = $stmt;
 		$this->n = -1;
 		$this->current = false;
@@ -23,7 +24,8 @@ abstract class AFK_PDO_IteratorBase implements Iterator {
 		$this->peeked = false;
 	}
 
-	protected function _current($peek=false) {
+	protected function _current($peek=false)
+	{
 		if ($this->open && $this->current === false) {
 			if (!$peek || !$this->peeked) {
 				$this->current = $this->_fetch($this->stmt);
@@ -41,20 +43,24 @@ abstract class AFK_PDO_IteratorBase implements Iterator {
 
 	protected abstract function _fetch(PDOStatement $stmt);
 
-	protected function _process_current_row() {
+	protected function _process_current_row()
+	{
 		$this->n++;
 	}
 
-	public function rewind() {
+	public function rewind()
+	{
 		// Erm...
 		$this->next();
 	}
 
-	public function key() {
+	public function key()
+	{
 		return $this->n;
 	}
 
-	public function next() {
+	public function next()
+	{
 		// Resetting our cached current value will force the next item to be
 		// fetched.
 		if (!$this->peeked) {
@@ -63,7 +69,8 @@ abstract class AFK_PDO_IteratorBase implements Iterator {
 		return $this->current();
 	}
 
-	public function valid() {
+	public function valid()
+	{
 		return $this->_current(true) !== false;
 	}
 }

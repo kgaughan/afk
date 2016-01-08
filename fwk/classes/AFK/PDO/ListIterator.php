@@ -7,13 +7,15 @@
  * that was distributed with this source code.
  */
 
-class AFK_PDO_ListIterator extends AFK_PDO_IteratorBase {
-
-	protected function _fetch(PDOStatement $stmt) {
+class AFK_PDO_ListIterator extends AFK_PDO_IteratorBase
+{
+	protected function _fetch(PDOStatement $stmt)
+	{
 		return $stmt->fetch(PDO::FETCH_NUM);
 	}
 
-	public function current() {
+	public function current()
+	{
 		$current = $this->_current();
 		return $current === false ? false : $current[0];
 	}

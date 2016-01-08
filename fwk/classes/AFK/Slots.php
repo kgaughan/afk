@@ -13,24 +13,33 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Slots {
-
+class AFK_Slots
+{
 	// Slot Management {{{
 
 	private $slots = array();
 
-	/** Checks if the named slot has content. */
-	private function has_int($slot) {
+	/**
+	 * Checks if the named slot has content.
+	 */
+	private function has_int($slot)
+	{
 		return array_key_exists($slot, $this->slots);
 	}
 
-	/** Checks if the named slot has content, or corresponding event handlers. */
-	public function has($slot) {
+	/**
+	 * Checks if the named slot has content, or corresponding event handlers.
+	 */
+	public function has($slot)
+	{
 		return $this->has_int($slot) || AFK_Registry::_('broker')->has_callbacks("slot:$slot");
 	}
 
-	/** Writes out the content in the given slot. */
-	public function get($slot, $default='') {
+	/**
+	 * Writes out the content in the given slot.
+	 */
+	public function get($slot, $default='')
+	{
 		if (!$this->has($slot)) {
 			echo $default;
 			return false;
@@ -42,13 +51,19 @@ class AFK_Slots {
 		return true;
 	}
 
-	/** Sets the contents of the given slot. */
-	public function set($slot, $contents) {
+	/**
+	 * Sets the contents of the given slot.
+	 */
+	public function set($slot, $contents)
+	{
 		$this->slots[$slot] = $contents;
 	}
 
-	/** Appends content to the given slot. */
-	public function append($slot, $contents) {
+	/**
+	 * Appends content to the given slot.
+	 */
+	public function append($slot, $contents)
+	{
 		if ($this->has_int($slot)) {
 			$this->slots[$slot] .= $contents;
 		} else {
@@ -66,11 +81,15 @@ class AFK_Slots {
 	 * Delimit the start of a block of code which will generate content for
 	 * the given slot.
 	 */
-	public function start($slot) {
+	public function start($slot)
+	{
 		if (!is_null($this->current)) {
-			throw new AFK_SlotException(sprintf(
-				"Cannot start new slot '%s': already in slot '%s'.",
-				$slot, $this->current));
+			throw new AFK_SlotException(
+				sprintf(
+					"Cannot start new slot '%s': already in slot '%s'.",
+					$slot, $this->current
+				)
+			);
 		}
 		$this->current = $slot;
 		ob_start();
@@ -80,7 +99,8 @@ class AFK_Slots {
 	/**
 	 * Delimits the end of a block started with ::start().
 	 */
-	public function end() {
+	public function end()
+	{
 		if (is_null($this->current)) {
 			throw new AFK_SlotException("Attempt to end a slot while not in a slot.");
 		}
@@ -93,7 +113,8 @@ class AFK_Slots {
 	 * Like ::end(), but the delimited content is appended to whatever's
 	 * already in the slot.
 	 */
-	public function end_append() {
+	public function end_append()
+	{
 		if (is_null($this->current)) {
 			throw new AFK_SlotException("Attempt to end a slot while not in a slot.");
 		}

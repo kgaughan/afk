@@ -18,8 +18,8 @@
  *
  * @author Keith Gaughan
  */
-class AFK_XmlParseFilter implements AFK_Filter {
-
+class AFK_XmlParseFilter implements AFK_Filter
+{
 	private $content_type;
 	private $schema;
 
@@ -28,7 +28,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	 *                        or string.
 	 * @param  $schema        Location of schema to validate against.
 	 */
-	public function __construct($content_type, $schema=false) {
+	public function __construct($content_type, $schema=false)
+	{
 		if (!is_array($content_type)) {
 			$content_type = array($content_type);
 		}
@@ -38,7 +39,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 
 	// Filter Execution {{{
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	public function execute(AFK_Pipeline $pipe, $ctx)
+	{
 		list($request_content_type) = explode(';', $ctx->CONTENT_TYPE, 2);
 		if (in_array($request_content_type, $this->content_type, true)) {
 			$doc = $this->load_and_validate($ctx->_raw);
@@ -56,7 +58,8 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	/**
 	 * @return Parsed and validated document.
 	 */
-	public function load_and_validate($xml) {
+	public function load_and_validate($xml)
+	{
 		if ($xml == '') {
 			throw new AFK_ParseException("Invalid document:\nEmpty request!");
 		}
@@ -75,8 +78,12 @@ class AFK_XmlParseFilter implements AFK_Filter {
 		libxml_use_internal_errors($old_use_errors);
 		if (count($errors) > 0) {
 			// TODO: Hack! This should be done more cleanly!
-			throw new AFK_ParseException(sprintf(
-				"Invalid document:\n%s", $this->join_errors($errors)));
+			throw new AFK_ParseException(
+				sprintf(
+					"Invalid document:\n%s",
+					$this->join_errors($errors)
+				)
+			);
 		}
 
 		return $result;
@@ -85,22 +92,27 @@ class AFK_XmlParseFilter implements AFK_Filter {
 	/**
 	 * Validates the documents if a schema was given.
 	 */
-	protected function validate(DOMDocument $doc, $schema) {
-		 return $doc->relaxNGValidate($schema);
+	protected function validate(DOMDocument $doc, $schema)
+	{
+		return $doc->relaxNGValidate($schema);
 	}
 
-	private function join_errors(array $errors) {
+	private function join_errors(array $errors)
+	{
 		return implode("\n", array_map(array($this, 'error_to_string'), $errors));
 	}
 
-	private function error_to_string($error) {
+	private function error_to_string($error)
+	{
 		return sprintf(
 			"%s at line %s, column %s: %s",
 			$this->get_level_name($error->level),
-			$error->line, $error->column, trim($error->message));
+			$error->line, $error->column, trim($error->message)
+		);
 	}
 
-	private function get_level_name($level) {
+	private function get_level_name($level)
+	{
 		switch ($level) {
 		case LIBXML_ERR_WARNING:
 			return "Warning";
@@ -114,13 +126,17 @@ class AFK_XmlParseFilter implements AFK_Filter {
 
 	// }}}
 
-	public function parse(SimpleXMLElement $doc) {
+	public function parse(SimpleXMLElement $doc)
+	{
 		$callable = array($this, 'parse_' . $doc->getName());
 		if (is_callable($callable)) {
 			return call_user_func($callable, $doc);
 		}
-		throw new AFK_ParseException(sprintf(
-			"Cannot accept messages rooted by the '%s' element.",
-			$doc->getName()));
+		throw new AFK_ParseException(
+			sprintf(
+				"Cannot accept messages rooted by the '%s' element.",
+				$doc->getName()
+			)
+		);
 	}
 }

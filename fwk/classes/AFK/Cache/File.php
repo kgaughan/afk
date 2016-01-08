@@ -12,25 +12,28 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Cache_File implements AFK_Cache {
-
+class AFK_Cache_File implements AFK_Cache
+{
 	private $cache_path;
 
 	/**
 	 * @param  $path  Path to the cache directory. Must end in a slash.
 	 */
-	public function __construct($path) {
+	public function __construct($path)
+	{
 		$this->cache_path = $path;
 	}
 
-	public function invalidate($id) {
+	public function invalidate($id)
+	{
 		$path = $this->cache_path . md5($id);
 		if (is_file($path)) {
 			unlink($path);
 		}
 	}
 
-	public function invalidate_all($max_age=0) {
+	public function invalidate_all($max_age=0)
+	{
 		$dh = dir($this->cache_path);
 		$cutoff = time() - $max_age;
 		while ($file = $dh->read()) {
@@ -41,7 +44,8 @@ class AFK_Cache_File implements AFK_Cache {
 		$dh->close();
 	}
 
-	public function load($id, $max_age=300) {
+	public function load($id, $max_age=300)
+	{
 		$path = $this->cache_path . md5($id);
 		if (is_file($path)) {
 			if (filemtime($path) >= time() - $max_age) {
@@ -52,7 +56,8 @@ class AFK_Cache_File implements AFK_Cache {
 		return null;
 	}
 
-	public function save($id, $item) {
+	public function save($id, $item)
+	{
 		file_put_contents($this->cache_path . md5($id), serialize($item), LOCK_EX);
 	}
 }

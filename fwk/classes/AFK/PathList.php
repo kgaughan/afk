@@ -13,24 +13,28 @@
  *
  * @author Keith Gaughan
  */
-class AFK_PathList {
-
+class AFK_PathList
+{
 	private $paths = array();
 	private $path_pattern;
 
-	public function __construct($path_pattern="%s/%s.php") {
+	public function __construct($path_pattern="%s/%s.php")
+	{
 		$this->path_pattern = $path_pattern;
 	}
 
-	public function prepend($path) {
+	public function prepend($path)
+	{
 		array_unshift($this->paths, $path);
 	}
 
-	public function append($path) {
+	public function append($path)
+	{
 		$this->paths[] = $path;
 	}
 
-	public function find($name) {
+	public function find($name)
+	{
 		foreach ($this->paths as $d) {
 			$path = sprintf($this->path_pattern, $d, $name);
 			if (file_exists($path)) {
@@ -40,7 +44,8 @@ class AFK_PathList {
 		return false;
 	}
 
-	public function load($name) {
+	public function load($name)
+	{
 		$path = $this->find($name);
 		if ($path !== false) {
 			include $path;

@@ -10,11 +10,12 @@
 /**
  * Container for a string that should be base64 encoded in XML-RPC responses.
  */
-class AFK_Blob {
-
+class AFK_Blob
+{
 	public $blob;
 
-	public function __construct($blob) {
+	public function __construct($blob)
+	{
 		$this->blob = $blob;
 	}
 }

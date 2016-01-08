@@ -10,11 +10,12 @@
 /**
  * Wraps a PHP error that's been converted to an exception.
  */
-class AFK_TrappedErrorException extends AFK_Exception {
-
+class AFK_TrappedErrorException extends AFK_Exception
+{
 	protected $ctx;
 
-	public function __construct($msg, $code, $file, $line, $ctx) {
+	public function __construct($msg, $code, $file, $line, $ctx)
+	{
 		parent::__construct($msg, $code);
 		$this->file = $file;
 		$this->line = $line;
@@ -37,9 +38,10 @@ class AFK_TrappedErrorException extends AFK_Exception {
  * form error<STATUS>.php, so to the template rendered for a 404 Page Not Found
  * would be error404.php.
  */
-class AFK_ExceptionTrapFilter implements AFK_Filter {
-
-	public function convert_error($errno, $errstr, $errfile, $errline, $ctx) {
+class AFK_ExceptionTrapFilter implements AFK_Filter
+{
+	public function convert_error($errno, $errstr, $errfile, $errline, $ctx)
+	{
 		// Only trigger the exception if the error hasn't been suppressed with '@'.
 		if (error_reporting() != 0) {
 			restore_error_handler();
@@ -48,7 +50,8 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		return false;
 	}
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	public function execute(AFK_Pipeline $pipe, $ctx)
+	{
 		$errors = E_ALL;
 		if (defined('E_DEPRECATED')) {
 			$errors &= ~E_DEPRECATED;
@@ -81,7 +84,8 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		}
 	}
 
-	private function report_error($code, AFK_Pipeline $pipe, AFK_Context $ctx) {
+	private function report_error($code, AFK_Pipeline $pipe, AFK_Context $ctx)
+	{
 		// Assuming the last pipeline element is a rendering filter.
 		// Not entirely happy with this.
 		$ctx->change_view('error' . $code);
@@ -92,16 +96,18 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 
 	// Diagnostics Page Rendering {{{
 
-	private function render_error500(AFK_Context $ctx, Exception $ex) {
+	private function render_error500(AFK_Context $ctx, Exception $ex)
+	{
 		$traceback = array();
 		$last_file = $ex->getFile();
 		$last_line = $ex->getLine();
 		$trace = $ex->getTrace();
 		foreach ($trace as $f) {
 			if (!empty($last_file)) {
-				 $traceback[] = $this->make_traceback_frame(
+				$traceback[] = $this->make_traceback_frame(
 					$last_file, $last_line,
-					$this->frame_to_name($f));
+					$this->frame_to_name($f)
+				);
 			}
 			if (array_key_exists('file', $f)) {
 				$last_file = $f['file'];
@@ -114,14 +120,17 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 		$traceback[] = $this->make_traceback_frame($last_file, $last_line);
 
 		AFK::load_helper('html');
-		$ctx->page_title = sprintf('%s [%s]',
-			get_class($ex), $this->truncate_filename($ex->getFile()));
+		$ctx->page_title = sprintf(
+			'%s [%s]',
+			get_class($ex), $this->truncate_filename($ex->getFile())
+		);
 		$ctx->message = $ex->getMessage();
 		$ctx->details = $ex->__toString();
 		$ctx->traceback = $traceback;
 	}
 
-	private function make_traceback_frame($file, $line, $function='') {
+	private function make_traceback_frame($file, $line, $function='')
+	{
 		return array(
 			'file'    => $this->truncate_filename($file),
 			'line'    => $line,
@@ -132,7 +141,8 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	/**
 	 * Converts an exception trace frame to a function/method name.
 	 */
-	private function frame_to_name(array $frame) {
+	private function frame_to_name(array $frame)
+	{
 		$name = '';
 
 		// Handle calls via call_user_func*().
@@ -176,7 +186,8 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	 * Extracts the lines in and around where where an exception was thrown to
 	 * give it context.
 	 */
-	private function get_context_lines($file, $line_no, $amount=3) {
+	private function get_context_lines($file, $line_no, $amount=3)
+	{
 		$context = array();
 		// TODO: Quick dumb hack. Need to deal with cases of generated code
 		// (such as in regexes) properly.
@@ -194,7 +205,8 @@ class AFK_ExceptionTrapFilter implements AFK_Filter {
 	/**
 	 * Truncates an application/library filename.
 	 */
-	private function truncate_filename($filename) {
+	private function truncate_filename($filename)
+	{
 		if (substr($filename, 0, strlen(AFK_ROOT)) == AFK_ROOT) {
 			return 'AFK:' . substr($filename, strlen(AFK_ROOT) + 1);
 		}

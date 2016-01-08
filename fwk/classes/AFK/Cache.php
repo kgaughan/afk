@@ -13,12 +13,12 @@
  *
  * @author Keith Gaughan
  */
-interface AFK_Cache {
-
+interface AFK_Cache
+{
 	/**
 	 * Invalidates the given item, removing it from the cache.
 	 *
-	 * @param  $id  Id of the cached item.
+	 * @param $id  Id of the cached item.
 	 */
 	function invalidate($id);
 
@@ -39,8 +39,8 @@ interface AFK_Cache {
 	/**
 	 * Saves the given item to the cache.
 	 *
-	 * @param  $id    ID of the cached item.
-	 * @param  $item  The item to be cached.
+	 * @param $id    ID of the cached item.
+	 * @param $item  The item to be cached.
 	 */
 	function save($id, $item);
 }

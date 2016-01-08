@@ -12,9 +12,10 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Urls {
-
-	public static function canonicalise($url, $base=null) {
+class AFK_Urls
+{
+	public static function canonicalise($url, $base=null)
+	{
 		$pu = parse_url($url);
 		if (array_key_exists('path', $pu)) {
 			$pu['path'] = self::scrub_path($pu['path']);
@@ -52,14 +53,16 @@ class AFK_Urls {
 		return self::reconstruct_path($pb);
 	}
 
-	public static function reconstruct_path(array $p) {
+	public static function reconstruct_path(array $p)
+	{
 		return $p['scheme'] . '://' . $p['host'] .
 			(array_key_exists('port', $p) ? ':' . $p['port'] : '') .
 			$p['path'] .
 			(array_key_exists('query', $p) ? '?' . $p['query'] : '');
 	}
 
-	public static function scrub_path($path) {
+	public static function scrub_path($path)
+	{
 		// Attempt to canonicalise the path, removing any instances of '..'
 		// and '.'. Why? Mainly because it's likely that the client dealing
 		// with the request will likely not be smart enough to deal with them

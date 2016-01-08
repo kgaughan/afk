@@ -1,5 +1,5 @@
 <?php
-interface DB_Logger {
-
+interface DB_Logger
+{
 	function log($q);
 }

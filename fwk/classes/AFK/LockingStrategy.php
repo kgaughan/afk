@@ -7,20 +7,23 @@
  * that was distributed with this source code.
  */
 
-abstract class AFK_LockingStrategy {
-
+abstract class AFK_LockingStrategy
+{
 	private $lock;
 	private $key;
 
-	public function __construct() {
+	public function __construct()
+	{
 		$this->lock = false;
 		$this->key = false;
 	}
 
-	public function lock($key) {
+	public function lock($key)
+	{
 		if ($this->lock !== false) {
 			throw new AFK_LockingException(
-				sprintf("Cannot lock for '%s': lock active for '%s'", $key, $this->key));
+				sprintf("Cannot lock for '%s': lock active for '%s'", $key, $this->key)
+			);
 		}
 		$this->lock = $this->lock_int($key);
 		if ($this->lock === false) {
@@ -30,7 +33,8 @@ abstract class AFK_LockingStrategy {
 		return true;
 	}
 
-	public function unlock() {
+	public function unlock()
+	{
 		if ($this->lock === false) {
 			throw new AFK_LockingException('Lock is not active.');
 		}

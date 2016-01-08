@@ -6,7 +6,8 @@ define('_AFK_NOTIFICATIONS_KEY', '__notifications');
  * session support so that is can persist the notifications across
  * requests.
  */
-function add_notification($type, $message) {
+function add_notification($type, $message)
+{
 	if (isset($_SESSION)) {
 		if (!array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
 			$_SESSION[_AFK_NOTIFICATIONS_KEY] = array();
@@ -33,7 +34,8 @@ function add_notification($type, $message) {
 /**
  * Displays and clears any currently recorded form notifications.
  */
-function display_notifications($template='notifications') {
+function display_notifications($template='notifications')
+{
 	if (isset($_SESSION) && array_key_exists(_AFK_NOTIFICATIONS_KEY, $_SESSION)) {
 		$notifications = $_SESSION[_AFK_NOTIFICATIONS_KEY];
 		unset($_SESSION[_AFK_NOTIFICATIONS_KEY]);
@@ -53,11 +55,13 @@ function display_notifications($template='notifications') {
 	}
 }
 
-function get_field($name, $default=null) {
+function get_field($name, $default=null)
+{
 	return AFK::coalesce(AFK_Registry::context()->__get($name), $default);
 }
 
-function radio_field($name, array $elements, $default=null, array $field_ids=array()) {
+function radio_field($name, array $elements, $default=null, array $field_ids=array())
+{
 	$selected = get_field($name, $default);
 	if (count($elements) > 1) {
 		$i = 0;
@@ -83,7 +87,8 @@ function radio_field($name, array $elements, $default=null, array $field_ids=arr
 	}
 }
 
-function checkbox_field($name, $value, $id=null) {
+function checkbox_field($name, $value, $id=null)
+{
 	echo '<input type="checkbox" name="', e($name), '" value="', e($value), '"';
 	if (!is_null($id)) {
 		echo ' id="', e($id), '"';
@@ -100,7 +105,8 @@ function checkbox_field($name, $value, $id=null) {
  * element, and if so using that as the default, otherwise using the
  * specified fallback default.
  */
-function select_box($name, array $elements, $default=null) {
+function select_box($name, array $elements, $default=null)
+{
 	$selected = get_field($name, $default);
 	if (count($elements) > 1) {
 		echo '<select name="', e($name), '" id="', e($name), '">';
@@ -117,7 +123,8 @@ function select_box($name, array $elements, $default=null) {
 	}
 }
 
-function select_box__options(array $elements, $selected) {
+function select_box__options(array $elements, $selected)
+{
 	foreach ($elements as $k => $v) {
 		if (is_array($v)) {
 			echo '<optgroup label="', e($k), '">';
@@ -133,7 +140,8 @@ function select_box__options(array $elements, $selected) {
 	}
 }
 
-function select_box_to_title(array $elements, $value, $default=false) {
+function select_box_to_title(array $elements, $value, $default=false)
+{
 	foreach ($elements as $k => $v) {
 		if (is_array($v)) {
 			return select_box_to_title($v, $value, $default);
@@ -149,7 +157,8 @@ function select_box_to_title(array $elements, $value, $default=false) {
 /**
  * Renders the named entries in the current context as hidden form fields.
  */
-function carry_hidden_values() {
+function carry_hidden_values()
+{
 	$names = func_get_args();
 	hidden_fields(AFK_Registry::context()->as_array($names), '');
 }
@@ -157,7 +166,8 @@ function carry_hidden_values() {
 /**
  * Renders the given array as a set of hidden form fields.
  */
-function hidden_fields(array $data, $prefix='') {
+function hidden_fields(array $data, $prefix='')
+{
 	foreach ($data as $name => $value) {
 		$field = $prefix == '' ? $name : ($prefix . '[' . $name . ']');
 		if (is_array($value)) {

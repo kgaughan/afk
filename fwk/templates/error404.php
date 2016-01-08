@@ -15,8 +15,10 @@ the bad part of town...</p>
 	<p>Oops! It looks like we&rsquo;ve messed up. You selected a broken link
 	on this site.</p>
 	<?php
-	list($unhandled) = trigger_event('afk:404',
-		$ctx->as_array('HTTP_REFERER', 'REQUEST_URI'));
+	list($unhandled) = trigger_event(
+		'afk:404',
+		$ctx->as_array('HTTP_REFERER', 'REQUEST_URI')
+	);
 	?>
 	<?php if (!$unhandled) { ?>
 		<p>We&rsquo;ve taken note of this, and will investigate the

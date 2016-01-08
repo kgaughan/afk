@@ -16,18 +16,20 @@
  * This has one advantage: registries can be swapped in and out for testing
  * purposes.
  */
-class AFK_Registry {
-
+class AFK_Registry
+{
 	// Swappable Implementation {{{
 
 	private static $inst;
 
-	public static function set_instance(AFK_Registry $inst) {
+	public static function set_instance(AFK_Registry $inst)
+	{
 		list($old_inst, self::$inst) = array(self::$inst, $inst);
 		return $old_inst;
 	}
 
-	public static function clone_current_instance() {
+	public static function clone_current_instance()
+	{
 		return clone self::$inst;
 	}
 
@@ -35,15 +37,18 @@ class AFK_Registry {
 
 	// External Interface {{{
 
-	public static function context() {
+	public static function context()
+	{
 		return self::$inst->ctx;
 	}
 
-	public static function routes() {
+	public static function routes()
+	{
 		return self::$inst->routes;
 	}
 
-	public static function _($name) {
+	public static function _($name)
+	{
 		return self::$inst->__get($name);
 	}
 
@@ -53,21 +58,24 @@ class AFK_Registry {
 
 	private $registry = array();
 
-	public function __construct() {
+	public function __construct()
+	{
 		$this->broker = new AFK_EventBroker();
 		$this->ctx = new AFK_Context();
 		$this->output_cache = new AFK_OutputCache();
 		$this->slots = new AFK_Slots();
 	}
 
-	public function __get($name) {
+	public function __get($name)
+	{
 		if (!array_key_exists($name, $this->registry)) {
 			throw new AFK_Exception(sprintf("'%s' is not registered with the current AFK_Registry.", $name));
 		}
 		return $this->registry[$name];
 	}
 
-	public function __set($name, $value) {
+	public function __set($name, $value)
+	{
 		$this->registry[$name] = $value;
 	}
 

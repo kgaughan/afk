@@ -2,14 +2,16 @@
 /**
  * @return The full URL path of the application's assets drectory.
  */
-function afk_get_assets_location($where=null) {
+function afk_get_assets_location($where=null)
+{
 	if (is_null($where)) {
 		return AFK_Registry::context()->application_root() . 'assets/';
 	}
 	return $where;
 }
 
-function stylesheets(array $styles=array(), $where=null) {
+function stylesheets(array $styles=array(), $where=null)
+{
 	$root_enc = e(afk_get_assets_location($where));
 	if (count($styles) == 0 || !is_array($styles)) {
 		$styles = array();
@@ -33,7 +35,8 @@ function stylesheets(array $styles=array(), $where=null) {
 	echo "\n";
 }
 
-function javascript(array $scripts, $where=null) {
+function javascript(array $scripts, $where=null)
+{
 	$root_enc = e(afk_get_assets_location($where));
 	foreach ($scripts as $s) {
 		echo '<script type="text/javascript" src="', $root_enc, $s, '.js"></script>';
@@ -41,12 +44,14 @@ function javascript(array $scripts, $where=null) {
 	echo "\n";
 }
 
-function echo_title() {
+function echo_title()
+{
 	$args = func_get_args();
 	echo implode(' - ', array_filter(array_map('e', $args)));
 }
 
-function favicon() {
+function favicon()
+{
 	echo '<link rel="shortcut icon" type="image/x-icon" href="';
 	echo e(AFK_Registry::context()->application_root()), 'favicon.ico">';
 }

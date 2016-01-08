@@ -13,8 +13,8 @@
  *
  * @author Keith Gaughan
  */
-class AFK_HttpException extends AFK_Exception {
-
+class AFK_HttpException extends AFK_Exception
+{
 	private $headers = array();
 
 	/**
@@ -23,7 +23,8 @@ class AFK_HttpException extends AFK_Exception {
 	 * @param  $headers  Associative array of HTTP headers to attach to this
 	 *                   exception.
 	 */
-	public function __construct($msg, $code, array $headers=array()) {
+	public function __construct($msg, $code, array $headers=array())
+	{
 		parent::__construct($msg, $code);
 		$this->add_headers($headers);
 	}
@@ -31,7 +32,8 @@ class AFK_HttpException extends AFK_Exception {
 	/**
 	 * Adds additional HTTP headers to this exception.
 	 */
-	public function add_headers(array $headers) {
+	public function add_headers(array $headers)
+	{
 		foreach ($headers as $n => $v) {
 			if (is_array($v)) {
 				$v = implode(', ', $v);
@@ -48,7 +50,8 @@ class AFK_HttpException extends AFK_Exception {
 	/**
 	 * @return The headers associated with this
 	 */
-	public function get_headers() {
+	public function get_headers()
+	{
 		$result = array();
 		foreach ($this->headers as $n => $v) {
 			$result[] = "$n: $v";

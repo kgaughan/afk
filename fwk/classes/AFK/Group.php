@@ -12,32 +12,39 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Group {
-
+class AFK_Group
+{
 	private $id;
 	private $name;
 	private $slug;
 
-	public function  __construct($id, $name, $slug) {
+	public function __construct($id, $name, $slug)
+	{
 		$this->id = $id;
 		$this->name = $name;
 		$this->slug = $slug;
 	}
 
-	/** @warning For internal use only: prefer AFK_Group::get_slug() */
-	public function get_id() {
+	/**
+	 * @warning For internal use only: prefer AFK_Group::get_slug()
+	 */
+	public function get_id()
+	{
 		return $this->id;
 	}
 
-	public function get_slug() {
+	public function get_slug()
+	{
 		return $this->slug;
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return $this->name;
 	}
 
-	public function save() {
+	public function save()
+	{
 		// TODO: Do magic with AFK_Groups.
 	}
 }

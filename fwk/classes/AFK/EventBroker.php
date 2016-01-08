@@ -30,28 +30,31 @@
  *
  * @author Keith Gaughan
  */
-class AFK_EventBroker {
-
+class AFK_EventBroker
+{
 	private $callbacks = array();
 
 	/**
 	 * Registers a callback for an event stage.
 	 *
-	 * @param  $stage      Event stage name.
-	 * @param  $callback   Function or method to trigger on that stage.
-	 * @param  $singleton  Should it be the only one listening on that
+	 * @param $stage      Event stage name.
+	 * @param $callback   Function or method to trigger on that stage.
+	 * @param $singleton  Should it be the only one listening on that
 	 *                     stage?
 	 */
-	public function register($stage, $callback, $singleton=false) {
-		if (!array_key_exists($stage, $this->callbacks) ||
-				($singleton && count($this->callbacks[$stage]) > 0)) {
+	public function register($stage, $callback, $singleton=false)
+	{
+		if (!array_key_exists($stage, $this->callbacks)
+			|| ($singleton && count($this->callbacks[$stage]) > 0)
+		) {
 			$this->callbacks[$stage] = array($callback);
 		} else {
 			$this->callbacks[$stage][] = $callback;
 		}
 	}
 
-	public function has_callbacks($event) {
+	public function has_callbacks($event)
+	{
 		foreach (array("pre:$event", $event, "post:$event") as $stage) {
 			if (isset($this->callbacks[$stage])) {
 				return true;
@@ -63,8 +66,8 @@ class AFK_EventBroker {
 	/**
 	 * Trigger's an event.
 	 *
-	 * @param  $event  Event being triggered.
-	 * @param  $value  Value to be processed by the event.
+	 * @param $event  Event being triggered.
+	 * @param $value  Value to be processed by the event.
 	 *
 	 * @return A two element array; the first element of which, when true
 	 *         specifies that all registered callbacks ran to completion, and
@@ -73,7 +76,8 @@ class AFK_EventBroker {
 	 *         the event; the second of which is the value returned by the
 	 *         last callback executed.
 	 */
-	public function trigger($event, $value) {
+	public function trigger($event, $value)
+	{
 		foreach (array("pre:$event", $event, "post:$event") as $stage) {
 			list($continue, $value) = $this->trigger_stage($stage, $value);
 			if (!$continue) {
@@ -83,8 +87,11 @@ class AFK_EventBroker {
 		return array($continue, $value);
 	}
 
-	/** Internal processing of an event stage. */
-	private function trigger_stage($stage, $value) {
+	/**
+	 * Internal processing of an event stage.
+	 */
+	private function trigger_stage($stage, $value)
+	{
 		if (array_key_exists($stage, $this->callbacks)) {
 			foreach ($this->callbacks[$stage] as $cb) {
 				list($continue, $value) = call_user_func($cb, $stage, $value);

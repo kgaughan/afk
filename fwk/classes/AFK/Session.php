@@ -12,21 +12,24 @@
  *
  * @author Keith Gaughan
  */
-abstract class AFK_Session {
-
-	public function __construct() {
+abstract class AFK_Session
+{
+	public function __construct()
+	{
 		session_set_save_handler(
 			array($this, 'open'),
 			array($this, 'close'),
 			array($this, 'read'),
 			array($this, 'write'),
 			array($this, 'destroy'),
-			array($this, 'gc'));
+			array($this, 'gc')
+		);
 	}
 
 	public abstract function open($save_path, $name);
 
-	public function close() {
+	public function close()
+	{
 		return true;
 	}
 

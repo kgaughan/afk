@@ -10,4 +10,6 @@
 /**
  * Thrown when there's something wrong with a provided path.
  */
-class AFK_PathException extends AFK_Exception { }
+class AFK_PathException extends AFK_Exception
+{
+}

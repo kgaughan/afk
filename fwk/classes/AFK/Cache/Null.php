@@ -20,22 +20,26 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Cache_Null implements AFK_Cache {
-
-	public function invalidate($id) {
+class AFK_Cache_Null implements AFK_Cache
+{
+	public function invalidate($id)
+	{
 		// Do nothing.
 	}
 
-	public function invalidate_all($max_age=0) {
+	public function invalidate_all($max_age=0)
+	{
 		// Do nothing.
 	}
 
-	public function load($id, $max_age=300) {
+	public function load($id, $max_age=300)
+	{
 		// Do nothing.
 		return null;
 	}
 
-	public function save($id, $item) {
+	public function save($id, $item)
+	{
 		// Do nothing.
 	}
 }

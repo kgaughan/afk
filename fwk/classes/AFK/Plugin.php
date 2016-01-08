@@ -33,19 +33,26 @@
  *     version  The version number of this plugin.
  *     date     When this plugin was last revised in the format YYYY-MM-DD.
  */
-abstract class AFK_Plugin {
-
-	/** This plugin's path. */
+abstract class AFK_Plugin
+{
+	/**
+	 * This plugin's path.
+	 */
 	protected $root;
-	/** The plugin's internal name. */
+	/**
+	 * The plugin's internal name.
+	 */
 	protected $name;
 
-	/** Contents of about.ini. */
+	/**
+	 * Contents of about.ini.
+	 */
 	protected $about;
 
 	private static $registry = array();
 
-	public function __construct($name=null) {
+	public function __construct($name=null)
+	{
 		$this->root = $this->get_plugin_root();
 		$this->name = coalesce($name, basename($this->root));
 		self::$registry[$this->name] = $this;
@@ -53,16 +60,19 @@ abstract class AFK_Plugin {
 		$this->register_listeners();
 	}
 
-	private function get_plugin_root() {
+	private function get_plugin_root()
+	{
 		$robj = new ReflectionObject($this);
 		return dirname($robj->getFileName());
 	}
 
-	public function get_internal_name() {
+	public function get_internal_name()
+	{
 		return $this->name;
 	}
 
-	public static function by_name($name) {
+	public static function by_name($name)
+	{
 		if (isset(self::$registry[$name])) {
 			return self::$registry[$name];
 		}
@@ -71,19 +81,23 @@ abstract class AFK_Plugin {
 
 	// Settings {{{
 
-	protected function load_configuration() {
+	protected function load_configuration()
+	{
 		$config = new AFK_ConfigFile();
 		if ($config->read_file($this->root . '/about.ini') === false) {
 			throw new AFK_ConfigurationException(
 				sprintf(
 					'%s (%s): could not read configuration',
 					$this->get_internal_name(),
-					get_class($this)));
+					get_class($this)
+				)
+			);
 		}
 		return $config;
 	}
 
-	public function get_plugin_description() {
+	public function get_plugin_description()
+	{
 		// Backwards compatibility with old-style about.ini files.
 		if (!$this->has_section('plugin')) {
 			return $this->about->get_section('DEFAULT');
@@ -91,18 +105,22 @@ abstract class AFK_Plugin {
 		return $this->about->get_section('plugin');
 	}
 
-	protected function get_setting($name, $default=null) {
+	protected function get_setting($name, $default=null)
+	{
 		$section = defined('STATUS') ? ('settings:' . STATUS) : 'settings';
 		return $this->about->get($section, $name, $default);
 	}
 
-	protected function get_bool_setting($name, $default=false) {
+	protected function get_bool_setting($name, $default=false)
+	{
 		return in_array(
 			strtolower($this->get_setting($name, $default ? 'yes' : 'no')),
-			array('yes', 'on', 'true', '1'));
+			array('yes', 'on', 'true', '1')
+		);
 	}
 
-	protected function get_setting_descriptions() {
+	protected function get_setting_descriptions()
+	{
 		return $this->about->get_section('setting-descriptions');
 	}
 
@@ -110,7 +128,8 @@ abstract class AFK_Plugin {
 
 	// Events {{{
 
-	private function register_listeners() {
+	private function register_listeners()
+	{
 		$evts = $this->get_events();
 		foreach ($evts as $evt => $fn) {
 			if (is_numeric($evt)) {
@@ -135,10 +154,11 @@ abstract class AFK_Plugin {
 	/**
 	 * Loads the given plugins from the given location.
 	 *
-	 * @param  $location  Path to plugin directories.
-	 * @param  $active    List of plugins to load.
+	 * @param $location  Path to plugin directories.
+	 * @param $active    List of plugins to load.
 	 */
-	public static function load($location, array $active) {
+	public static function load($location, array $active)
+	{
 		foreach ($active as $name) {
 			$d = "$location/$name";
 			if (is_dir($d) && is_file("$d/plugin.php") && is_file("$d/about.ini")) {

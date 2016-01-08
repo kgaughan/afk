@@ -10,9 +10,10 @@
 /**
  * Thrown when a request could not be parsed.
  */
-class AFK_ParseException extends AFK_HttpException {
-
-	public function __construct($msg) {
+class AFK_ParseException extends AFK_HttpException
+{
+	public function __construct($msg)
+	{
 		parent::__construct($msg, AFK_Context::BAD_REQUEST);
 	}
 }

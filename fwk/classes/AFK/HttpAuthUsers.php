@@ -10,29 +10,33 @@
 /**
  *
  */
-abstract class AFK_HttpAuthUsers extends AFK_Users {
-
+abstract class AFK_HttpAuthUsers extends AFK_Users
+{
 	private static $realm = 'Realm';
 	private static $methods = array();
 
 	private $id;
 	private $actual_id;
 
-	public function __construct() {
+	public function __construct()
+	{
 		parent::__construct();
 		$this->id = false;
 		$this->actual_id = false;
 	}
 
-	public static function set_realm($realm) {
+	public static function set_realm($realm)
+	{
 		self::$realm = $realm;
 	}
 
-	public static function add_method(AFK_HttpAuth $method) {
+	public static function add_method(AFK_HttpAuth $method)
+	{
 		self::$methods[$method->get_name()] = $method;
 	}
 
-	private static function collect_authenticate_headers() {
+	private static function collect_authenticate_headers()
+	{
 		$headers = array();
 		foreach (self::$methods as $method) {
 			$headers[] = $method->get_name() . ' ' . $method->get_authenticate_header(self::$realm);
@@ -40,7 +44,8 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		return $headers;
 	}
 
-	private static function get_header(AFK_Environment $ctx) {
+	private static function get_header(AFK_Environment $ctx)
+	{
 		$header = false;
 		if (isset($ctx->HTTP_AUTHORIZATION)) {
 			$header = $ctx->HTTP_AUTHORIZATION;
@@ -61,7 +66,8 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		return false;
 	}
 
-	private function check() {
+	private function check()
+	{
 		$ctx = AFK_Registry::context();
 		$header = self::get_header($ctx);
 		if ($header !== false) {
@@ -83,21 +89,24 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 		return false;
 	}
 
-	public function act_as_effective_user_impl($id) {
+	public function act_as_effective_user_impl($id)
+	{
 		if ($this->actual_id === false) {
 			$this->actual_id = $this->id;
 		}
 		$this->id = $id;
 	}
 
-	public function revert_to_actual_user_impl() {
+	public function revert_to_actual_user_impl()
+	{
 		if ($this->actual_id !== false) {
 			$this->id = $this->actual_id;
 			$this->actual_id = false;
 		}
 	}
 
-	protected function get_current_user_id() {
+	protected function get_current_user_id()
+	{
 		if ($this->id === false && ($id = $this->check()) !== false) {
 			$this->id = $id;
 		}
@@ -109,7 +118,8 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 	 */
 	protected abstract function authenticate($username);
 
-	protected function require_auth() {
+	protected function require_auth()
+	{
 		static $called = false;
 		if (!$called) {
 			$called = true;
@@ -117,22 +127,26 @@ abstract class AFK_HttpAuthUsers extends AFK_Users {
 				throw new AFK_HttpException(
 					'You are not authorised for access.',
 					AFK_Context::UNAUTHORISED,
-					array('WWW-Authenticate' => self::collect_authenticate_headers()));
+					array('WWW-Authenticate' => self::collect_authenticate_headers())
+				);
 			}
 			throw new AFK_HttpException(
 				'You lack the required credentials.',
-				AFK_Context::FORBIDDEN);
+				AFK_Context::FORBIDDEN
+			);
 		}
 	}
 
 	/**
 	 * Helper method for generating a passphrase hash for storage.
 	 */
-	public static function make_passphrase_hash($username, $passphrase) {
+	public static function make_passphrase_hash($username, $passphrase)
+	{
 		return md5($username . ':' . self::$realm . ':' . $passphrase);
 	}
 
-	public static function check_credentials($username, $passphrase) {
+	public static function check_credentials($username, $passphrase)
+	{
 		$info = self::$impl->authenticate($username);
 		if (is_array($info)) {
 			list($id, $a1) = $info;

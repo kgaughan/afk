@@ -11,8 +11,8 @@
  * A request processing pipeline. Pipelines can be inserted into other
  * pipelines as filters.
  */
-class AFK_Pipeline implements AFK_Filter {
-
+class AFK_Pipeline implements AFK_Filter
+{
 	private $filters = array();
 
 	/**
@@ -22,7 +22,8 @@ class AFK_Pipeline implements AFK_Filter {
 	 *
 	 * @return Self.
 	 */
-	public function add($filter) {
+	public function add($filter)
+	{
 		if (is_array($filter) || is_string($filter)) {
 			$this->filters[] = $filter;
 		} else {
@@ -34,9 +35,10 @@ class AFK_Pipeline implements AFK_Filter {
 	/**
 	 * Starts processing the pipeline.
 	 *
-	 * @param  $ctx  The pipeline processing context.
+	 * @param $ctx  The pipeline processing context.
 	 */
-	public function start($ctx) {
+	public function start($ctx)
+	{
 		// Maintainer's note: Don't put a type annotation on this method!
 		// AFK_Context isn't the only class that could be used as a pipeline
 		// processing context.
@@ -47,7 +49,8 @@ class AFK_Pipeline implements AFK_Filter {
 	/**
 	 * Processes the next filter in the pipeline.
 	 */
-	public function do_next($ctx) {
+	public function do_next($ctx)
+	{
 		$filter = current($this->filters);
 		if ($filter !== false) {
 			next($this->filters);
@@ -58,11 +61,13 @@ class AFK_Pipeline implements AFK_Filter {
 	/**
 	 * Moves to the last filter in the pipeline.
 	 */
-	public function to_end() {
+	public function to_end()
+	{
 		end($this->filters);
 	}
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	public function execute(AFK_Pipeline $pipe, $ctx)
+	{
 		$this->start($ctx);
 		$pipe->do_next($ctx);
 	}

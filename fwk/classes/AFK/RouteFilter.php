@@ -10,8 +10,8 @@
 /**
  * Parses and routes the current request URL.
  */
-class AFK_RouteFilter implements AFK_Filter {
-
+class AFK_RouteFilter implements AFK_Filter
+{
 	private $map;
 	private $server;
 	private $request;
@@ -26,7 +26,8 @@ class AFK_RouteFilter implements AFK_Filter {
 	 *                   after the request has been routed. In production,
 	 *                   this will be $_REQUEST.
 	 */
-	public function __construct(AFK_RouteMap $map, array $server, array $request) {
+	public function __construct(AFK_RouteMap $map, array $server, array $request)
+	{
 		$this->map = $map;
 		$this->server = $server;
 		$this->request = $request;
@@ -34,7 +35,8 @@ class AFK_RouteFilter implements AFK_Filter {
 
 	// Filter Execution {{{
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	public function execute(AFK_Pipeline $pipe, $ctx)
+	{
 		$ctx->merge($this->server);
 		// Ensures the request URI doesn't contain double-slashes.
 		$canon = preg_replace('~/{2,}~', '/', $ctx->REQUEST_URI);

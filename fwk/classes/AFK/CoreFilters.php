@@ -12,16 +12,18 @@
  *
  * @author Keith Gaughan
  */
-class AFK_CoreFilters {
-
+class AFK_CoreFilters
+{
 	/**
 	 * Populates the request context with AFK_UploadedFile instances from the
 	 * $_FILES superglobal.
 	 */
-	public static function populate_uploaded_files(AFK_Pipeline $pipe, $ctx) {
+	public static function populate_uploaded_files(AFK_Pipeline $pipe, $ctx)
+	{
 		foreach ($_FILES as $field_name => $info) {
 			$contents = self::convert_uploaded_files(
-				$info['name'], $info['type'], $info['size'], $info['tmp_name'], $info['error']);
+				$info['name'], $info['type'], $info['size'], $info['tmp_name'], $info['error']
+			);
 			if ($contents !== false) {
 				$ctx->$field_name = $contents;
 			}
@@ -29,12 +31,14 @@ class AFK_CoreFilters {
 		$pipe->do_next($ctx);
 	}
 
-	private static function convert_uploaded_files($name, $type, $size, $tmp_name, $error) {
+	private static function convert_uploaded_files($name, $type, $size, $tmp_name, $error)
+	{
 		if (is_array($name)) {
 			$files = array();
 			for ($i = 0; $i < count($name); $i++) {
 				$contents = self::convert_uploaded_files(
-					$name[$i], $type[$i], $size[$i], $tmp_name[$i], $error[$i]);
+					$name[$i], $type[$i], $size[$i], $tmp_name[$i], $error[$i]
+				);
 				if ($contents !== false) {
 					$files[] = $contents;
 				}
@@ -52,7 +56,8 @@ class AFK_CoreFilters {
 	 * Dispatches the request to the appropriate request handler class, if
 	 * possible.
 	 */
-	public static function dispatch(AFK_Pipeline $pipe, $ctx) {
+	public static function dispatch(AFK_Pipeline $pipe, $ctx)
+	{
 		if (is_null($ctx->_handler)) {
 			throw new AFK_Exception('No handler specified.');
 		}
@@ -66,8 +71,11 @@ class AFK_CoreFilters {
 		$pipe->do_next($ctx);
 	}
 
-	/** Does the final stage of request processing: rendering. */
-	public static function render(AFK_Pipeline $pipe, $ctx) {
+	/**
+	 * Does the final stage of request processing: rendering.
+	 */
+	public static function render(AFK_Pipeline $pipe, $ctx)
+	{
 		if ($ctx->rendering_is_allowed()) {
 			$engine = AFK_Registry::_('template_engine');
 			$engine->add_path(APP_TEMPLATE_ROOT . '/' . strtolower($ctx->_handler));
@@ -89,7 +97,8 @@ class AFK_CoreFilters {
 	/**
 	 * Forces the current AFK_Users implementation to authenticate the user.
 	 */
-	public static function require_auth(AFK_Pipeline $pipe, $ctx) {
+	public static function require_auth(AFK_Pipeline $pipe, $ctx)
+	{
 		AFK_Users::force_auth();
 		$pipe->do_next($ctx);
 	}

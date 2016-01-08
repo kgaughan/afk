@@ -32,7 +32,8 @@
 		$env['traceback'],
 		$env['page_title'],
 		$env['PHP_AUTH_USER'],
-		$env['PHP_AUTH_PW']);
+		$env['PHP_AUTH_PW']
+	);
 	AFK::dump($env);
 	?>
 </div>

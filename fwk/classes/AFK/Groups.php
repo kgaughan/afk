@@ -7,7 +7,9 @@
  * that was distributed with this source code.
  */
 
-class AFK_BadSlugException extends AFK_Exception {}
+class AFK_BadSlugException extends AFK_Exception
+{
+}
 
 /**
  * Represents the collection of all groups.
@@ -15,22 +17,25 @@ class AFK_BadSlugException extends AFK_Exception {}
  * @author Keith Gaughan
  * @author Ken Guest
  */
-abstract class AFK_Groups {
-
+abstract class AFK_Groups
+{
 	private $instances = array();
 
-	public function __construct() {
+	public function __construct()
+	{
 	}
 
 	// Implementation Assignment {{{
 
 	private static $impl = null;
 
-	public static function set_implementation(AFK_Groups $impl) {
+	public static function set_implementation(AFK_Groups $impl)
+	{
 		self::$impl = $impl;
 	}
 
-	private static function ensure_implementation() {
+	private static function ensure_implementation()
+	{
 		if (is_null(self::$impl)) {
 			throw new AFK_Exception("No AFK_Groups implementation assigned. Check if you've passed on to AFK_Users::set_implementation().");
 		}
@@ -40,7 +45,8 @@ abstract class AFK_Groups {
 
 	// Loading Group Instances {{{
 
-	protected function add(AFK_Group $inst) {
+	protected function add(AFK_Group $inst)
+	{
 		$this->instances[$inst->get_slug()] = $inst;
 	}
 
@@ -50,11 +56,13 @@ abstract class AFK_Groups {
 
 	// Fetching Groups {{{
 
-	protected function has($slug) {
+	protected function has($slug)
+	{
 		return array_key_exists($slug, $this->instances);
 	}
 
-	private function internal_get($slug) {
+	private function internal_get($slug)
+	{
 		if (!$this->has($slug)) {
 			$this->load_all();
 			if (!$this->has($slug)) {
@@ -64,14 +72,16 @@ abstract class AFK_Groups {
 		return $this->instances[$slug];
 	}
 
-	private function internal_get_all() {
+	private function internal_get_all()
+	{
 		if (count($this->instances) == 0) {
 			$this->load_all();
 		}
 		return $this->instances;
 	}
 
-	public static function get(array $slugs) {
+	public static function get(array $slugs)
+	{
 		self::ensure_implementation();
 		$result = array();
 		foreach ($slugs as $slug) {
@@ -80,7 +90,8 @@ abstract class AFK_Groups {
 		return $result;
 	}
 
-	public static function get_all() {
+	public static function get_all()
+	{
 		self::ensure_implementation();
 		return self::$impl->internal_get_all();
 	}

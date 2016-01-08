@@ -12,59 +12,70 @@
  *
  * @author Keith Gaughan
  */
-class AFK_User {
-
+class AFK_User
+{
 	protected $id;
 	protected $username;
 	private $caps = array();
 	private $groups = array();
 
-	public function __construct($id, $username) {
+	public function __construct($id, $username)
+	{
 		$this->id = $id;
 		$this->username = $username;
 	}
 
-	public function get_id() {
+	public function get_id()
+	{
 		return $this->id;
 	}
 
-	public function get_display_name() {
+	public function get_display_name()
+	{
 		return $this->username;
 	}
 
-	public function get_username() {
+	public function get_username()
+	{
 		return $this->username;
 	}
 
-	public function get_profile() {
+	public function get_profile()
+	{
 		return null;
 	}
 
-	public function is_logged_in() {
+	public function is_logged_in()
+	{
 		return $this->id !== AFK_Users::ANONYMOUS;
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return $this->get_display_name();
 	}
 
 	// Capabilities {{{
 
-	public function add_capabilities(array $to_add) {
+	public function add_capabilities(array $to_add)
+	{
 		$this->caps = array_unique($to_add + $this->caps);
 	}
 
-	public function remove_capabilities(array $to_remove) {
+	public function remove_capabilities(array $to_remove)
+	{
 		$this->caps = array_diff($this->caps, $to_remove);
 	}
 
-	public function can() {
+	public function can()
+	{
 		$reqs = func_get_args();
 		$reqs = array_unique($reqs);
 		return count($reqs) == count(array_intersect($this->caps, $reqs));
 	}
 
-	public function get_capabilities() {
+	public function get_capabilities()
+	{
 		return $this->caps;
 	}
 
@@ -72,24 +83,29 @@ class AFK_User {
 
 	// Groups {{{
 
-	public function add_groups(array $to_add) {
+	public function add_groups(array $to_add)
+	{
 		$this->groups = array_unique($to_add + $this->groups);
 	}
 
-	public function remove_groups(array $to_remove) {
+	public function remove_groups(array $to_remove)
+	{
 		$this->groups = array_diff($this->groups, $to_remove);
 	}
 
-	public function set_groups(array $slugs) {
+	public function set_groups(array $slugs)
+	{
 		$this->groups = array_unique($slugs);
 	}
 
-	public function member_of() {
+	public function member_of()
+	{
 		$groups = func_get_args();
 		return count(array_intersect($this->groups, array_unique($groups))) > 0;
 	}
 
-	public function get_groups() {
+	public function get_groups()
+	{
 		return $this->groups;
 	}
 

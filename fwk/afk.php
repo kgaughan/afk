@@ -18,14 +18,20 @@ define('AFK_VERSION', '1.2.4');
 
 // Utility Functions {{{
 
-/** @return The first non-empty argument in the arguments passed in. */
-function coalesce() {
+/**
+ * @return The first non-empty argument in the arguments passed in.
+ */
+function coalesce()
+{
 	$args = func_get_args();
 	return call_user_func_array(array('AFK', 'coalesce'), $args);
 }
 
-/** Entity encodes the given string. */
-function e($s) {
+/**
+ * Entity encodes the given string.
+*/
+function e($s)
+{
 	return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
@@ -33,7 +39,8 @@ function e($s) {
  * Entity-encoded echo: encodes all the special characters in it's arguments
  * and echos them.
  */
-function ee() {
+function ee()
+{
 	$args = func_get_args();
 	echo htmlspecialchars(implode('', $args), ENT_QUOTES, 'UTF-8');
 }

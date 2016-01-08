@@ -10,27 +10,33 @@
 /**
  * Compiles routes into a searchable form.
  */
-class AFK_Routes {
-
+class AFK_Routes
+{
 	private $map;
 	private $defaults = array();
 	private $patterns;
 
-	public function __construct(array $patterns=array()) {
+	public function __construct(array $patterns=array())
+	{
 		$this->map = new AFK_RouteMap();
 		$this->patterns = $patterns;
 	}
 
-	public function get_map() {
+	public function get_map()
+	{
 		return $this->map;
 	}
 
-	public function defaults(array $defaults) {
+	public function defaults(array $defaults)
+	{
 		$this->defaults = $defaults;
 	}
 
-	/** Adds a route and an associated resource handler. */
-	public function route($route, array $defaults=array(), array $patterns=array()) {
+	/**
+	 * Adds a route and an associated resource handler.
+	 */
+	public function route($route, array $defaults=array(), array $patterns=array())
+	{
 		$all_patterns = $this->patterns + $patterns;
 		$all_defaults = $this->defaults + $defaults;
 		list($regex, $keys) = $this->compile_route($route, $all_patterns);
@@ -40,8 +46,11 @@ class AFK_Routes {
 
 	// Route Compilation {{{
 
-	/** Compiles a route into a regex and an array of placeholder keys. */
-	private function compile_route($route, array $patterns) {
+	/**
+	 * Compiles a route into a regex and an array of placeholder keys.
+	 */
+	private function compile_route($route, array $patterns)
+	{
 		// Construct a regular expression to match this route. This method is
 		// meant to be simple, not to be fast. If speed becomes necessary, it
 		// can probably be improved using some complex nonsense with
@@ -70,7 +79,8 @@ class AFK_Routes {
 		return array($regex, $keys);
 	}
 
-	private function to_pattern($name, $trailer, array $patterns) {
+	private function to_pattern($name, $trailer, array $patterns)
+	{
 		if (array_key_exists($name, $patterns)) {
 			$p = $patterns[$name];
 			if (is_array($p)) {
@@ -84,15 +94,19 @@ class AFK_Routes {
 		return "($p)" . $this->quote($trailer);
 	}
 
-	/** Escapes a character if it has a special meaning in a character class. */
-	private function escape_class_character($c) {
+	/**
+	 * Escapes a character if it has a special meaning in a character class.
+	 */
+	private function escape_class_character($c)
+	{
 		if (strpos("/^-]\\", $c) !== false) {
 			return "\\$c";
 		}
 		return $c;
 	}
 
-	private function quote($s) {
+	private function quote($s)
+	{
 		return preg_quote($s, '`');
 	}
 

@@ -12,8 +12,8 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Context extends AFK_Environment {
-
+class AFK_Context extends AFK_Environment
+{
 	// Important HTTP response status codes {{{
 
 	const OK = 200;
@@ -52,7 +52,8 @@ class AFK_Context extends AFK_Environment {
 	 * key and the value to associate with that key is taken from the request
 	 * context.
 	 */
-	public function to_query(array $vars, $prefix='?', $separator='&') { // {{{
+	public function to_query(array $vars, $prefix='?', $separator='&')
+	{
 		$result = '';
 		foreach ($vars as $k => $v) {
 			if (is_numeric($k)) {
@@ -70,20 +71,24 @@ class AFK_Context extends AFK_Environment {
 			$result = $prefix . $result;
 		}
 		return $result;
-	} // }}}
+	}
 
-	/** Merges an array into the context, but if it's empty, cause a 404. */
-	public function merge_or_not_found($ary, $msg='') { // {{{
+	/**
+	 * Merges an array into the context, but if it's empty, cause a 404.
+	 */
+	public function merge_or_not_found($ary, $msg='')
+	{
 		if (empty($ary)) {
 			$this->not_found($msg);
 		} else {
 			$this->merge($ary);
 		}
-	} // }}}
+	}
 
-	public function is_upload($key) { // {{{
+	public function is_upload($key)
+	{
 		return $this->__isset($key) && $this->__get($key) instanceof AFK_UploadedFile;
-	} // }}}
+	}
 
 	// URLs {{{
 
@@ -95,7 +100,8 @@ class AFK_Context extends AFK_Environment {
 	 * @return The resolved path, or false if it could not be processed,
 	 *         e.g., it resolved to something outside the application.
 	 */
-	public function resolve($rel_path) {
+	public function resolve($rel_path)
+	{
 		$canon = $this->to_absolute_uri($rel_path);
 		$root = $this->application_root();
 		if (substr_compare($canon, $root, 0, strlen($root)) == 0) {
@@ -108,9 +114,10 @@ class AFK_Context extends AFK_Environment {
 	 * Converts the given URI into an absolute one, fit for use with the
 	 * HTTP 'Location' header.
 	 *
-	 * @param  $path  An absolute or relative path to canonicalise into a URI.
+	 * @param $path  An absolute or relative path to canonicalise into a URI.
 	 */
-	public function to_absolute_uri($path) {
+	public function to_absolute_uri($path)
+	{
 		if (substr($path, 0, 2) == '~/') {
 			$path = $this->application_root() . substr($path, 1);
 		}
@@ -120,7 +127,8 @@ class AFK_Context extends AFK_Environment {
 		return $this->get_host_prefix() . $this->canonicalise_path($path);
 	}
 
-	private function canonicalise_path($path) {
+	private function canonicalise_path($path)
+	{
 		if ($path == '' || $path[0] != '/') {
 			$prefix = $this->REQUEST_URI;
 			if (substr($prefix, -1) != '/') {
@@ -134,15 +142,19 @@ class AFK_Context extends AFK_Environment {
 		return AFK_Urls::scrub_path($path);
 	}
 
-	public function get_host_prefix() {
+	public function get_host_prefix()
+	{
 		if (is_null($this->host_prefix)) {
 			$this->host_prefix = ($this->is_secure() ? 'https' : 'http') . '://' . $this->HTTP_HOST;
 		}
 		return $this->host_prefix;
 	}
 
-	/** @return The root path of the application. */
-	public function application_root_path() {
+	/**
+	 * @return The root path of the application.
+	 */
+	public function application_root_path()
+	{
 		if (is_null($this->application_root)) {
 			$path = $this->REQUEST_URI;
 			$excess = strlen($this->PATH_INFO) - 1;
@@ -156,18 +168,25 @@ class AFK_Context extends AFK_Environment {
 		return $this->application_root;
 	}
 
-	/** @return The root URL of the application. */
-	public function application_root() {
+	/**
+	 * @return The root URL of the application.
+	 */
+	public function application_root()
+	{
 		return $this->get_host_prefix() . $this->application_root_path();
 	}
 
-	public function base_url() {
+	public function base_url()
+	{
 		$parts = func_get_args();
 		return $this->application_root() . implode('/', array_map('rawurlencode', $parts));
 	}
 
-	/** @return The current request URI (without the query string.) */
-	public function request_uri() {
+	/**
+	 * @return The current request URI (without the query string.)
+	 */
+	public function request_uri()
+	{
 		if (is_null($this->current_request_uri)) {
 			list($this->current_request_uri) = explode('?', $this->REQUEST_URI, 2);
 		}
@@ -178,8 +197,11 @@ class AFK_Context extends AFK_Environment {
 
 	// Request Information {{{
 
-	/** @return The HTTP method used for this request. */
-	public function method() {
+	/**
+	 * @return The HTTP method used for this request.
+	 */
+	public function method()
+	{
 		if (is_null($this->current_method)) {
 			$this->current_method = strtolower($this->REQUEST_METHOD);
 			if ($this->current_method == 'post' && isset($this->_method)) {
@@ -189,12 +211,16 @@ class AFK_Context extends AFK_Environment {
 		return $this->current_method;
 	}
 
-	/** @return True if this request is running over SSL/TLS. */
-	public function is_secure() {
+	/**
+	 * @return True if this request is running over SSL/TLS.
+	 */
+	public function is_secure()
+	{
 		return $this->__isset('HTTPS');
 	}
 
-	public function is_referrer_this_host() {
+	public function is_referrer_this_host()
+	{
 		if (isset($ctx->HTTP_REFERER)) {
 			$parts = parse_url($ctx->HTTP_REFERER);
 			return isset($parts['host']) && $parts['host'] == $ctx->HTTP_HOST;
@@ -213,26 +239,36 @@ class AFK_Context extends AFK_Environment {
 	 *
 	 * @return The view to use for rendering this request.
 	 */
-	public function view($default='') {
+	public function view($default='')
+	{
 		if (!is_null($this->_view)) {
 			return $this->_view;
 		}
 		return $default;
 	}
 
-	/** Alters the view to be rendered later. */
-	public function change_view($new) {
+	/**
+	 * Alters the view to be rendered later.
+	 */
+	public function change_view($new)
+	{
 		$this->_old_view = $this->_view;
 		$this->_view = $new;
 	}
 
-	/** Toggles whether any rendering components should run. */
-	public function allow_rendering($allow=true) {
+	/**
+	 * Toggles whether any rendering components should run.
+	 */
+	public function allow_rendering($allow=true)
+	{
 		$this->allow_rendering = $allow;
 	}
 
-	/** @return True if any subsequent template renderer should run. */
-	public function rendering_is_allowed() {
+	/**
+	 * @return True if any subsequent template renderer should run.
+	 */
+	public function rendering_is_allowed()
+	{
 		return $this->allow_rendering;
 	}
 
@@ -243,7 +279,8 @@ class AFK_Context extends AFK_Environment {
 	/**
 	 * Wraps the PHP header() function to allow testing.
 	 */
-	public function header($header, $replace=true, $status=null) {
+	public function header($header, $replace=true, $status=null)
+	{
 		if (!headers_sent()) {
 			if (is_null($status)) {
 				header($header, $replace);
@@ -256,9 +293,10 @@ class AFK_Context extends AFK_Environment {
 	/**
 	 * Signal that the application has created a new resource.
 	 *
-	 * @param  $location  Path to the new resource.
+	 * @param $location  Path to the new resource.
 	 */
-	public function created($location) {
+	public function created($location)
+	{
 		$this->allow_rendering(false);
 		$this->header('Location: ' . $this->to_absolute_uri($location), true, self::CREATED);
 	}
@@ -267,10 +305,11 @@ class AFK_Context extends AFK_Environment {
 	 * Signal that the application has accepted but not yet processed the
 	 * request.
 	 *
-	 * @param  $location  Location to poll, if any. If not specified here,
-	 *                    give it in the body.
+	 * @param $location  Location to poll, if any. If not specified here,
+	 *                   give it in the body.
 	 */
-	public function accepted($location=null) {
+	public function accepted($location=null)
+	{
 		if (is_null($location)) {
 			$this->set_response_code(self::ACCEPTED);
 		} else {
@@ -281,12 +320,13 @@ class AFK_Context extends AFK_Environment {
 	/**
 	 * Performs a HTTP redirect.
 	 *
-	 * @param  The redirect type.
-	 * @param  Where to redirect to. Defaults to the current URI.
+	 * @param The redirect type.
+	 * @param Where to redirect to. Defaults to the current URI.
 	 *
-	 * @note   For RFC2161 compliance, this does _not_ turn off rendering.
+	 * @note For RFC2161 compliance, this does _not_ turn off rendering.
 	 */
-	public function redirect($code, $to=null) {
+	public function redirect($code, $to=null)
+	{
 		if ($code < 300 || $code > 307 || $code == 306 || $code == self::NOT_MODIFIED) {
 			throw new AFK_Exception(sprintf("Bad redirect code: %s", $code));
 		}
@@ -300,16 +340,21 @@ class AFK_Context extends AFK_Environment {
 		$this->header('Location: ' . $this->to_absolute_uri($to), true, $code);
 	}
 
-	public function see_other($to=null) {
+	public function see_other($to=null)
+	{
 		$this->redirect(self::SEE_OTHER, $to);
 	}
 
-	/** Performs a permanent redirect. See ::redirect(). */
-	public function permanent_redirect($to) {
+	/**
+	 * Performs a permanent redirect. See ::redirect().
+	 */
+	public function permanent_redirect($to)
+	{
 		$this->redirect(self::PERMANENT, $to);
 	}
 
-	public function try_not_modified($etag) {
+	public function try_not_modified($etag)
+	{
 		$status = self::OK;
 		$etag = '"' . $etag . '"';
 		if (in_array($etag, explode(', ', AFK::coalesce($this->HTTP_IF_NONE_MATCH, '')))) {
@@ -323,50 +368,58 @@ class AFK_Context extends AFK_Environment {
 	/**
 	 * Signal that the request was malformed.
 	 *
-	 * @param  $msg  Description of how the message is malformed.
+	 * @param $msg  Description of how the message is malformed.
 	 *
-	 * @note   This method triggers an immediate non-local jump.
+	 * @note This method triggers an immediate non-local jump.
 	 */
-	public function bad_request($msg='') {
+	public function bad_request($msg='')
+	{
 		throw new AFK_HttpException($msg, self::BAD_REQUEST);
 	}
 
 	/**
 	 * @note   This method triggers an immediate non-local jump.
 	 */
-	public function forbidden($msg='') {
+	public function forbidden($msg='')
+	{
 		throw new AFK_HttpException($msg, self::FORBIDDEN);
 	}
 
 	/**
 	 * Triggers a HTTP Not Found (404) response.
 	 *
-	 * @note   This method triggers an immediate non-local jump.
+	 * @note This method triggers an immediate non-local jump.
 	 */
-	public function not_found($msg='') {
+	public function not_found($msg='')
+	{
 		throw new AFK_HttpException($msg, self::NOT_FOUND);
 	}
 
 	/**
 	 * Triggers a HTTP No Such Method (405) response.
 	 *
-	 * @note   This method triggers an immediate non-local jump.
+	 * @note This method triggers an immediate non-local jump.
 	 */
-	public function no_such_method(array $available_methods) {
+	public function no_such_method(array $available_methods)
+	{
 		throw new AFK_HttpException('', self::BAD_METHOD, array('Allow' => $available_methods));
 	}
 
 	/**
 	 * Triggers a HTTP Conflict (409) response.
 	 *
-	 * @note   This method triggers an immediate non-local jump.
+	 * @note This method triggers an immediate non-local jump.
 	 */
-	public function conflict($msg='') {
+	public function conflict($msg='')
+	{
 		throw new AFK_HttpException($msg, self::CONFLICT);
 	}
 
-	/** Sets the HTTP response code. */
-	public function set_response_code($code) {
+	/**
+	 * Sets the HTTP response code.
+	 */
+	public function set_response_code($code)
+	{
 		// For backward compatibility, see RFC2616, SS10.3.4
 		if ($code == self::SEE_OTHER && $this->SERVER_PROTOCOL == 'HTTP/1.0') {
 			$code = self::FOUND;
@@ -377,53 +430,94 @@ class AFK_Context extends AFK_Environment {
 		$this->header("{$this->SERVER_PROTOCOL} $code " . $this->get_status_msg($code));
 	}
 
-	private function get_status_msg($code) {
+	private function get_status_msg($code)
+	{
 		switch ($code) {
 		// Informational.
-		case 100: return 'Continue';
-		case 101: return 'Switching Protocols';
+		case 100:
+			return 'Continue';
+		case 101:
+			return 'Switching Protocols';
 		// Success.
-		case 200: return 'OK';
-		case 201: return 'Created';
-		case 202: return 'Accepted';
-		case 203: return 'Non-Authoritative Information';
-		case 204: return 'No Content';
-		case 205: return 'Reset Content';
-		case 206: return 'Partial Content';
+		case 200:
+			return 'OK';
+		case 201:
+			return 'Created';
+		case 202:
+			return 'Accepted';
+		case 203:
+			return 'Non-Authoritative Information';
+		case 204:
+			return 'No Content';
+		case 205:
+			return 'Reset Content';
+		case 206:
+			return 'Partial Content';
 		// Redirection.
-		case 300: return 'Multiple Choices';
-		case 301: return 'Moved Permanently';
-		case 302: return 'Found';
-		case 303: return 'See Other';
-		case 304: return 'Not Modified';
-		case 305: return 'Use Proxy';
-		case 307: return 'Temporary Redirect';
+		case 300:
+			return 'Multiple Choices';
+		case 301:
+			return 'Moved Permanently';
+		case 302:
+			return 'Found';
+		case 303:
+			return 'See Other';
+		case 304:
+			return 'Not Modified';
+		case 305:
+			return 'Use Proxy';
+		case 307:
+			return 'Temporary Redirect';
 		// Client Error.
-		case 400: return 'Bad Request';
-		case 401: return 'Unauthorised';
-		case 402: return 'Payment Required';
-		case 403: return 'Forbidden';
-		case 404: return 'Not Found';
-		case 405: return 'Method Not Allowed';
-		case 406: return 'Not Acceptable';
-		case 407: return 'Proxy Authentication Required';
-		case 408: return 'Request Timeout';
-		case 409: return 'Conflict';
-		case 410: return 'Gone';
-		case 411: return 'Length Required';
-		case 412: return 'Precondition Failed';
-		case 413: return 'Request Entity Too Large';
-		case 414: return 'Request-URI Too Long';
-		case 415: return 'Unsupported Media Type';
-		case 416: return 'Request Range Not Satisfiable';
-		case 417: return 'Expectation Failed';
+		case 400:
+			return 'Bad Request';
+		case 401:
+			return 'Unauthorised';
+		case 402:
+			return 'Payment Required';
+		case 403:
+			return 'Forbidden';
+		case 404:
+			return 'Not Found';
+		case 405:
+			return 'Method Not Allowed';
+		case 406:
+			return 'Not Acceptable';
+		case 407:
+			return 'Proxy Authentication Required';
+		case 408:
+			return 'Request Timeout';
+		case 409:
+			return 'Conflict';
+		case 410:
+			return 'Gone';
+		case 411:
+			return 'Length Required';
+		case 412:
+			return 'Precondition Failed';
+		case 413:
+			return 'Request Entity Too Large';
+		case 414:
+			return 'Request-URI Too Long';
+		case 415:
+			return 'Unsupported Media Type';
+		case 416:
+			return 'Request Range Not Satisfiable';
+		case 417:
+			return 'Expectation Failed';
 		// Server Error.
-		case 500: return 'Internal Server Error';
-		case 501: return 'Not Implemented';
-		case 502: return 'Bad Gateway';
-		case 503: return 'Service Unavailable';
-		case 504: return 'Gateway Timeout';
-		case 505: return 'HTTP Version Not Supported';
+		case 500:
+			return 'Internal Server Error';
+		case 501:
+			return 'Not Implemented';
+		case 502:
+			return 'Bad Gateway';
+		case 503:
+			return 'Service Unavailable';
+		case 504:
+			return 'Gateway Timeout';
+		case 505:
+			return 'HTTP Version Not Supported';
 		}
 		return '';
 	}

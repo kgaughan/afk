@@ -12,4 +12,6 @@
  *
  * @author Keith Gaughan
  */
-class AFK_SlotException extends AFK_Exception { }
+class AFK_SlotException extends AFK_Exception
+{
+}

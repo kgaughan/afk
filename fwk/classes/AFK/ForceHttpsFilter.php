@@ -11,18 +11,20 @@
  * Requires that all requests are done over HTTPS. Useful if you've no other
  * ways of forcing this such as in an Apache .htaccess file.
  */
-class AFK_ForceHttpsFilter implements AFK_Filter {
-
+class AFK_ForceHttpsFilter implements AFK_Filter
+{
 	private $port;
 
 	/**
 	 * @param  port  HTTPS port to use, 443 by default.
 	 */
-	public function __construct($port=443) {
+	public function __construct($port=443)
+	{
 		$this->port = $port;
 	}
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	public function execute(AFK_Pipeline $pipe, $ctx)
+	{
 		if ($ctx->is_secure()) {
 			$pipe->do_next($ctx);
 		} else {

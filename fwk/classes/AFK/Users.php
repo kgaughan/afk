@@ -12,13 +12,14 @@
  *
  * @author Keith Gaughan
  */
-abstract class AFK_Users {
-
+abstract class AFK_Users
+{
 	const ANONYMOUS = 0;
 
 	private $instances = array();
 
-	public function __construct() {
+	public function __construct()
+	{
 		$this->add($this->get_anonymous_user());
 	}
 
@@ -26,11 +27,13 @@ abstract class AFK_Users {
 
 	protected static $impl = null;
 
-	public static function set_implementation(AFK_Users $impl) {
+	public static function set_implementation(AFK_Users $impl)
+	{
 		self::$impl = $impl;
 	}
 
-	private static function ensure_implementation() {
+	private static function ensure_implementation()
+	{
 		if (is_null(self::$impl)) {
 			throw new AFK_Exception("No AFK_Users implementation assigned. Check if you've passed on to AFK_Users::set_implementation().");
 		}
@@ -40,7 +43,8 @@ abstract class AFK_Users {
 
 	// Loading User Instances {{{
 
-	protected function add($inst) {
+	protected function add($inst)
+	{
 		if (is_null($inst)) {
 			$this->instances[self::ANONYMOUS] = null;
 		} else {
@@ -48,19 +52,22 @@ abstract class AFK_Users {
 		}
 	}
 
-	public static function preload(array $ids) {
+	public static function preload(array $ids)
+	{
 		self::ensure_implementation();
 		self::$impl->internal_preload($ids);
 	}
 
-	private function internal_preload(array $ids) {
+	private function internal_preload(array $ids)
+	{
 		$to_load = array_diff($ids, array_keys($this->instances));
 		if (count($to_load) > 0) {
 			$this->load($to_load);
 		}
 	}
 
-	protected function get_anonymous_user() {
+	protected function get_anonymous_user()
+	{
 		return null;
 	}
 
@@ -70,11 +77,13 @@ abstract class AFK_Users {
 
 	// Fetching Users {{{
 
-	protected function has($id) {
+	protected function has($id)
+	{
 		return array_key_exists($id, $this->instances);
 	}
 
-	private function internal_get($id) {
+	private function internal_get($id)
+	{
 		if (!$this->has($id)) {
 			$this->load(array($id));
 			if (!$this->has($id)) {
@@ -84,16 +93,19 @@ abstract class AFK_Users {
 		return $this->instances[$id];
 	}
 
-	protected function get_current_user_id() {
+	protected function get_current_user_id()
+	{
 		return self::ANONYMOUS;
 	}
 
-	public static function current() {
+	public static function current()
+	{
 		self::ensure_implementation();
 		return self::$impl->internal_get(self::$impl->get_current_user_id());
 	}
 
-	public static function get($id) {
+	public static function get($id)
+	{
 		self::ensure_implementation();
 
 		// An array of IDs to fetch.
@@ -113,12 +125,14 @@ abstract class AFK_Users {
 
 	// Saving {{{
 
-	public static function save(AFK_User $user) {
+	public static function save(AFK_User $user)
+	{
 		self::ensure_implementation();
 		return self::$impl->save_impl($user);
 	}
 
-	public function save_impl(AFK_User $user) {
+	public function save_impl(AFK_User $user)
+	{
 		// Subclass should implement this.
 		throw new AFK_Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
 	}
@@ -127,13 +141,15 @@ abstract class AFK_Users {
 
 	// Access Control {{{
 
-	public static function act_as_effective_user($id) {
+	public static function act_as_effective_user($id)
+	{
 		self::ensure_implementation();
 		// We delegate it to the actual implementation.
 		self::$impl->act_as_effective_user_impl($id);
 	}
 
-	public static function revert_to_actual_user() {
+	public static function revert_to_actual_user()
+	{
 		self::ensure_implementation();
 		// We delegate it to the actual implementation.
 		self::$impl->revert_to_actual_user_impl();
@@ -152,7 +168,8 @@ abstract class AFK_Users {
 	 * $this->id = $id;
 	 * </code>
 	 */
-	public function act_as_effective_user_impl($id) {
+	public function act_as_effective_user_impl($id)
+	{
 		// Subclass should implement this.
 		throw new AFK_Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
 	}
@@ -168,12 +185,14 @@ abstract class AFK_Users {
 	 * }
 	 * </code>
 	 */
-	public function revert_to_actual_user_impl() {
+	public function revert_to_actual_user_impl()
+	{
 		// Subclass should implement this.
 		throw new AFK_Exception(sprintf("%s not implemented.", get_class($this) . '::' . __METHOD__));
 	}
 
-	public static function prerequisites() {
+	public static function prerequisites()
+	{
 		self::ensure_implementation();
 		$reqs = func_get_args();
 		$user = self::current();
@@ -182,7 +201,8 @@ abstract class AFK_Users {
 		}
 	}
 
-	public static function member_of() {
+	public static function member_of()
+	{
 		self::ensure_implementation();
 		$reqs = func_get_args();
 		$user = self::current();
@@ -191,23 +211,27 @@ abstract class AFK_Users {
 		}
 	}
 
-	public static function is_anonymous() {
+	public static function is_anonymous()
+	{
 		return is_null(self::current()) || !self::current()->is_logged_in();
 	}
 
-	public static function force_auth() {
+	public static function force_auth()
+	{
 		if (self::is_anonymous()) {
 			self::$impl->require_auth();
 		}
 	}
 
-	protected function require_auth() {
+	protected function require_auth()
+	{
 		static $called = false;
 		if (!$called) {
 			$called = true;
 			throw new AFK_HttpException(
 				'You lack the required credentials.',
-				AFK_Context::FORBIDDEN);
+				AFK_Context::FORBIDDEN
+			);
 		}
 	}
 

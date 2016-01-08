@@ -11,4 +11,6 @@
  * Thrown when something goes wrong when attempting to move an uploaded
  * file.
  */
-class AFK_UploadedFileMoveException extends AFK_Exception { }
+class AFK_UploadedFileMoveException extends AFK_Exception
+{
+}

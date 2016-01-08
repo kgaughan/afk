@@ -1,19 +1,22 @@
 <?php
 require_once dirname(__FILE__) . '/../autoload.php';
 
-class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
-
-	private function load($file) {
+class XmlRpcParserTest extends PHPUnit_Framework_TestCase
+{
+	private function load($file)
+	{
 		return file_get_contents(dirname(__FILE__) . "/files/$file");
 	}
 
-	private function parse($file) {
+	private function parse($file)
+	{
 		$p = new AFK_XmlRpc_Parser();
 		$p->parse($this->load($file));
 		return $p->get_result();
 	}
 
-	private function format($xml) {
+	private function format($xml)
+	{
 		$file = tempnam(sys_get_temp_dir(), 'afk-test');
 		file_put_contents($file, $xml);
 		$result = shell_exec('xmlstarlet fo -C -N -e "utf-8" ' . escapeshellarg($file));
@@ -21,7 +24,8 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 		return $result;
 	}
 
-	public function test_hierarchy() {
+	public function test_hierarchy()
+	{
 		$r = $this->parse('xmlrpc-hierarchy.xml');
 		$expected = array(
 			'examples.getStateName',
@@ -36,22 +40,26 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $r);
 	}
 
-	public function test_fault() {
+	public function test_fault()
+	{
 		$r = $this->parse('xmlrpc-fault.xml');
 		$this->assertEquals('AFK_XmlRpc_Fault', get_class($r));
 		$this->assertEquals(new AFK_XmlRpc_Fault(4, 'Too many parameters.'), $r);
 	}
 
-	public function test_fault_build() {
+	public function test_fault_build()
+	{
 		$expected = $this->load('xmlrpc-fault.xml');
 		$result = AFK_XmlRpc_Parser::serialise_response(
-			new AFK_XmlRpc_Fault(4, 'Too many parameters.'));
+			new AFK_XmlRpc_Fault(4, 'Too many parameters.')
+		);
 		$expected = $this->format($expected);
 		$result = $this->format($result);
 		$this->assertEquals($expected, $result);
 	}
 
-	public function test_types() {
+	public function test_types()
+	{
 		list($method, $args) = $this->parse('xmlrpc-types.xml');
 		list($dt, $t, $f, $d, $b64) = $args;
 		$this->assertEquals('2002-05-12T07:09:42+00:00', $dt->format('c'));
@@ -61,7 +69,8 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($b64, new AFK_Blob('Hello, World!'));
 	}
 
-	public function test_types_build() {
+	public function test_types_build()
+	{
 		$expected = $this->load('xmlrpc-types.xml');
 		$result = AFK_XmlRpc_Parser::serialise_request(
 			'examples.testTypes',
@@ -70,18 +79,24 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 				true,
 				false,
 				1.5,
-				new AFK_Blob('Hello, World!')));
+				new AFK_Blob('Hello, World!'),
+			)
+		);
 		$expected = $this->format($expected);
 		$result = $this->format($result);
 		$this->assertEquals($expected, $result);
 	}
 
-	/** Runs each of the eight validation tests in turn. */
-	public function test_validation() {
+	/**
+	 * Runs each of the eight validation tests in turn.
+	 */
+	public function test_validation()
+	{
 		for ($i = 1; $i <= 8; $i++) {
 			list(, $args) = $this->parse("test$i.xml");
 			$response = AFK_XmlRpc_Parser::serialise_response(
-				call_user_func_array(array($this, "validate_$i"), $args));
+				call_user_func_array(array($this, "validate_$i"), $args)
+			);
 			$expected = $this->load("test$i.response.xml");
 			$response = $this->format($response);
 			$expected = $this->format($expected);
@@ -90,12 +105,13 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * This handler takes a single parameter, an array of structs, each of which
-	 * contains at least three elements named moe, larry and curly, all <i4>s.
-	 * Your handler must add all the struct elements named curly and return the
-	 * result.
+	 * This handler takes a single parameter, an array of structs, each of
+	 * which contains at least three elements named moe, larry and curly, all
+	 * <i4>s.  Your handler must add all the struct elements named curly and
+	 * return the result.
 	 */
-	private function validate_1(array $a) {
+	private function validate_1(array $a)
+	{
 		$curlies = 0;
 		foreach ($a as $s) {
 			if (isset($s['curly'])) {
@@ -106,16 +122,17 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * This handler takes a single parameter, a string, that contains any number
-	 * of predefined entities, namely <, >, &, ' and ".
+	 * This handler takes a single parameter, a string, that contains any
+	 * number of predefined entities, namely <, >, &, ' and ".
 	 *
-	 * Your handler must return a struct that contains five fields, all numbers:
-	 * ctLeftAngleBrackets, ctRightAngleBrackets, ctAmpersands, ctApostrophes,
-	 * ctQuotes.
+	 * Your handler must return a struct that contains five fields, all
+	 * numbers: ctLeftAngleBrackets, ctRightAngleBrackets, ctAmpersands,
+	 * ctApostrophes, ctQuotes.
 	 *
 	 * To validate, the numbers must be correct.
 	 */
-	private function validate_2($s) {
+	private function validate_2($s)
+	{
 		$ns = array('<' => 0, '>' => 0, '&' => 0, '\'' => 0, '"' => 0);
 		foreach (str_split($s) as $c) {
 			if (isset($ns[$c])) {
@@ -127,15 +144,17 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 			'ctApostrophes' => $ns['\''],
 			'ctLeftAngleBrackets' => $ns['<'],
 			'ctQuotes' => $ns['"'],
-			'ctRightAngleBrackets' => $ns['>']);
+			'ctRightAngleBrackets' => $ns['>'],
+		);
 	}
 
 	/**
-	 * This handler takes a single parameter, a struct, containing at least three
-	 * elements named moe, larry and curly, all <i4>s.  Your handler must add the
-	 * three numbers and return the result.
+	 * This handler takes a single parameter, a struct, containing at least
+	 * three elements named moe, larry and curly, all <i4>s.  Your handler must
+	 * add the three numbers and return the result.
 	 */
-	private function validate_3($s) {
+	private function validate_3($s)
+	{
 		$n = 0;
 		foreach ($s as $v) {
 			$n += $v;
@@ -147,7 +166,8 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	 * This handler takes a single parameter, a struct.  Your handler must return
 	 * the struct.
 	 */
-	private function validate_4($s) {
+	private function validate_4($s)
+	{
 		return $s;
 	}
 
@@ -155,7 +175,8 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	 * This handler takes six parameters, and returns an array containing all the
 	 * parameters.
 	 */
-	private function validate_5($p1, $p2, $p3, $p4, $p5, $p6) {
+	private function validate_5($p1, $p2, $p3, $p4, $p5, $p6)
+	{
 		return array($p1, $p2, $p3, $p4, $p5, $p6);
 	}
 
@@ -165,7 +186,8 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	 * must return a string containing the concatenated text of the first and
 	 * last elements.
 	 */
-	private function validate_6(array $a) {
+	private function validate_6(array $a)
+	{
 		return $a[0] . $a[count($a) - 1];
 	}
 
@@ -181,7 +203,8 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	 * in fact it's '2000.04.01'.  Adding a note saying that month and day are
 	 * two-digits with leading 0s, and January is 01 would help." Done.
 	 */
-	private function validate_7(array $s) {
+	private function validate_7(array $s)
+	{
 		$n = 0;
 		foreach ($s['2000']['04']['01'] as $v) {
 			$n += $v;
@@ -194,10 +217,12 @@ class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 	 * elements, times10, times100 and times1000, the result of multiplying the
 	 * number by 10, 100 and 1000.
 	 */
-	private function validate_8($n) {
+	private function validate_8($n)
+	{
 		return array(
 			'times10' => $n * 10,
 			'times100' => $n * 100,
-			'times1000' => $n * 1000);
+			'times1000' => $n * 1000,
+		);
 	}
 }

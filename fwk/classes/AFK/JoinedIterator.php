@@ -11,11 +11,12 @@
  * Allows iteration over a number of different iterable objects in
  * succession.
  */
-class AFK_JoinedIterator implements Iterator {
-
+class AFK_JoinedIterator implements Iterator
+{
 	private $iterators = array();
 
-	public function __construct() {
+	public function __construct()
+	{
 		$args = func_get_args();
 		$i = 0;
 		foreach ($args as $a) {
@@ -27,29 +28,35 @@ class AFK_JoinedIterator implements Iterator {
 				$this->iterators[] = new ArrayIterator($a);
 			} else {
 				throw AFK_NotIterableException(
-					sprintf("Argument %d is not iterable", $i));
+					sprintf("Argument %d is not iterable", $i)
+				);
 			}
 			$i++;
 		}
 	}
 
-	public function rewind() {
+	public function rewind()
+	{
 		// Do nothing.
 	}
 
-	public function current() {
+	public function current()
+	{
 		return $this->iterators[0]->current();
 	}
 
-	public function key() {
+	public function key()
+	{
 		return $this->iterators[0]->key();
 	}
 
-	public function valid() {
+	public function valid()
+	{
 		return count($this->iterators) > 0 && $this->iterators[0]->valid();
 	}
 
-	public function next() {
+	public function next()
+	{
 		if (count($this->iterators) > 1 && !$this->iterators[0]->valid()) {
 			array_shift($this->iterators);
 		}

@@ -29,32 +29,39 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Session_DB extends AFK_Session {
-
+class AFK_Session_DB extends AFK_Session
+{
 	private $dbh;
 	private $name;
 	private $table;
 
-	public function __construct(DB_Base $dbh, $table='sessions') {
+	public function __construct(DB_Base $dbh, $table='sessions')
+	{
 		parent::__construct();
 		$this->dbh = $dbh;
 		$this->table = $table;
 	}
 
-	public function open($save_path, $name) {
+	public function open($save_path, $name)
+	{
 		$this->name = $name;
 		return true;
 	}
 
-	public function read($id) {
-		$data = $this->dbh->query_value("
+	public function read($id)
+	{
+		$data = $this->dbh->query_value(
+			"
 			SELECT	data
 			FROM	{$this->table}
-			WHERE	name = %s AND id = %s", $this->name, $id);
+			WHERE	name = %s AND id = %s
+			", $this->name, $id
+		);
 		return is_null($data) ? '' : $data;
 	}
 
-	public function write($id, $data) {
+	public function write($id, $data)
+	{
 		if ($data == '') {
 			return $this->destroy($id);
 		}
@@ -69,19 +76,27 @@ class AFK_Session_DB extends AFK_Session {
 		return true;
 	}
 
-	public function destroy($id) {
-		$this->dbh->execute("
+	public function destroy($id)
+	{
+		$this->dbh->execute(
+			"
 			DELETE
 			FROM	{$this->table}
-			WHERE	name = %s AND id = %s", $this->name, $id);
+			WHERE	name = %s AND id = %s
+			", $this->name, $id
+		);
 		return true;
 	}
 
-	public function gc($max_age) {
-		$this->dbh->execute("
+	public function gc($max_age)
+	{
+		$this->dbh->execute(
+			"
 			DELETE
 			FROM	{$this->table}
-			WHERE	ts < %s", time() - $max_age);
+			WHERE	ts < %s
+			", time() - $max_age
+		);
 		return true;
 	}
 }

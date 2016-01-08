@@ -12,15 +12,18 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Exception extends Exception {
-
-	public function __construct($msg, $code=0) {
+class AFK_Exception extends Exception
+{
+	public function __construct($msg, $code=0)
+	{
 		parent::__construct($msg, $code);
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return sprintf(
 			"%s in %s at line %d:\nCode %d: %s\n\n",
-			get_class($this), $this->file, $this->line, $this->code, $this->message);
+			get_class($this), $this->file, $this->line, $this->code, $this->message
+		);
 	}
 }

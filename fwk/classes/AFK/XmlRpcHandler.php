@@ -23,8 +23,8 @@
  * handler instance. This should give any listening plugins, &c. an opportunity
  * to register themselves to handle various calls.
  */
-class AFK_XmlRpcHandler implements AFK_Handler {
-
+class AFK_XmlRpcHandler implements AFK_Handler
+{
 	// Map from method names to pairs of callbacks, the first of which is the
 	// method handler callback, and the second being the introspection
 	// callback.
@@ -33,7 +33,8 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 
 	// Internal request processing mechanics {{{
 
-	public function handle(AFK_Context $ctx) {
+	public function handle(AFK_Context $ctx)
+	{
 		$this->add_registrations();
 		trigger_event('afk:xmlrpc_register', $this);
 		switch ($ctx->method()) {
@@ -50,7 +51,8 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 			} catch (AFK_XmlParserException $xpex) {
 				$result = new AFK_XmlRpc_Fault(
 					AFK_XmlRpc_Fault::NOT_WELL_FORMED,
-					"Cannot parse request: " . $xpex);
+					"Cannot parse request: " . $xpex
+				);
 			}
 			$ctx->header("Content-Type: application/xml; charset=utf-8");
 			echo AFK_XmlRpc_Parser::serialise_response($result);
@@ -66,11 +68,13 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		}
 	}
 
-	private function process_request($method, array $params) {
+	private function process_request($method, array $params)
+	{
 		if (!isset($this->method_table[$method])) {
 			return new AFK_XmlRpc_Fault(
 				AFK_XmlRpc_Fault::UNKNOWN_METHOD,
-				"Unknown method: '$method'");
+				"Unknown method: '$method'"
+			);
 		}
 		try {
 			return call_user_func_array($this->method_table[$method], $params);
@@ -78,11 +82,13 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 			trigger_event('afk:xmlrpc_fault', compact('method', 'params', 'ex'));
 			return new AFK_XmlRpc_Fault(
 				AFK_XmlRpc_Fault::INTERNAL_ERROR,
-				"Uncaught internal exception.");
+				"Uncaught internal exception."
+			);
 		}
 	}
 
-	public function register($name, $method_callback, $introspection_callback) {
+	public function register($name, $method_callback, $introspection_callback)
+	{
 		if (!isset($this->method_table[$name]) && is_callable($method_callback)) {
 			$this->method_table[$name] = $method_callback;
 			if (is_callable($introspection_callback)) {
@@ -91,7 +97,8 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		}
 	}
 
-	protected function register_each(array $methods) {
+	protected function register_each(array $methods)
+	{
 		$introspection_cb = array($this, 'on_introspection');
 		foreach ($methods as $method) {
 			$info = $this->on_introspection($method);
@@ -103,16 +110,21 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 
 	// Registration and metadata {{{
 
-	protected function add_registrations() {
-		$this->register_each(array(
-			'system.getCapabilities',
-			'system.listMethods',
-			'system.methodSignature',
-			'system.methodHelp',
-			'system.multicall'));
+	protected function add_registrations()
+	{
+		$this->register_each(
+			array(
+				'system.getCapabilities',
+				'system.listMethods',
+				'system.methodSignature',
+				'system.methodHelp',
+				'system.multicall',
+			)
+		);
 	}
 
-	protected function on_introspection($method) {
+	protected function on_introspection($method)
+	{
 		switch ($method) {
 		case 'system.getCapabilities':
 			return array(
@@ -147,7 +159,8 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 
 	// Default methods {{{
 
-	protected function call_get_capabilities() {
+	protected function call_get_capabilities()
+	{
 		return array(
 			'faults_interop' => array(
 				'specUrl' => 'http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php',
@@ -157,18 +170,21 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 				'specVersion' => 1));
 	}
 
-	protected function call_list_methods() {
+	protected function call_list_methods()
+	{
 		return array_keys($this->method_table);
 	}
 
-	protected function get_introspection($method) {
+	protected function get_introspection($method)
+	{
 		if (isset($this->introspection_table[$method])) {
 			return call_user_func($this->introspection_table[$method], $method);
 		}
 		return null;
 	}
 
-	protected function call_method_signature($method) {
+	protected function call_method_signature($method)
+	{
 		$introspection = $this->get_introspection($method);
 		if (!is_array($introspection) || !isset($introspection['signatures'])) {
 			return array();
@@ -176,7 +192,8 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		return $introspection['signatures'];
 	}
 
-	protected function call_method_help($method) {
+	protected function call_method_help($method)
+	{
 		$introspection = $this->get_introspection($method);
 		if (!is_array($introspection) || !isset($introspection['help'])) {
 			return '';
@@ -184,17 +201,20 @@ class AFK_XmlRpcHandler implements AFK_Handler {
 		return $introspection['help'];
 	}
 
-	protected function call_multicall(array $calls) {
+	protected function call_multicall(array $calls)
+	{
 		$results = array();
 		foreach ($calls as $call) {
 			if (!is_array($call) || !isset($call['methodName'])) {
 				$results[] = new AFK_XmlRpc_Fault(
 					AFK_XmlRpc_Fault::NOT_WELL_FORMED,
-					'system.multicall expected struct');
+					'system.multicall expected struct'
+				);
 			} elseif ($call['methodName'] == 'system.multicall') {
 				$results[] = new AFK_XmlRpc_Fault(
 					AFK_XmlRpc_Fault::UNKNOWN_METHOD,
-					'Recursive system.multicall forbidden');
+					'Recursive system.multicall forbidden'
+				);
 			} else {
 				$result = $this->process_request($call['methodName'], $call['params']);
 				if (is_object($result) && get_class($result) == 'AFK_XmlRpc_Fault') {

@@ -7,8 +7,8 @@
  * that was distributed with this source code.
  */
 
-class AFK_XmlRpc_Fault extends Exception {
-
+class AFK_XmlRpc_Fault extends Exception
+{
 	// See http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
 	// Parser errors
 	const NOT_WELL_FORMED      = -32700; // Not well formed
@@ -27,7 +27,8 @@ class AFK_XmlRpc_Fault extends Exception {
 	public $faultCode;
 	public $faultString;
 
-	public function __construct($faultCode, $faultString) {
+	public function __construct($faultCode, $faultString)
+	{
 		parent::__construct($faultString, $faultCode);
 		$this->faultCode = $faultCode;
 		$this->faultString = $faultString;

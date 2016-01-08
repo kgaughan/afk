@@ -12,12 +12,15 @@
  *
  * @author Keith Gaughan
  */
-class AFK {
-
+class AFK
+{
 	public static $loader;
 
-	/** @return The first non-empty argument in the arguments passed in. */
-	public static function coalesce() {
+	/**
+	 * @return The first non-empty argument in the arguments passed in.
+	 */
+	public static function coalesce()
+	{
 		$args = func_get_args();
 		$default = $args[0];
 		foreach ($args as $arg) {
@@ -32,7 +35,8 @@ class AFK {
 	 * Ensures the given list of contants are set up by setting them if
 	 * they are not already defined.
 	 */
-	public static function ensure_constants(array $cs) {
+	public static function ensure_constants(array $cs)
+	{
 		foreach ($cs as $name => $value) {
 			if (!defined($name)) {
 				define($name, $value);
@@ -40,37 +44,45 @@ class AFK {
 		}
 	}
 
-	public static function include_if_exists($path, $otherwise=null) {
+	public static function include_if_exists($path, $otherwise=null)
+	{
 		if (file_exists($path)) {
-			require($path);
+			include $path;
 		} elseif (!is_null($otherwise)) {
-			require($otherwise);
+			include $otherwise;
 		}
 	}
 
-	public static function register_autoloader() {
+	public static function register_autoloader()
+	{
 		if (function_exists('spl_autoload_register')) {
 			// Attempt to register an autoloader cleanly...
 			spl_autoload_register(array(self::$loader, 'load_class'));
 		} else {
 			// ...but if all else fails, just slam it in.
-			function __autoload($name) {
+			function __autoload($name)
+			{
 				AFK::$loader->load_class($name);
 			}
 		}
 	}
 
-	public static function load_helper() {
+	public static function load_helper()
+	{
 		$args = func_get_args();
 		call_user_func_array(array(self::$loader, 'load_helper'), $args);
 	}
 
-	public static function add_helper_path($path) {
+	public static function add_helper_path($path)
+	{
 		self::$loader->add_helper_path($path);
 	}
 
-	/** Does a clean HTML dump of the given variable. */
-	public static function dump() {
+	/**
+	 * Does a clean HTML dump of the given variable.
+	 */
+	public static function dump()
+	{
 		$vs = func_get_args();
 		ob_start();
 		ob_implicit_flush(false);
@@ -86,7 +98,8 @@ class AFK {
 	/**
 	 * A wrapper around getopt() to make it behave more sanely.
 	 */
-	public static function get_opt($opts, $longopts=null, $argv=null) {
+	public static function get_opt($opts, $longopts=null, $argv=null)
+	{
 		if (is_null($argv)) {
 			$argv = $GLOBALS['argv'];
 		}
@@ -136,8 +149,11 @@ class AFK {
 
 	// Workarounds {{{
 
-	/** Fixes the superglobals by removing any magic quotes, if present. */
-	public static function fix_superglobals() {
+	/**
+	 * Fixes the superglobals by removing any magic quotes, if present.
+	 */
+	public static function fix_superglobals()
+	{
 		// Magic quotes were removed in PHP 5.4.0, and the *_magic_quotes_*
 		// methods removed in PHP 7.0. This should be safe on PHP 7 due to
 		// shortcircuiting.
@@ -151,7 +167,8 @@ class AFK {
 		}
 	}
 
-	private static function fix_magic_quotes(&$val, $_) {
+	private static function fix_magic_quotes(&$val, $_)
+	{
 		$val = stripslashes($val);
 	}
 
@@ -159,8 +176,11 @@ class AFK {
 
 	// Framework {{{
 
-	/** Basic bootstrapping logic. Feel free to write your own. */
-	public static function bootstrap() {
+	/**
+	 * Basic bootstrapping logic. Feel free to write your own.
+	 */
+	public static function bootstrap()
+	{
 		self::fix_superglobals();
 
 		self::$loader = new AFK_Loader();
@@ -202,8 +222,11 @@ class AFK {
 		return array();
 	}
 
-	/** Basic dispatcher logic. Feel free to write your own dispatcher. */
-	public static function process_request(AFK_RouteMap $map, array $extra_filters=array()) {
+	/**
+	 * Basic dispatcher logic. Feel free to write your own dispatcher.
+	 */
+	public static function process_request(AFK_RouteMap $map, array $extra_filters=array())
+	{
 		$p = new AFK_Pipeline();
 		$p->add(new AFK_ExceptionTrapFilter());
 		$p->add(new AFK_RouteFilter($map, $_SERVER, $_REQUEST));
@@ -216,8 +239,11 @@ class AFK {
 		$p->start(AFK_Registry::context());
 	}
 
-	/** Helper method for writing a cron job runner. */
-	public static function run_callables(array $callables, $lock_directory=false) {
+	/**
+	 * Helper method for writing a cron job runner.
+	 */
+	public static function run_callables(array $callables, $lock_directory=false)
+	{
 		if (count($callables) == 0) {
 			return;
 		}
@@ -236,7 +262,8 @@ class AFK {
 		}
 	}
 
-	private static function run_callable($callable_name, AFK_LockingStrategy $locker) {
+	private static function run_callable($callable_name, AFK_LockingStrategy $locker)
+	{
 		$callable = explode('::', $callable_name, 2);
 		// Callable is a function rather than a static method?
 		if (count($callable) == 1) {
@@ -252,12 +279,12 @@ class AFK {
 				$locker->unlock();
 			} catch (Exception $ex) {
 				$locker->unlock();
-				list($unhandled) =
-					trigger_event(
-						'afk:internal_error',
-						array('ctx' => null, 'exception' => $ex));
-				// The nuclear option - you should have something to
-				// handle errors.
+				list($unhandled) = trigger_event(
+					'afk:internal_error',
+					array('ctx' => null, 'exception' => $ex)
+				);
+				// The nuclear option - you should have something to handle
+				// errors.
 				if ($unhandled) {
 					AFK::dump($ex);
 				}

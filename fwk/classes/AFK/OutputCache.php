@@ -16,15 +16,20 @@
  *     ...expensive to generate content...
  * <?php cache_end(); } ?>
  */
-class AFK_OutputCache {
-
-	/* Cache backend in use. */
+class AFK_OutputCache
+{
+	/**
+	 * Cache backend in use.
+	 */
 	private $backend;
 
-	/* Stack of current cache blocks. */
+	/**
+	 * Stack of current cache blocks.
+	 */
 	private $ids;
 
-	public function __construct() {
+	public function __construct()
+	{
 		$this->set_backend(new AFK_Cache_Null());
 		$this->ids = array();
 	}
@@ -33,7 +38,8 @@ class AFK_OutputCache {
 	 * Specify the implementation of the AFK_Cache interface to use as the
 	 * persistence mechanism.
 	 */
-	public function set_backend(AFK_Cache $backend) {
+	public function set_backend(AFK_Cache $backend)
+	{
 		$this->backend = $backend;
 	}
 
@@ -41,12 +47,13 @@ class AFK_OutputCache {
 	 * Start a cache block, outputting the previously cached content if
 	 * it's still valid.
 	 *
-	 * @param  id       ID of the cache block.
-	 * @param  max_age  Maximum age of the block.
+	 * @param id       ID of the cache block.
+	 * @param max_age  Maximum age of the block.
 	 *
 	 * @return True if the cache is valid, false if not.
 	 */
-	public function start($id, $max_age=300) {
+	public function start($id, $max_age=300)
+	{
 		$content = $this->backend->load($id, $max_age);
 		if (!is_null($content)) {
 			echo $content;
@@ -58,8 +65,11 @@ class AFK_OutputCache {
 		return true;
 	}
 
-	/** Marks the end the cache block. */
-	public function end() {
+	/**
+	 * Marks the end the cache block.
+	 */
+	public function end()
+	{
 		if (count($this->ids) == 0) {
 			throw new AFK_Exception('AFK_OutputCache->end() called when not in an output cache block.');
 		}
@@ -67,8 +77,11 @@ class AFK_OutputCache {
 		ob_end_flush();
 	}
 
-	/** Removes an item from the cache. */
-	public function remove($id) {
+	/**
+	 * Removes an item from the cache.
+	 */
+	public function remove($id)
+	{
 		$this->backend->invalidate($id);
 	}
 }

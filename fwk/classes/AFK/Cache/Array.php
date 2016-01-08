@@ -28,16 +28,18 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Cache_Array implements AFK_Cache {
-
+class AFK_Cache_Array implements AFK_Cache
+{
 	private $cache = array();
 	private $timestamps = array();
 
-	public function invalidate($id) {
+	public function invalidate($id)
+	{
 		unset($this->cache[$id], $this->timestamps[$id]);
 	}
 
-	public function invalidate_all($max_age=0) {
+	public function invalidate_all($max_age=0)
+	{
 		$cutoff = time() - $max_age;
 		foreach ($this->timestamps as $id => $ts) {
 			if ($ts < $cutoff) {
@@ -46,14 +48,16 @@ class AFK_Cache_Array implements AFK_Cache {
 		}
 	}
 
-	public function load($id, $max_age=300) {
+	public function load($id, $max_age=300)
+	{
 		if (array_key_exists($id, $this->cache) && $this->timestamps[$id] + $max_age > time()) {
 			return $this->cache[$id];
 		}
 		return null;
 	}
 
-	public function save($id, $item) {
+	public function save($id, $item)
+	{
 		$this->cache[$id] = $item;
 		$this->timestamps[$id] = time();
 	}

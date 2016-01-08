@@ -26,39 +26,48 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Cache_DB implements AFK_Cache {
-
+class AFK_Cache_DB implements AFK_Cache
+{
 	private $dbh;
 	private $table;
 
-	public function __construct(DB_Base $dbh, $table='cache') {
+	public function __construct(DB_Base $dbh, $table='cache')
+	{
 		$this->dbh = $dbh;
 		$this->table = $table;
 	}
 
-	public function invalidate($id) {
-		$this->dbh->execute("
-			DELETE FROM {$this->table} WHERE id = %s
-			", md5($id));
+	public function invalidate($id)
+	{
+		$this->dbh->execute(
+			"DELETE FROM {$this->table} WHERE id = %s",
+			md5($id)
+		);
 	}
 
-	public function invalidate_all($max_age=0) {
-		$this->dbh->execute("
-			DELETE FROM {$this->table} WHERE ts < %s
-			", time() - $max_age);
+	public function invalidate_all($max_age=0)
+	{
+		$this->dbh->execute(
+			"DELETE FROM {$this->table} WHERE ts < %s",
+			time() - $max_age
+		);
 	}
 
-	public function load($id, $max_age=300) {
-		$data = $this->dbh->query_value("
+	public function load($id, $max_age=300)
+	{
+		$data = $this->dbh->query_value(
+			"
 			SELECT	data
 			FROM	{$this->table}
 			WHERE	id = %s AND ts > %s
-			", md5($id), time() - $max_age);
+			", md5($id), time() - $max_age
+		);
 
 		return is_null($data) ? null : unserialize($data);
 	}
 
-	public function save($id, $item) {
+	public function save($id, $item)
+	{
 		$hash = md5($id);
 		$data = serialize($item);
 		$now = time();

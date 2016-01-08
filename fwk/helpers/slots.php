@@ -1,24 +1,30 @@
 <?php
-function has_slot($slot) {
+function has_slot($slot)
+{
 	return AFK_Registry::_('slots')->has($slot);
 }
 
-function set_slot($slot, $content) {
+function set_slot($slot, $content)
+{
 	return AFK_Registry::_('slots')->set($slot, $content);
 }
 
-function get_slot($slot, $default='') {
+function get_slot($slot, $default='')
+{
 	return AFK_Registry::_('slots')->get($slot, $default);
 }
 
-function start_slot($slot) {
+function start_slot($slot)
+{
 	AFK_Registry::_('slots')->start($slot);
 }
 
-function end_slot() {
+function end_slot()
+{
 	AFK_Registry::_('slots')->end();
 }
 
-function end_slot_append() {
+function end_slot_append()
+{
 	AFK_Registry::_('slots')->end_append();
 }

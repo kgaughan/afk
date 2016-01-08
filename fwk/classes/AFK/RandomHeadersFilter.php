@@ -10,18 +10,20 @@
 /**
  * Allow random headers to be always added to responses.
  */
-class AFK_RandomHeadersFilter implements AFK_Filter {
-
+class AFK_RandomHeadersFilter implements AFK_Filter
+{
 	private $headers;
 
 	/**
 	 * @param  headers  Array of headers to always add to responses.
 	 */
-	public function __construct(array $headers) {
+	public function __construct(array $headers)
+	{
 		$this->headers = $headers;
 	}
 
-	public function execute(AFK_Pipeline $pipe, $ctx) {
+	public function execute(AFK_Pipeline $pipe, $ctx)
+	{
 		foreach ($this->headers as $name => $value) {
 			$ctx->header("$name: $value", false);
 		}

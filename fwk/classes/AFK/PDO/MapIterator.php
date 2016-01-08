@@ -7,19 +7,22 @@
  * that was distributed with this source code.
  */
 
-class AFK_PDO_MapIterator extends AFK_PDO_IteratorBase {
-
-	public function key() {
+class AFK_PDO_MapIterator extends AFK_PDO_IteratorBase
+{
+	public function key()
+	{
 		$current = $this->_current();
 		return $current === false ? null : $current[0];
 	}
 
-	public function current() {
+	public function current()
+	{
 		$current = $this->_current();
 		return $current === false ? null : $current[1];
 	}
 
-	protected function _fetch(PDOStatement $stmt) {
+	protected function _fetch(PDOStatement $stmt)
+	{
 		return $stmt->fetch(PDO::FETCH_NUM);
 	}
 }

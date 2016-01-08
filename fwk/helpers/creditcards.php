@@ -2,11 +2,13 @@
 /**
  * Removes all non-digit characters from the given string.
  */
-function scrub_creditcard_number($cc) {
+function scrub_creditcard_number($cc)
+{
 	return preg_replace('/[^0-9]/', '', $cc);
 }
 
-function luhn_check($cc) {
+function luhn_check($cc)
+{
 	$ttl = 0;
 	$len = strlen($cc);
 	$alt = false;

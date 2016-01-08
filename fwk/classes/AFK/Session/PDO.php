@@ -30,33 +30,39 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Session_PDO extends AFK_Session {
-
+class AFK_Session_PDO extends AFK_Session
+{
 	private $dbh;
 	private $name;
 	private $table;
 
-	public function __construct(PDO $dbh, $table='sessions') {
+	public function __construct(PDO $dbh, $table='sessions')
+	{
 		parent::__construct();
 		$this->dbh = $dbh;
 		$this->table = $table;
 	}
 
-	public function open($save_path, $name) {
+	public function open($save_path, $name)
+	{
 		$this->name = $name;
 		return true;
 	}
 
-	public function read($id) {
-		$result = AFK_PDOHelper::query_value($this->dbh, "
+	public function read($id)
+	{
+		$result = AFK_PDOHelper::query_value(
+			$this->dbh, "
 			SELECT	data
 			FROM	{$this->table}
 			WHERE	name = :name AND id = :id
-			", array('name' => $this->name, 'id' => $id));
+			", array('name' => $this->name, 'id' => $id)
+		);
 		return $result === false ? '' : $result;
 	}
 
-	public function write($id, $data) {
+	public function write($id, $data)
+	{
 		if ($data == '') {
 			return $this->destroy($id);
 		}
@@ -71,17 +77,20 @@ class AFK_Session_PDO extends AFK_Session {
 		return true;
 	}
 
-	public function destroy($id) {
+	public function destroy($id)
+	{
 		$this->e("DELETE FROM {$this->table} WHERE name = :name AND id = :id", array('name' => $this->name, 'id' => $id));
 		return true;
 	}
 
-	public function gc($max_age) {
+	public function gc($max_age)
+	{
 		$this->e("DELETE FROM {$this->table} WHERE ts < :ts", array('ts' => time() - $max_age));
 		return true;
 	}
 
-	private function e($q, array $args) {
+	private function e($q, array $args)
+	{
 		return AFK_PDOHelper::execute($this->dbh, $q, $args);
 	}
 }

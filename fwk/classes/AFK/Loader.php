@@ -12,40 +12,54 @@
  *
  * @author Keith Gaughan
  */
-class AFK_Loader {
-
+class AFK_Loader
+{
 	private $class_paths;
 	private $helper_paths;
 	private $loaded_helpers;
 
-	public function __construct() {
+	public function __construct()
+	{
 		$this->class_paths = new AFK_PathList();
 		$this->helper_paths = new AFK_PathList();
 		$this->loaded_helpers = array();
 	}
 
-	/** Adds a new directory to use when searching for classes. */
-	public function add_class_path($path) {
+	/**
+	 * Adds a new directory to use when searching for classes.
+	 */
+	public function add_class_path($path)
+	{
 		$this->class_paths->append($path);
 	}
 
-	/** Loads the named class from one of the registered class paths. */
-	public function load_class($name) {
+	/**
+	 * Loads the named class from one of the registered class paths.
+	 */
+	public function load_class($name)
+	{
 		$this->class_paths->load(str_replace('_', '/', $name));
 	}
 
-	private function class_or_interface_is_loaded($name) {
+	private function class_or_interface_is_loaded($name)
+	{
 		// Workaround for changes introduced in PHP 5.0.2.
 		return class_exists($name, false) || function_exists('interface_exists') && interface_exists($name, false);
 	}
 
-	/** Adds a new directory to use when searching for helpers. */
-	public function add_helper_path($path) {
+	/**
+	 * Adds a new directory to use when searching for helpers.
+	 */
+	public function add_helper_path($path)
+	{
 		$this->helper_paths->append($path);
 	}
 
-	/** Loads the named helpers. */
-	public function load_helper() {
+	/**
+	 * Loads the named helpers.
+	 */
+	public function load_helper()
+	{
 		foreach (func_get_args() as $name) {
 			if (!array_key_exists($name, $this->loaded_helpers)) {
 				if ($this->helper_paths->load($name) === false) {

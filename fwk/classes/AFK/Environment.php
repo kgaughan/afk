@@ -10,53 +10,63 @@
 /**
  * Represents an execution environment.
  */
-class AFK_Environment {
-
+class AFK_Environment
+{
 	private $env = array();
 
 	// Magic Methods for Variables {{{
 
-	public function __isset($key) { // {{{
+	public function __isset($key)
+	{
 		return array_key_exists($key, $this->env);
-	} // }}}
+	}
 
-	public function __unset($key) { // {{{
+	public function __unset($key)
+	{
 		unset($this->env[$key]);
-	} // }}}
+	}
 
-	public function __get($key) { // {{{
+	public function __get($key)
+	{
 		if (array_key_exists($key, $this->env)) {
 			return $this->env[$key];
 		}
 		return null;
-	} // }}}
+	}
 
-	public function __set($key, $val) { // {{{
+	public function __set($key, $val)
+	{
 		$this->env[$key] = $val;
-	} // }}}
+	}
 
 	// }}}
 
 	// Defaults {{{
 
-	/** Default the named fields to empty strings. */
-	public function default_to_empty() { // {{{
+	/**
+	 * Default the named fields to empty strings.
+	 */
+	public function default_to_empty()
+	{
 		$fields = func_get_args();
 		foreach ($fields as $k) {
 			if (!array_key_exists($k, $this->env)) {
 				$this->env[$k] = '';
 			}
 		}
-	} // }}}
+	}
 
-	/** Use the given defaults if the named fields aren't set. */
-	public function defaults(array $defaults) { // {{{
+	/**
+	 * Use the given defaults if the named fields aren't set.
+	 */
+	public function defaults(array $defaults)
+	{
 		foreach ($defaults as $k => $v) {
 			if (!array_key_exists($k, $this->env)) {
 				$this->env[$k] = $v;
 			}
 		}
-	} // }}}
+	}
 
 	// }}}
 
@@ -64,16 +74,20 @@ class AFK_Environment {
 	 * Merges the given arrays into the environment; existing values are
 	 * not overwritten.
 	 */
-	public function merge() { // {{{
+	public function merge()
+	{
 		$args = func_get_args();
 		foreach ($args as $a) {
 			// Values already in the context are preserved.
 			$this->env += $a;
 		}
-	} // }}}
+	}
 
-	/** @return Part or all of the environment as an array. */
-	public function as_array($keys=false) { // {{{
+	/**
+	 * @return Part or all of the environment as an array.
+	 */
+	public function as_array($keys=false)
+	{
 		if ($keys === false) {
 			return $this->env;
 		}
@@ -87,5 +101,5 @@ class AFK_Environment {
 			return $extracted;
 		}
 		return array();
-	} // }}}
+	}
 }

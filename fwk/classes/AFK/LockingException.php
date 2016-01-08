@@ -7,4 +7,6 @@
  * that was distributed with this source code.
  */
 
-class AFK_LockingException extends AFK_Exception {}
+class AFK_LockingException extends AFK_Exception
+{
+}

@@ -11,4 +11,6 @@
  * Thrown when there are problems loading or saving configuration
  * information, obviously.
  */
-class AFK_ConfigurationException extends AFK_Exception { }
+class AFK_ConfigurationException extends AFK_Exception
+{
+}

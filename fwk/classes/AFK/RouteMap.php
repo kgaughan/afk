@@ -14,19 +14,23 @@
  *
  * @author Keith Gaughan
  */
-class AFK_RouteMap {
-
-	/* Maps routes to handlers. */
+class AFK_RouteMap
+{
+	/**
+	 * Maps routes to handlers.
+	 */
 	private $map = array();
 
-	public function add($route, array $keys, array $defaults) {
+	public function add($route, array $keys, array $defaults)
+	{
 		$this->map[$route] = array($keys, $defaults);
 	}
 
 	/**
 	 * Finds the first route that matches the given path.
 	 */
-	public function search($path) {
+	public function search($path)
+	{
 		$result = $this->internal_search($path);
 		if ($result !== false) {
 			return $result;
@@ -43,7 +47,8 @@ class AFK_RouteMap {
 		throw new AFK_HttpException('', AFK_Context::NOT_FOUND);
 	}
 
-	private function internal_search($path) {
+	private function internal_search($path)
+	{
 		foreach ($this->map as $regex => $v) {
 			// This is only needed because PHP's parser is too dumb to allow
 			// the use for list() in the foreach.
@@ -62,7 +67,8 @@ class AFK_RouteMap {
 	 *
 	 * @return false if it doesn't, otherwise an array of extracted values.
 	 */
-	private function match($regex, $path) {
+	private function match($regex, $path)
+	{
 		$values = array();
 		if (preg_match('`^' . $regex . '$`', $path, $values)) {
 			// We only want the parts parsed out, not the whole string.
@@ -77,7 +83,8 @@ class AFK_RouteMap {
 	/**
 	 * Behaves like array_combine(), but is safe when there's no keys.
 	 */
-	private function combine(array $keys, array $values) {
+	private function combine(array $keys, array $values)
+	{
 		if (count($keys) > 0) {
 			return array_combine($keys, $values);
 		}

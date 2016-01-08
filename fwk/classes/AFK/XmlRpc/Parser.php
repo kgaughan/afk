@@ -7,8 +7,8 @@
  * that was distributed with this source code.
  */
 
-class AFK_XmlRpc_Parser extends AFK_XmlParser {
-
+class AFK_XmlRpc_Parser extends AFK_XmlParser
+{
 	private $method_name;
 
 	private $tag_stack;
@@ -20,7 +20,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 
 	private $is_fault = false;
 
-	public function __construct() {
+	public function __construct()
+	{
 		parent::__construct();
 
 		$this->method_name = null;
@@ -33,7 +34,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		$this->current_value = array();
 	}
 
-	protected function on_start_tag($new_tag, array $_attrs) {
+	protected function on_start_tag($new_tag, array $_attrs)
+	{
 		if (is_array($this->expected_tags) && in_array($new_tag, $this->expected_tags)) {
 			$this->tag_stack[] = array($this->current_tag, $this->expected_tags);
 			$this->expected_tags = $this->get_expected_subtags($new_tag);
@@ -62,7 +64,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		}
 	}
 
-	protected function on_end_tag($new_tag) {
+	protected function on_end_tag($new_tag)
+	{
 		list($this->current_tag, $this->expected_tags) = array_pop($this->tag_stack);
 		if ($new_tag == 'array' || $new_tag == 'struct') {
 			$to_append = $this->current_value;
@@ -82,7 +85,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		}
 	}
 
-	protected function on_text($text) {
+	protected function on_text($text)
+	{
 		if ($this->current_tag == 'value' || $this->expected_tags === true) {
 			$text = trim($text);
 			$i_head = count($this->data_stack) - 1;
@@ -140,7 +144,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		}
 	}
 
-	private function set_current($value) {
+	private function set_current($value)
+	{
 		if (is_array($this->current_value)) {
 			$this->current_value[count($this->current_value) - 1] = $value;
 		} else {
@@ -148,7 +153,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		}
 	}
 
-	public function get_result() {
+	public function get_result()
+	{
 		if ($this->is_fault) {
 			if (isset($this->current_value[0])) {
 				$fault = $this->current_value[0];
@@ -166,7 +172,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		return array($this->method_name, $this->current_value);
 	}
 
-	private function get_expected_subtags($tag) {
+	private function get_expected_subtags($tag)
+	{
 		static $branches = null;
 		static $leaves = null;
 
@@ -198,7 +205,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		return array_key_exists($tag, $branches) ? $branches[$tag] : in_array($tag, $leaves);
 	}
 
-	public static function serialise_request($method, array $args) {
+	public static function serialise_request($method, array $args)
+	{
 		$root = new AFK_ElementNode('methodCall');
 		$root->methodName($method);
 		if (count($args) > 0) {
@@ -210,7 +218,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		return $root->as_xml();
 	}
 
-	public static function serialise_response($value) {
+	public static function serialise_response($value)
+	{
 		$root = new AFK_ElementNode('methodResponse');
 		if (is_object($value) && get_class($value) == 'AFK_XmlRpc_Fault') {
 			$container = $root->fault()->value();
@@ -221,7 +230,8 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		return $root->as_xml();
 	}
 
-	public static function serialise_value(AFK_ElementNode $parent, $value) {
+	public static function serialise_value(AFK_ElementNode $parent, $value)
+	{
 		if (is_array($value)) {
 			$is_numeric = true;
 			foreach ($value as $k => $_v) {
@@ -268,8 +278,11 @@ class AFK_XmlRpc_Parser extends AFK_XmlParser {
 		}
 	}
 
-	/** A helper for the lack of date_set_timestamp() */
-	public static function from_timestamp($ts) {
+	/**
+	 * A helper for the lack of date_set_timestamp()
+	 */
+	public static function from_timestamp($ts)
+	{
 		$p = strptime($ts, "%s");
 		$d = new DateTime();
 		$d->setTimezone(new DateTimeZone('UTC'));

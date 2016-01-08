@@ -1,2 +1,4 @@
 <?php
-class DB_PreparationException extends DB_Exception { }
+class DB_PreparationException extends DB_Exception
+{
+}
