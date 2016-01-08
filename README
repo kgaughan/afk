@@ -1,0 +1,22 @@
+AFK is my old PHP (anti)framework for building web applications. That is, it's
+a bunch of libraries with small framework built into it.
+
+I don't really its use for new projects. I myself now only use it for legacy
+projects, though I am looking to improve it a little, and modernise it, if
+only of the sake of maintainability.
+
+It predates practically all of the current PHP frameworks quite a bit, and the
+codebase goes back to the late '90s. It does contain some interesting nuggets.
+I'm still unreasonably happy with the template system it has built in, which
+had a form of template inheritence before that was even a thing.
+
+As a baseline, AFK must stay compatible with PHP 5.2, as the oldest critical
+system I know of that it runs on runs that. This is one of the reaons[1] that
+it doesn't use namespaces. However, some of the libraries it uses for
+development, notably PHPUnit, so there's that.
+
+I may update some parts of the code to be formatted according to PSR-1 and
+PSR-2, albeit without changing method and variable names to camel case. I
+won't be identing case statements though. That's just silly.
+
+[1] Aside from PHP namespaces being an ugly syntactic botch.
