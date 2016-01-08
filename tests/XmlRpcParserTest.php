@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . '/../internal.php';
+require_once dirname(__FILE__) . '/../autoload.php';
 
 class XmlRpcParserTest extends PHPUnit_Framework_TestCase {
 

@@ -5,7 +5,6 @@
  * me insane by having to explicitly include classes under test everywhere.
  */
 
-require_once 'PHPUnit/Framework.php';
 require_once dirname(__FILE__) . '/fwk/afk.php';
 AFK::bootstrap();
 
