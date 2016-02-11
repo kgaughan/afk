@@ -96,10 +96,12 @@ class AFK
 			$argv = $GLOBALS['argv'];
 		}
 		if (is_null($longopts)) {
-			$longopts = array();
+			// This avoids some noise on PHP <5.3.0 where PHP complains about
+			// long options not being supported.
+			$parsed = getopt($opts);
+		} else {
+			$parsed = getopt($opts, $longopts);
 		}
-
-		$parsed = getopt($opts, $longopts);
 
 		// We use this filter to eliminate any options from our argument list.
 		$filter = array();
