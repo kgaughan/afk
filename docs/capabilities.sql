@@ -38,7 +38,7 @@ CREATE TABLE capabilities (
 
     PRIMARY KEY (id),
     UNIQUE INDEX ux_slug (slug)
-) DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Groups are sets of users. They're also sets of capabilities, and
 -- membership of a group gives all of the capabilities of that group to its
@@ -50,7 +50,7 @@ CREATE TABLE groups (
 
     PRIMARY KEY (id),
     UNIQUE INDEX ux_slug (slug)
-) DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Relating users to groups.
 CREATE TABLE users_groups (
@@ -58,7 +58,7 @@ CREATE TABLE users_groups (
     group_id SMALLINT UNSIGNED NOT NULL,
 
     PRIMARY KEY (user_id, group_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Relating capabilities to groups.
 CREATE TABLE groups_capabilities (
@@ -66,7 +66,7 @@ CREATE TABLE groups_capabilities (
     capability_id SMALLINT UNSIGNED NOT NULL,
 
     PRIMARY KEY (group_id, capability_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Relating users directly to capabilities. Sometimes users need special
 -- capabilities not assigned to any group they're a member of, and it's
@@ -77,7 +77,7 @@ CREATE TABLE users_capabilities (
 
     PRIMARY KEY (user_id, capability_id),
     INDEX ix_capability (capability_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- The permissions view makes fetching the capabilities and groups of a given
