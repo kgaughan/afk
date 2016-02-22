@@ -45,6 +45,7 @@ class AFK_ExceptionTrapFilter implements AFK_Filter
 		// Only trigger the exception if the error hasn't been suppressed with '@'.
 		if (error_reporting() != 0) {
 			restore_error_handler();
+			error_log("$errfile@$errline $errno: $errstr");
 			throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
 		}
 		return false;
