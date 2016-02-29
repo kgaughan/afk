@@ -117,4 +117,12 @@ class AFK_UploadedFile
 		}
 		return false;
 	}
+
+	public function size()
+	{
+		if ($this->upload_exists()) {
+			return filesize($this->temporary_name);
+		}
+		return false;
+	}
 }
