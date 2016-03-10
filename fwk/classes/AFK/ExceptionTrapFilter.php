@@ -7,20 +7,14 @@
  * that was distributed with this source code.
  */
 
-/**
- * Wraps a PHP error that's been converted to an exception.
- */
-class AFK_TrappedErrorException extends AFK_Exception
+function afk_convert_error($severity, $message, $file, $line)
 {
-	protected $ctx;
-
-	public function __construct($msg, $code, $file, $line, $ctx)
-	{
-		parent::__construct($msg, $code);
-		$this->file = $file;
-		$this->line = $line;
-		$this->ctx  = $ctx;
+	// Only trigger the exception if the error hasn't been suppressed.
+	if (error_reporting() & $severity != 0) {
+		error_log("$file@$line $severity: $message");
+		throw new ErrorException($message, 0, $severity, $file, $line);
 	}
+	return false;
 }
 
 /**
@@ -40,25 +34,11 @@ class AFK_TrappedErrorException extends AFK_Exception
  */
 class AFK_ExceptionTrapFilter implements AFK_Filter
 {
-	public function convert_error($errno, $errstr, $errfile, $errline, $ctx)
-	{
-		// Only trigger the exception if the error hasn't been suppressed with '@'.
-		if (error_reporting() != 0) {
-			restore_error_handler();
-			error_log("$errfile@$errline $errno: $errstr");
-			throw new AFK_TrappedErrorException($errstr, $errno, $errfile, $errline, $ctx);
-		}
-		return false;
-	}
 
 	public function execute(AFK_Pipeline $pipe, $ctx)
 	{
-		$errors = E_ALL;
-		if (defined('E_DEPRECATED')) {
-			$errors &= ~E_DEPRECATED;
-		}
 		try {
-			set_error_handler(array($this, 'convert_error'), $errors);
+			set_error_handler('afk_convert_error');
 			$pipe->do_next($ctx);
 			restore_error_handler();
 		} catch (AFK_HttpException $he) {
@@ -70,12 +50,6 @@ class AFK_ExceptionTrapFilter implements AFK_Filter
 			$ctx->message = $he->getMessage();
 			$this->report_error($he->getCode(), $pipe, $ctx);
 		} catch (Exception $e) {
-			// The previous exception handler is restored previously to
-			// this being thrown, so there's no need.
-			if (get_class($e) != 'AFK_TrappedErrorException') {
-				restore_error_handler();
-			}
-
 			$ctx->allow_rendering();
 			$this->render_error500($ctx, $e);
 			$this->report_error(500, $pipe, $ctx);
