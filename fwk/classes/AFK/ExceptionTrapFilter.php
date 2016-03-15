@@ -10,7 +10,7 @@
 function afk_convert_error($severity, $message, $file, $line)
 {
 	// Only trigger the exception if the error hasn't been suppressed.
-	if (error_reporting() & $severity != 0) {
+	if ((error_reporting() & $severity) != 0) {
 		error_log("$file@$line $severity: $message");
 		throw new ErrorException($message, 0, $severity, $file, $line);
 	}
