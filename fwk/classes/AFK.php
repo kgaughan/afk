@@ -177,6 +177,8 @@ class AFK
 	{
 		self::fix_superglobals();
 
+		date_default_timezone_set('UTC');
+
 		self::$loader = new AFK_Loader();
 		self::$loader->add_helper_path(AFK_ROOT . '/helpers');
 		if (defined('APP_ROOT')) {
