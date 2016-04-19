@@ -4,7 +4,7 @@
 # Command functions are prefixed by 'do_', preexecution hooks by 'pre_',
 # library functions by 'afk_', except for 'dispatch', which is special as
 # it's invoked at the end of the script that includes this library.
-# 
+#
 
 SSH=`which ssh`
 
@@ -40,7 +40,7 @@ dispatch () {
 	# This regular expression is meant to be portable across implementations
 	# of sed, or at least to those I know and care about such as FreeBSD's
 	# sed, and GNU sed, hence the use of basic regex syntax.
-	for cmd in `set | sed -n "s/^do_\\([a-x]\{1,\}\\) ().*$/\1/p"`; do 
+	for cmd in `set | sed -n "s/^do_\\([a-x]\{1,\}\\) ().*$/\1/p"`; do
 		echo -n "|$cmd"
 	done
 	echo "}"
@@ -137,7 +137,7 @@ afk_list_help () {
 	# This regular expression is meant to be portable across implementations
 	# of sed, or at least to those I know and care about such as FreeBSD's
 	# sed, and GNU sed, hence the use of basic regex syntax.
-	for cmd in `set | sed -n "s/^help_\\([a-x]\{1,\}\\) ().*$/\1/p"`; do 
+	for cmd in `set | sed -n "s/^help_\\([a-x]\{1,\}\\) ().*$/\1/p"`; do
 		echo "  $cmd"
 	done
 }
@@ -218,6 +218,11 @@ do_ctags () {
 		--regex-PHP='/(public |static |abstract |protected |private )+function ([^ (]*)/\2/f/'
 }
 
+do_dev () {
+	cd $(dirname $0)
+	php -S localhost:8080 dispatch.php
+}
+
 help_help () {
 	afk_help_banner "help" "Displays help on the given subcommand." "CMD"
 }
@@ -238,7 +243,7 @@ help_testing () {
 
 pre_deploy () {
 	# This function is a dummy hook - replace it with your own.
-	: 
+	:
 }
 
 pre_dispatch () {

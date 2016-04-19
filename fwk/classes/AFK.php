@@ -170,6 +170,13 @@ class AFK
 
 	// Framework {{{
 
+	public static function cli_server_passthrough() {
+		return php_sapi_name() == 'cli-server' &&
+			preg_match(
+				'~^/(assets/|favicon.ico|robots.txt)~',
+				$_SERVER['REQUEST_URI']);
+	}
+
 	/**
 	 * Basic bootstrapping logic. Feel free to write your own.
 	 */
