@@ -43,6 +43,15 @@ class AFK_RouteFilter implements AFK_Filter
 		if ($canon !== $ctx->REQUEST_URI) {
 			$ctx->permanent_redirect($canon);
 		}
+
+		// Generate reliable QUERY_STRING and PATH_INFO values.
+		$app_root = substr($ctx->SCRIPT_NAME, 0, strrpos($ctx->SCRIPT_NAME, '/'));
+		$parts = parse_url($ctx->REQUEST_URI);
+		if (isset($parts['query'])) {
+			$ctx->QUERY_STRING = $parts['query'];
+		}
+		$ctx->PATH_INFO = substr($parts['path'], strlen($app_root));
+
 		$result = $this->map->search($ctx->PATH_INFO);
 		if (is_string($result)) {
 			// Result is a normalised URL. The original request URL was
